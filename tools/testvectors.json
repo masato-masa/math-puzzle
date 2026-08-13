@@ -1,0 +1,490 @@
+{
+  "merges": [
+    {
+      "mover": [
+        8
+      ],
+      "target": [
+        "÷",
+        4
+      ],
+      "expected": [
+        2
+      ]
+    },
+    {
+      "mover": [
+        "÷",
+        4
+      ],
+      "target": [
+        8
+      ],
+      "expected": null
+    },
+    {
+      "mover": [
+        3
+      ],
+      "target": [
+        "+"
+      ],
+      "expected": [
+        3,
+        "+"
+      ]
+    },
+    {
+      "mover": [
+        3,
+        "+"
+      ],
+      "target": [
+        5
+      ],
+      "expected": [
+        8
+      ]
+    },
+    {
+      "mover": [
+        5
+      ],
+      "target": [
+        "+"
+      ],
+      "expected": [
+        5,
+        "+"
+      ]
+    },
+    {
+      "mover": [
+        5,
+        "+"
+      ],
+      "target": [
+        3
+      ],
+      "expected": [
+        8
+      ]
+    },
+    {
+      "mover": [
+        7
+      ],
+      "target": [
+        "÷",
+        2
+      ],
+      "expected": null
+    },
+    {
+      "mover": [
+        4
+      ],
+      "target": [
+        "+"
+      ],
+      "expected": [
+        4,
+        "+"
+      ]
+    },
+    {
+      "mover": [
+        "+"
+      ],
+      "target": [
+        "×"
+      ],
+      "expected": null
+    },
+    {
+      "mover": [
+        4
+      ],
+      "target": [
+        5
+      ],
+      "expected": null
+    },
+    {
+      "mover": [
+        "√"
+      ],
+      "target": [
+        36
+      ],
+      "expected": [
+        6
+      ]
+    },
+    {
+      "mover": [
+        "√"
+      ],
+      "target": [
+        37
+      ],
+      "expected": null
+    },
+    {
+      "mover": [
+        6
+      ],
+      "target": [
+        "+",
+        4
+      ],
+      "expected": [
+        10
+      ]
+    },
+    {
+      "mover": [
+        4
+      ],
+      "target": [
+        "!"
+      ],
+      "expected": [
+        24
+      ]
+    },
+    {
+      "mover": [
+        4,
+        "!"
+      ],
+      "target": [
+        "÷",
+        6
+      ],
+      "expected": null
+    },
+    {
+      "mover": [
+        "!"
+      ],
+      "target": [
+        5
+      ],
+      "expected": null
+    },
+    {
+      "mover": [
+        3
+      ],
+      "target": [
+        "^",
+        3
+      ],
+      "expected": [
+        27
+      ]
+    },
+    {
+      "mover": [
+        27
+      ],
+      "target": [
+        "−",
+        7
+      ],
+      "expected": [
+        20
+      ]
+    },
+    {
+      "mover": [
+        2
+      ],
+      "target": [
+        "×",
+        3
+      ],
+      "expected": [
+        6
+      ]
+    },
+    {
+      "mover": [
+        2,
+        "×"
+      ],
+      "target": [
+        3
+      ],
+      "expected": [
+        6
+      ]
+    },
+    {
+      "mover": [
+        9
+      ],
+      "target": [
+        "×",
+        3
+      ],
+      "expected": [
+        27
+      ]
+    },
+    {
+      "mover": [
+        27
+      ],
+      "target": [
+        "−",
+        5
+      ],
+      "expected": [
+        22
+      ]
+    },
+    {
+      "mover": [
+        9
+      ],
+      "target": [
+        "−",
+        5
+      ],
+      "expected": [
+        4
+      ]
+    },
+    {
+      "mover": [
+        10
+      ],
+      "target": [
+        "−"
+      ],
+      "expected": [
+        10,
+        "−"
+      ]
+    },
+    {
+      "mover": [
+        10,
+        "−"
+      ],
+      "target": [
+        2
+      ],
+      "expected": [
+        8
+      ]
+    },
+    {
+      "mover": [
+        8
+      ],
+      "target": [
+        "÷",
+        2
+      ],
+      "expected": [
+        4
+      ]
+    },
+    {
+      "mover": [
+        96
+      ],
+      "target": [
+        "÷"
+      ],
+      "expected": [
+        96,
+        "÷"
+      ]
+    },
+    {
+      "mover": [
+        96,
+        "÷"
+      ],
+      "target": [
+        4
+      ],
+      "expected": [
+        24
+      ]
+    },
+    {
+      "mover": [
+        24
+      ],
+      "target": [
+        "+"
+      ],
+      "expected": [
+        24,
+        "+"
+      ]
+    },
+    {
+      "mover": [
+        24,
+        "+"
+      ],
+      "target": [
+        24
+      ],
+      "expected": [
+        48
+      ]
+    },
+    {
+      "mover": [
+        6
+      ],
+      "target": [
+        "×"
+      ],
+      "expected": [
+        6,
+        "×"
+      ]
+    },
+    {
+      "mover": [
+        6,
+        "×"
+      ],
+      "target": [
+        7
+      ],
+      "expected": [
+        42
+      ]
+    },
+    {
+      "mover": [
+        12
+      ],
+      "target": [
+        "÷"
+      ],
+      "expected": [
+        12,
+        "÷"
+      ]
+    },
+    {
+      "mover": [
+        12,
+        "÷"
+      ],
+      "target": [
+        4
+      ],
+      "expected": [
+        3
+      ]
+    },
+    {
+      "mover": [
+        2
+      ],
+      "target": [
+        "^",
+        10
+      ],
+      "expected": null
+    },
+    {
+      "mover": [
+        100
+      ],
+      "target": [
+        "×",
+        2000
+      ],
+      "expected": null
+    }
+  ],
+  "exits": [
+    {
+      "tokens": [
+        2
+      ],
+      "exit": {
+        "value": 2
+      },
+      "expected": true
+    },
+    {
+      "tokens": [
+        3
+      ],
+      "exit": {
+        "value": 2
+      },
+      "expected": false
+    },
+    {
+      "tokens": [
+        2,
+        "×"
+      ],
+      "exit": {
+        "value": 2
+      },
+      "expected": false
+    },
+    {
+      "tokens": [
+        22
+      ],
+      "exit": {
+        "minValue": 20,
+        "maxValue": 25
+      },
+      "expected": true
+    },
+    {
+      "tokens": [
+        27
+      ],
+      "exit": {
+        "minValue": 20,
+        "maxValue": 25
+      },
+      "expected": false
+    },
+    {
+      "tokens": [
+        20
+      ],
+      "exit": {
+        "minValue": 20,
+        "maxValue": 25
+      },
+      "expected": true
+    },
+    {
+      "tokens": [
+        25
+      ],
+      "exit": {
+        "minValue": 20,
+        "maxValue": 25
+      },
+      "expected": true
+    },
+    {
+      "tokens": [
+        4
+      ],
+      "exit": {},
+      "expected": true
+    }
+  ]
+}

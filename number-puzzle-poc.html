@@ -1,0 +1,1470 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>数式パズル POC</title>
+<style>
+  :root {
+    --paper: #FAF7EE;
+    --gridLine: #B9C9E0;
+    --ink: #24344A;
+    --pencil: #8B8578;
+    --red: #C1442D;
+    --compound: #5C4A3A;
+    --fixed: #6E7A88;
+    --slide: #1F7A6B;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: -apple-system, "Hiragino Sans", "Yu Gothic", sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px 12px 60px;
+  }
+  h1 { font-size: 20px; letter-spacing: 0.05em; margin: 0 0 4px; }
+  .subtitle { color: var(--pencil); font-size: 12px; margin-bottom: 20px; }
+
+  /* ---------- レベル選択 ---------- */
+  #levelSelect { width: 100%; max-width: 460px; }
+  .level-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .level-card {
+    background: #fff;
+    border: 2px solid var(--gridLine);
+    border-radius: 10px;
+    padding: 12px 8px;
+    text-align: center;
+    cursor: pointer;
+    font-weight: bold;
+    position: relative;
+  }
+  .level-card:hover { border-color: var(--red); }
+  .level-card .cleared-mark {
+    position: absolute; top: 4px; right: 6px; color: var(--red); font-size: 12px;
+  }
+  .level-card .name {
+    font-size: 11px; color: var(--pencil); font-weight: normal; margin-top: 2px;
+    min-height: 28px; display: flex; align-items: center; justify-content: center;
+  }
+  .level-card .par { display: block; font-size: 10px; color: var(--pencil); font-weight: normal; }
+  .level-card .best { display: block; font-size: 10px; color: var(--red); font-weight: normal; }
+
+  /* ---------- パズル画面 ---------- */
+  #puzzleScreen { display: none; width: 100%; max-width: 460px; }
+  .hud {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 6px; font-size: 13px;
+  }
+  .hud button {
+    background: #fff; border: 1px solid var(--gridLine); border-radius: 6px;
+    padding: 6px 10px; font-size: 12px; cursor: pointer; color: var(--ink);
+  }
+  .hud button:hover { border-color: var(--red); color: var(--red); }
+  .hint { font-size: 11px; color: var(--pencil); text-align: center; }
+  .board-wrap { position: relative; margin: 46px auto 26px; width: min(82vw, 340px); }
+  .board {
+    position: relative; display: grid; background: var(--paper);
+    border: 2px solid var(--gridLine); width: 100%; aspect-ratio: 1;
+  }
+  .cell { position: relative; border: 1px solid var(--gridLine); min-width: 0; min-height: 0; }
+  .cell.wall {
+    background: repeating-linear-gradient(45deg, var(--gridLine) 0 4px, transparent 4px 8px);
+  }
+  .tile {
+    position: absolute; inset: 5px; border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: "SFMono-Regular", Consolas, "Courier New", monospace;
+    font-weight: bold; cursor: pointer; user-select: none;
+    white-space: nowrap; overflow: hidden; line-height: 1;
+  }
+  .tile.number   { background: var(--ink);      color: var(--paper); }
+  .tile.operator { background: var(--red);      color: var(--paper); }
+  .tile.compound { background: var(--compound); color: var(--paper); letter-spacing: -0.3px; }
+  .tile.fixed {
+    background: var(--fixed);
+    border: 2px dashed rgba(250,247,238,0.85);
+    cursor: not-allowed;
+  }
+  /* 滑るタイル: 止まるまで一気に進む */
+  .tile.slide {
+    background: var(--slide);
+    border: 2px solid rgba(250,247,238,0.9);
+  }
+  .tile.slide::after {
+    content: "⇶";
+    position: absolute;
+    right: 3px;
+    bottom: 1px;
+    font-size: 11px;
+    line-height: 1;
+    opacity: 0.95;
+  }
+  .tile.selected { outline: 3px solid var(--red); outline-offset: -1px; z-index: 2; }
+
+  /* ---------- 出口（盤外） ---------- */
+  .exit-marker {
+    position: absolute; display: flex; align-items: center; justify-content: center;
+    gap: 1px; height: 26px; min-width: 34px; padding: 0 7px; border-radius: 13px;
+    background: var(--red); color: #fff;
+    font-family: "SFMono-Regular", Consolas, "Courier New", monospace;
+    font-size: 12px; font-weight: bold; cursor: pointer;
+    box-shadow: 0 0 0 2px var(--paper); white-space: nowrap;
+  }
+  .exit-marker .arrow { font-size: 11px; opacity: 0.9; }
+  .exit-marker.ready { animation: pulse 1s infinite; }
+  @keyframes pulse {
+    0%,100% { box-shadow: 0 0 0 2px var(--paper); }
+    50%     { box-shadow: 0 0 0 5px var(--paper); }
+  }
+
+  .message { min-height: 20px; text-align: center; color: var(--red); font-size: 13px; }
+  .win-overlay {
+    position: fixed; inset: 0; background: rgba(36,52,74,0.85);
+    display: flex; align-items: center; justify-content: center; z-index: 10;
+  }
+  .win-card { background: var(--paper); border-radius: 12px; padding: 28px 32px; text-align: center; }
+  .win-card h2 { color: var(--red); margin: 0 0 8px; }
+  .win-card p { color: var(--pencil); margin: 0 0 20px; }
+  .win-card .actions { display: flex; gap: 10px; justify-content: center; }
+  .win-card button {
+    background: var(--ink); color: var(--paper); border: none; border-radius: 6px;
+    padding: 8px 16px; cursor: pointer; font-size: 13px;
+  }
+  .win-card button.secondary { background: transparent; color: var(--ink); border: 1px solid var(--gridLine); }
+  .rule-note {
+    max-width: 460px; font-size: 11px; color: var(--pencil);
+    text-align: left; margin-top: 24px; line-height: 1.8;
+  }
+  .rule-note b { color: var(--ink); }
+  .back-link {
+    background: none; border: none; color: var(--pencil); font-size: 12px;
+    cursor: pointer; margin-bottom: 12px; padding: 0;
+  }
+</style>
+</head>
+<body>
+
+<h1>数式パズル <span style="color:var(--red)">POC</span></h1>
+<div class="subtitle">全レベル ソルバー検証済み（クリア可能・最短手数・解法1通り）</div>
+
+<div id="levelSelect">
+  <div class="level-grid" id="levelGrid"></div>
+  <div class="rule-note">
+    ・タイルをタップして選び、<b>隣のマス</b>をタップして動かす（移動・結合・出口はそれぞれ1手）<br>
+    ・ぶつけた側が<b>前</b>、ぶつけられた側が<b>後</b>につながる（8を÷4にぶつけると 8÷4）<br>
+    ・数字どうし・演算子どうしはぶつけられない<br>
+    ・両端が数字になった式は<b>左から順に</b>計算される（優先順位なし・割り切れないと結合できない）<br>
+    ・<b>√</b>は数字の前、<b>!</b>は数字の後ろにつく単項演算子<br>
+    ・灰色の破線タイルは<b>動かせない</b>（ぶつけられる側にはなれる）<br>
+    ・緑の <b>⇶</b> タイルは<b>止まるまで滑る</b>（壁・盤の縁・結合できないタイルに当たるまで一気に進んで1手）<br>
+    ・出口に書かれた数字（または範囲）と一致する<b>完成した数字</b>だけが盤外へ出られる<br>
+    ・<b>数字タイルを全部出せばクリア</b>（演算子は余らせてよい）
+  </div>
+</div>
+
+<div id="puzzleScreen">
+  <button class="back-link" onclick="goToLevelSelect()">← レベル選択に戻る</button>
+  <div class="hud">
+    <div>手数: <b id="moveCount">0</b> <span style="color:var(--pencil)">/ 最短 <b id="parLabel">-</b></span></div>
+    <div style="display:flex; gap:8px;">
+      <button onclick="undo()">戻す</button>
+      <button onclick="resetLevel()">リセット</button>
+    </div>
+  </div>
+  <div class="hint" id="hintLabel"></div>
+  <div class="board-wrap" id="boardWrap"><div class="board" id="board"></div></div>
+  <div class="message" id="message"></div>
+</div>
+
+<script>
+/* ============================================================
+   コアルール（tools/puzzle_rules.py と 1:1 対応）
+   ============================================================ */
+const BINARY  = ["+", "−", "×", "÷", "^"];
+const PREFIX  = ["√"];
+const POSTFIX = ["!"];
+const OPERATORS = BINARY.concat(PREFIX, POSTFIX);
+
+const MAX_ABS_VALUE = 100000;
+const MAX_FACTORIAL_INPUT = 8;
+const MAX_POW_EXP = 4;
+const MAX_POW_BASE = 20;
+
+function isNum(t) { return typeof t === "number"; }
+function isOp(t)  { return typeof t === "string" && OPERATORS.includes(t); }
+function isBinary(t)  { return typeof t === "string" && BINARY.includes(t); }
+function isPrefix(t)  { return typeof t === "string" && PREFIX.includes(t); }
+function isPostfix(t) { return typeof t === "string" && POSTFIX.includes(t); }
+function hasNumber(tokens) { return tokens.some(isNum); }
+
+function factorial(n) { let r = 1; for (let i = 2; i <= n; i++) r *= i; return r; }
+
+/* 正規化: ("value",[n]) / ("incomplete",[...]) / null(不正) */
+function normalize(tokens) {
+  const t = tokens.slice();
+
+  // 1) 単項演算子の簡約
+  let changed = true;
+  while (changed) {
+    changed = false;
+    for (let i = 0; i < t.length; i++) {
+      if (isPrefix(t[i]) && i + 1 < t.length && isNum(t[i + 1])) {
+        const v = t[i + 1];
+        if (v < 0) return null;
+        const r = Math.round(Math.sqrt(v));
+        if (r * r !== v) return null;          // 整数にならない平方根は不可
+        t.splice(i, 2, r);
+        changed = true;
+        break;
+      }
+      if (isPostfix(t[i]) && i - 1 >= 0 && isNum(t[i - 1])) {
+        const v = t[i - 1];
+        if (v < 0 || v > MAX_FACTORIAL_INPUT) return null;
+        t.splice(i - 1, 2, factorial(v));
+        changed = true;
+        break;
+      }
+    }
+  }
+  if (t.length === 0) return null;
+
+  // 2) 構造チェック
+  for (let i = 0; i < t.length - 1; i++) {
+    const a = t[i], b = t[i + 1];
+    if (isNum(a) && isNum(b)) return null;
+    if (isNum(a) && (isPrefix(b) || isPostfix(b))) return null;
+    if (isBinary(a) && (isBinary(b) || isPostfix(b))) return null;
+    if (isPrefix(a) && (isBinary(b) || isPostfix(b) || isNum(b))) return null;
+    if (isPostfix(a) && (isNum(b) || isPostfix(b) || isPrefix(b))) return null;
+  }
+
+  // 3) 両端が数値なら左から順に計算
+  if (isNum(t[0]) && isNum(t[t.length - 1])) {
+    let res = t[0];
+    for (let i = 1; i < t.length; i += 2) {
+      const op = t[i];
+      if (!isBinary(op) || i + 1 >= t.length || !isNum(t[i + 1])) return null;
+      const b = t[i + 1];
+      if (op === "+") res = res + b;
+      else if (op === "−") res = res - b;
+      else if (op === "×") res = res * b;
+      else if (op === "÷") {
+        if (b === 0 || res % b !== 0) return null;   // 割り切れない → 結合無効
+        res = res / b;
+      } else if (op === "^") {
+        if (b < 0 || b > MAX_POW_EXP || Math.abs(res) > MAX_POW_BASE) return null;
+        res = Math.pow(res, b);
+      }
+      if (Math.abs(res) > MAX_ABS_VALUE) return null;
+    }
+    return { kind: "value", tokens: [res] };
+  }
+  return { kind: "incomplete", tokens: t };
+}
+
+/* 3.3 結合判定（mover が先・target が後） */
+function tryMerge(moverTokens, targetTokens) {
+  const mLast = moverTokens[moverTokens.length - 1];
+  const tFirst = targetTokens[0];
+  if (isNum(mLast) && isNum(tFirst))  return { allowed: false, reason: "both-number" };
+  if (isOp(mLast)  && isOp(tFirst))   return { allowed: false, reason: "both-operator" };
+
+  const merged = moverTokens.concat(targetTokens);
+  const result = normalize(merged);
+  if (result === null) return { allowed: false, reason: "invalid" };
+  return { allowed: true, tokens: result.tokens, complete: result.kind === "value" };
+}
+
+/* 3.5 出口ルール（固定値 / レンジ / 指定なし） */
+function canExit(tokens, exit) {
+  if (!tokens || tokens.length !== 1 || !isNum(tokens[0])) return false;
+  const v = tokens[0];
+  if (exit.minValue !== undefined && exit.maxValue !== undefined) {
+    return v >= exit.minValue && v <= exit.maxValue;
+  }
+  if (exit.value === undefined || exit.value === null) return true;
+  return v === exit.value;
+}
+
+function exitLabel(exit) {
+  if (exit.minValue !== undefined && exit.maxValue !== undefined) {
+    return exit.minValue + "-" + exit.maxValue;
+  }
+  return (exit.value === undefined || exit.value === null) ? "" : String(exit.value);
+}
+
+function exitIsOnBorder(exit, size) {
+  if (exit.direction === "up")    return exit.row === 0;
+  if (exit.direction === "down")  return exit.row === size - 1;
+  if (exit.direction === "left")  return exit.col === 0;
+  if (exit.direction === "right") return exit.col === size - 1;
+  return false;
+}
+
+/* ============================================================
+   レベルデータ（tools/build_levels.py が検証して自動生成）
+   ============================================================ */
+/* LEVELS:BEGIN */
+const LEVELS = [
+  {
+    "levelId": "level_001",
+    "title": "はじめての結合",
+    "hint": "数字を演算子にぶつける",
+    "tutorial": true,
+    "size": 3,
+    "pieces": [
+      {
+        "id": "a",
+        "row": 1,
+        "col": 0,
+        "tokens": [
+          8
+        ]
+      },
+      {
+        "id": "b",
+        "row": 1,
+        "col": 1,
+        "tokens": [
+          "÷",
+          4
+        ]
+      }
+    ],
+    "walls": [
+      {
+        "row": 0,
+        "col": 0
+      },
+      {
+        "row": 0,
+        "col": 1
+      },
+      {
+        "row": 0,
+        "col": 2
+      },
+      {
+        "row": 2,
+        "col": 0
+      },
+      {
+        "row": 2,
+        "col": 1
+      },
+      {
+        "row": 2,
+        "col": 2
+      }
+    ],
+    "exits": [
+      {
+        "row": 1,
+        "col": 2,
+        "direction": "right",
+        "value": 2
+      }
+    ],
+    "par": 3,
+    "routes": 1
+  },
+  {
+    "levelId": "level_002",
+    "title": "ぶつける向き",
+    "hint": "ぶつけた側が式の前になる",
+    "tutorial": true,
+    "size": 3,
+    "pieces": [
+      {
+        "id": "a",
+        "row": 1,
+        "col": 0,
+        "tokens": [
+          3
+        ]
+      },
+      {
+        "id": "b",
+        "row": 1,
+        "col": 1,
+        "tokens": [
+          "+"
+        ]
+      },
+      {
+        "id": "c",
+        "row": 1,
+        "col": 2,
+        "tokens": [
+          5
+        ]
+      },
+      {
+        "id": "d",
+        "row": 0,
+        "col": 0,
+        "tokens": [
+          "×"
+        ]
+      }
+    ],
+    "walls": [
+      {
+        "row": 2,
+        "col": 0
+      },
+      {
+        "row": 2,
+        "col": 1
+      },
+      {
+        "row": 2,
+        "col": 2
+      },
+      {
+        "row": 0,
+        "col": 1
+      }
+    ],
+    "exits": [
+      {
+        "row": 1,
+        "col": 2,
+        "direction": "right",
+        "value": 8
+      }
+    ],
+    "par": 3,
+    "routes": 1
+  },
+  {
+    "levelId": "level_003",
+    "title": "動かせないタイル",
+    "hint": "灰色のタイルは動かせない",
+    "tutorial": true,
+    "size": 3,
+    "pieces": [
+      {
+        "id": "a",
+        "row": 2,
+        "col": 0,
+        "tokens": [
+          6
+        ]
+      },
+      {
+        "id": "b",
+        "row": 1,
+        "col": 0,
+        "tokens": [
+          "×"
+        ]
+      },
+      {
+        "id": "c",
+        "row": 0,
+        "col": 0,
+        "tokens": [
+          7
+        ],
+        "fixed": true
+      }
+    ],
+    "walls": [
+      {
+        "row": 0,
+        "col": 1
+      },
+      {
+        "row": 1,
+        "col": 1
+      },
+      {
+        "row": 2,
+        "col": 1
+      },
+      {
+        "row": 0,
+        "col": 2
+      },
+      {
+        "row": 1,
+        "col": 2
+      },
+      {
+        "row": 2,
+        "col": 2
+      }
+    ],
+    "exits": [
+      {
+        "row": 0,
+        "col": 0,
+        "direction": "up",
+        "value": 42
+      }
+    ],
+    "par": 3,
+    "routes": 1
+  },
+  {
+    "levelId": "level_004",
+    "title": "順番がすべて",
+    "hint": "先に引き算を作る",
+    "size": 4,
+    "pieces": [
+      {
+        "id": "a",
+        "row": 0,
+        "col": 0,
+        "tokens": [
+          24
+        ]
+      },
+      {
+        "id": "b",
+        "row": 2,
+        "col": 2,
+        "tokens": [
+          "÷"
+        ]
+      },
+      {
+        "id": "c",
+        "row": 3,
+        "col": 0,
+        "tokens": [
+          7
+        ]
+      },
+      {
+        "id": "d",
+        "row": 3,
+        "col": 2,
+        "tokens": [
+          "−"
+        ]
+      },
+      {
+        "id": "e",
+        "row": 1,
+        "col": 3,
+        "tokens": [
+          3
+        ]
+      }
+    ],
+    "walls": [
+      {
+        "row": 1,
+        "col": 1
+      }
+    ],
+    "exits": [
+      {
+        "row": 0,
+        "col": 3,
+        "direction": "up",
+        "value": 6
+      }
+    ],
+    "par": 12,
+    "routes": 1
+  },
+  {
+    "levelId": "level_005",
+    "title": "ちょうどに収める",
+    "hint": "20〜25 に収まる形を探す",
+    "size": 4,
+    "pieces": [
+      {
+        "id": "a",
+        "row": 0,
+        "col": 0,
+        "tokens": [
+          9
+        ]
+      },
+      {
+        "id": "b",
+        "row": 1,
+        "col": 2,
+        "tokens": [
+          "×"
+        ]
+      },
+      {
+        "id": "c",
+        "row": 3,
+        "col": 1,
+        "tokens": [
+          3
+        ]
+      },
+      {
+        "id": "d",
+        "row": 2,
+        "col": 0,
+        "tokens": [
+          "−"
+        ]
+      },
+      {
+        "id": "e",
+        "row": 3,
+        "col": 3,
+        "tokens": [
+          5
+        ]
+      }
+    ],
+    "walls": [
+      {
+        "row": 1,
+        "col": 1
+      }
+    ],
+    "exits": [
+      {
+        "row": 0,
+        "col": 3,
+        "direction": "up",
+        "minValue": 20,
+        "maxValue": 25
+      }
+    ],
+    "par": 12,
+    "routes": 1
+  },
+  {
+    "levelId": "level_006",
+    "title": "動かない的",
+    "hint": "固定タイルへ式を運ぶ",
+    "size": 4,
+    "pieces": [
+      {
+        "id": "a",
+        "row": 0,
+        "col": 0,
+        "tokens": [
+          24
+        ],
+        "fixed": true
+      },
+      {
+        "id": "b",
+        "row": 3,
+        "col": 0,
+        "tokens": [
+          96
+        ]
+      },
+      {
+        "id": "c",
+        "row": 3,
+        "col": 2,
+        "tokens": [
+          "÷"
+        ]
+      },
+      {
+        "id": "d",
+        "row": 2,
+        "col": 3,
+        "tokens": [
+          4
+        ]
+      },
+      {
+        "id": "e",
+        "row": 1,
+        "col": 2,
+        "tokens": [
+          "+"
+        ]
+      }
+    ],
+    "walls": [
+      {
+        "row": 1,
+        "col": 1
+      },
+      {
+        "row": 2,
+        "col": 1
+      }
+    ],
+    "exits": [
+      {
+        "row": 0,
+        "col": 0,
+        "direction": "up",
+        "value": 48
+      }
+    ],
+    "par": 9,
+    "routes": 1
+  },
+  {
+    "levelId": "level_007",
+    "title": "平方根",
+    "hint": "√ を使う相手を間違えない",
+    "size": 4,
+    "pieces": [
+      {
+        "id": "a",
+        "row": 1,
+        "col": 2,
+        "tokens": [
+          "√"
+        ]
+      },
+      {
+        "id": "b",
+        "row": 0,
+        "col": 1,
+        "tokens": [
+          36
+        ]
+      },
+      {
+        "id": "c",
+        "row": 3,
+        "col": 0,
+        "tokens": [
+          "+"
+        ]
+      },
+      {
+        "id": "d",
+        "row": 1,
+        "col": 3,
+        "tokens": [
+          4
+        ]
+      },
+      {
+        "id": "e",
+        "row": 2,
+        "col": 2,
+        "tokens": [
+          "×"
+        ]
+      }
+    ],
+    "walls": [
+      {
+        "row": 1,
+        "col": 1
+      }
+    ],
+    "exits": [
+      {
+        "row": 0,
+        "col": 3,
+        "direction": "up",
+        "value": 10
+      }
+    ],
+    "par": 10,
+    "routes": 1
+  },
+  {
+    "levelId": "level_008",
+    "title": "階乗",
+    "hint": "! は数字の後ろにつく",
+    "size": 4,
+    "pieces": [
+      {
+        "id": "a",
+        "row": 3,
+        "col": 0,
+        "tokens": [
+          4
+        ]
+      },
+      {
+        "id": "b",
+        "row": 2,
+        "col": 2,
+        "tokens": [
+          "!"
+        ]
+      },
+      {
+        "id": "c",
+        "row": 0,
+        "col": 1,
+        "tokens": [
+          "÷"
+        ]
+      },
+      {
+        "id": "d",
+        "row": 1,
+        "col": 3,
+        "tokens": [
+          6
+        ]
+      },
+      {
+        "id": "e",
+        "row": 3,
+        "col": 2,
+        "tokens": [
+          "+"
+        ]
+      }
+    ],
+    "walls": [
+      {
+        "row": 1,
+        "col": 1
+      }
+    ],
+    "exits": [
+      {
+        "row": 0,
+        "col": 3,
+        "direction": "up",
+        "value": 4
+      }
+    ],
+    "par": 9,
+    "routes": 1
+  },
+  {
+    "levelId": "level_009",
+    "title": "ふたつの出口",
+    "hint": "数字ごとに行き先が違う",
+    "size": 4,
+    "pieces": [
+      {
+        "id": "a",
+        "row": 3,
+        "col": 0,
+        "tokens": [
+          2
+        ]
+      },
+      {
+        "id": "b",
+        "row": 2,
+        "col": 2,
+        "tokens": [
+          "×"
+        ]
+      },
+      {
+        "id": "c",
+        "row": 3,
+        "col": 3,
+        "tokens": [
+          3
+        ]
+      },
+      {
+        "id": "d",
+        "row": 0,
+        "col": 1,
+        "tokens": [
+          5
+        ]
+      },
+      {
+        "id": "e",
+        "row": 1,
+        "col": 0,
+        "tokens": [
+          "−"
+        ]
+      }
+    ],
+    "walls": [
+      {
+        "row": 2,
+        "col": 1
+      }
+    ],
+    "exits": [
+      {
+        "row": 0,
+        "col": 0,
+        "direction": "up",
+        "value": 6
+      },
+      {
+        "row": 0,
+        "col": 3,
+        "direction": "up",
+        "value": 5
+      }
+    ],
+    "par": 11,
+    "routes": 2
+  },
+  {
+    "levelId": "level_010",
+    "title": "累乗",
+    "hint": "^ の右に来る数で決まる",
+    "size": 4,
+    "pieces": [
+      {
+        "id": "a",
+        "row": 3,
+        "col": 0,
+        "tokens": [
+          3
+        ]
+      },
+      {
+        "id": "b",
+        "row": 2,
+        "col": 2,
+        "tokens": [
+          "^"
+        ]
+      },
+      {
+        "id": "c",
+        "row": 3,
+        "col": 3,
+        "tokens": [
+          3
+        ]
+      },
+      {
+        "id": "d",
+        "row": 1,
+        "col": 0,
+        "tokens": [
+          "−"
+        ]
+      },
+      {
+        "id": "e",
+        "row": 0,
+        "col": 2,
+        "tokens": [
+          7
+        ]
+      }
+    ],
+    "walls": [
+      {
+        "row": 1,
+        "col": 2
+      }
+    ],
+    "exits": [
+      {
+        "row": 0,
+        "col": 0,
+        "direction": "up",
+        "value": 20
+      }
+    ],
+    "par": 10,
+    "routes": 1
+  },
+  {
+    "levelId": "level_011",
+    "title": "滑るタイル",
+    "hint": "緑のタイルは止まるまで滑る",
+    "tutorial": true,
+    "size": 3,
+    "pieces": [
+      {
+        "id": "a",
+        "row": 2,
+        "col": 0,
+        "tokens": [
+          12
+        ],
+        "slide": true
+      },
+      {
+        "id": "b",
+        "row": 2,
+        "col": 2,
+        "tokens": [
+          "÷"
+        ]
+      },
+      {
+        "id": "c",
+        "row": 0,
+        "col": 1,
+        "tokens": [
+          4
+        ]
+      }
+    ],
+    "walls": [],
+    "exits": [
+      {
+        "row": 0,
+        "col": 1,
+        "direction": "up",
+        "value": 3
+      }
+    ],
+    "par": 5,
+    "routes": 1
+  },
+  {
+    "levelId": "level_012",
+    "title": "止め方を考える",
+    "hint": "滑る先に何を置くか",
+    "size": 4,
+    "pieces": [
+      {
+        "id": "a",
+        "row": 3,
+        "col": 0,
+        "tokens": [
+          30
+        ],
+        "slide": true
+      },
+      {
+        "id": "b",
+        "row": 1,
+        "col": 1,
+        "tokens": [
+          "÷"
+        ]
+      },
+      {
+        "id": "c",
+        "row": 3,
+        "col": 3,
+        "tokens": [
+          5
+        ]
+      },
+      {
+        "id": "d",
+        "row": 0,
+        "col": 2,
+        "tokens": [
+          "+"
+        ]
+      },
+      {
+        "id": "e",
+        "row": 2,
+        "col": 0,
+        "tokens": [
+          4
+        ]
+      }
+    ],
+    "walls": [
+      {
+        "row": 2,
+        "col": 2
+      }
+    ],
+    "exits": [
+      {
+        "row": 0,
+        "col": 0,
+        "direction": "up",
+        "value": 10
+      }
+    ],
+    "par": 11,
+    "routes": 1
+  }
+];
+/* LEVELS:END */
+
+// 出口が盤の縁にあるか（＝マーカーが盤外に描けるか）を起動時に検査する
+LEVELS.forEach(lv => {
+  lv.exits.forEach(ex => {
+    if (!exitIsOnBorder(ex, lv.size)) {
+      console.error("[レベル不正] 出口が盤の縁にない:", lv.levelId, ex);
+    }
+  });
+});
+
+/* ============================================================
+   ゲーム状態
+   ============================================================ */
+let currentLevel = null;
+let pieces = [];
+let moveCount = 0;
+let selectedId = null;
+let history = [];
+
+const PROGRESS_KEY = "number_puzzle_poc_progress_v2";
+
+function loadProgress() {
+  try { return JSON.parse(localStorage.getItem(PROGRESS_KEY)) || {}; }
+  catch (e) { return {}; }
+}
+function saveProgress(progress) {
+  try { localStorage.setItem(PROGRESS_KEY, JSON.stringify(progress)); }
+  catch (e) { /* ストレージ不可の環境でも進行は続ける */ }
+}
+function recordClear(levelId, moves) {
+  const progress = loadProgress();
+  const prev = progress[levelId] && progress[levelId].bestMoves;
+  progress[levelId] = { cleared: true, bestMoves: prev ? Math.min(prev, moves) : moves };
+  saveProgress(progress);
+}
+
+/* ---------- レベル選択 ---------- */
+function renderLevelSelect() {
+  const progress = loadProgress();
+  const grid = document.getElementById("levelGrid");
+  grid.innerHTML = "";
+  LEVELS.forEach((level, idx) => {
+    const card = document.createElement("div");
+    card.className = "level-card";
+    const p = progress[level.levelId];
+    card.innerHTML =
+      (p && p.cleared ? '<div class="cleared-mark">✓</div>' : '') +
+      '<div>Lv.' + (idx + 1) + '</div>' +
+      '<div class="name">' + level.title + '</div>' +
+      '<span class="par">最短 ' + level.par + '手</span>' +
+      (p && p.cleared ? '<span class="best">best ' + p.bestMoves + '手</span>' : '');
+    card.onclick = () => startLevel(level.levelId);
+    grid.appendChild(card);
+  });
+}
+
+function goToLevelSelect() {
+  document.getElementById("puzzleScreen").style.display = "none";
+  document.getElementById("levelSelect").style.display = "block";
+  renderLevelSelect();
+}
+
+/* ---------- パズル画面 ---------- */
+function startLevel(levelId) {
+  currentLevel = LEVELS.find(l => l.levelId === levelId);
+  pieces = currentLevel.pieces.map(p => ({
+    id: p.id, row: p.row, col: p.col, tokens: p.tokens.slice(),
+    fixed: !!p.fixed, slide: !!p.slide
+  }));
+  moveCount = 0;
+  selectedId = null;
+  history = [];
+
+  document.getElementById("levelSelect").style.display = "none";
+  document.getElementById("puzzleScreen").style.display = "block";
+  document.getElementById("parLabel").textContent = currentLevel.par + "手";
+  document.getElementById("hintLabel").textContent = currentLevel.hint || "";
+  buildBoard();
+  renderBoard();
+  setMessage("");
+}
+
+function findPieceAt(row, col) {
+  return pieces.find(p => p.row === row && p.col === col) || null;
+}
+function isWall(row, col) {
+  return currentLevel.walls.some(w => w.row === row && w.col === col);
+}
+function saveHistory() {
+  history.push({
+    pieces: pieces.map(p => ({
+      id: p.id, row: p.row, col: p.col, tokens: p.tokens.slice(),
+      fixed: p.fixed, slide: p.slide
+    })),
+    moveCount
+  });
+}
+function undo() {
+  if (history.length === 0) return;
+  const snap = history.pop();
+  pieces = snap.pieces;
+  moveCount = snap.moveCount;
+  selectedId = null;
+  setMessage("");
+  renderBoard();
+}
+function resetLevel() { startLevel(currentLevel.levelId); }
+function setMessage(msg) { document.getElementById("message").textContent = msg; }
+
+/* ---------- 盤面 ---------- */
+function buildBoard() {
+  const board = document.getElementById("board");
+  const size = currentLevel.size;
+  board.style.gridTemplateColumns = `repeat(${size}, 1fr)`;
+  board.style.gridTemplateRows = `repeat(${size}, 1fr)`;
+  board.innerHTML = "";
+
+  for (let r = 0; r < size; r++) {
+    for (let c = 0; c < size; c++) {
+      const cell = document.createElement("div");
+      cell.className = "cell" + (isWall(r, c) ? " wall" : "");
+      cell.dataset.row = r;
+      cell.dataset.col = c;
+      cell.onclick = () => onCellClick(r, c);
+      board.appendChild(cell);
+    }
+  }
+
+  const wrap = document.getElementById("boardWrap");
+  wrap.querySelectorAll(".exit-marker").forEach(e => e.remove());
+  currentLevel.exits.forEach(exit => {
+    const marker = document.createElement("div");
+    marker.className = "exit-marker";
+    const arrow = { up: "↑", down: "↓", left: "←", right: "→" }[exit.direction] || "•";
+    marker.innerHTML = '<span class="arrow">' + arrow + '</span><span>' + exitLabel(exit) + '</span>';
+    marker.title = exitLabel(exit) + " を出せます";
+    marker.dataset.row = exit.row;
+    marker.dataset.col = exit.col;
+    marker.onclick = () => onExitClick(exit);
+    wrap.appendChild(marker);
+    positionExitMarker(marker, exit, size);
+  });
+}
+
+function positionExitMarker(marker, exit, size) {
+  const wrap = document.getElementById("boardWrap");
+  requestAnimationFrame(() => {
+    const board = document.getElementById("board");
+    const rect = board.getBoundingClientRect();
+    const wrapRect = wrap.getBoundingClientRect();
+    if (rect.width === 0) return;
+    const cellW = rect.width / size, cellH = rect.height / size;
+    const cellLeft = rect.left - wrapRect.left + exit.col * cellW;
+    const cellTop  = rect.top  - wrapRect.top  + exit.row * cellH;
+    const mw = marker.offsetWidth, mh = marker.offsetHeight, gap = 8;
+    let x = cellLeft + cellW / 2 - mw / 2;
+    let y = cellTop + cellH / 2 - mh / 2;
+    if (exit.direction === "up")    y = cellTop - mh - gap;
+    if (exit.direction === "down")  y = cellTop + cellH + gap;
+    if (exit.direction === "left")  x = cellLeft - mw - gap;
+    if (exit.direction === "right") x = cellLeft + cellW + gap;
+    marker.style.left = x + "px";
+    marker.style.top = y + "px";
+  });
+}
+
+function tileClass(p) {
+  let cls;
+  if (p.tokens.length === 1 && isNum(p.tokens[0])) cls = "number";
+  else if (!hasNumber(p.tokens)) cls = "operator";
+  else cls = "compound";
+  return cls + (p.fixed ? " fixed" : "") + (p.slide ? " slide" : "");
+}
+
+function renderBoard() {
+  const board = document.getElementById("board");
+  const size = currentLevel.size;
+  board.querySelectorAll(".tile").forEach(t => t.remove());
+
+  const cellPx = board.getBoundingClientRect().width / size || 100;
+
+  pieces.forEach(p => {
+    const cell = board.querySelector('.cell[data-row="' + p.row + '"][data-col="' + p.col + '"]');
+    if (!cell) return;
+    const tile = document.createElement("div");
+    tile.className = "tile " + tileClass(p) + (p.id === selectedId ? " selected" : "");
+    tile.textContent = p.tokens.join(" ");
+    const len = tile.textContent.length;
+    tile.style.fontSize = Math.max(10, Math.min(cellPx * 0.42, cellPx * 1.5 / Math.max(1, len))) + "px";
+    tile.onclick = (e) => { e.stopPropagation(); onTileClick(p.id); };
+    cell.appendChild(tile);
+  });
+
+  document.getElementById("moveCount").textContent = moveCount;
+
+  document.querySelectorAll(".exit-marker").forEach(marker => {
+    const r = Number(marker.dataset.row), c = Number(marker.dataset.col);
+    const exit = currentLevel.exits.find(e => e.row === r && e.col === c);
+    const piece = findPieceAt(r, c);
+    marker.classList.toggle("ready", !!(exit && piece && canExit(piece.tokens, exit)));
+  });
+
+  checkWin();
+}
+
+/* ---------- 操作 ---------- */
+/* 選んだタイルから見て (row,col) がどの向きかを返す。
+   通常タイルは隣接1マスのみ。滑るタイルは同じ行・列ならどこでも向き指定として扱う。 */
+function directionTo(selected, row, col) {
+  const dr = row - selected.row, dc = col - selected.col;
+  if (Math.abs(dr) + Math.abs(dc) === 1) return [dr, dc];
+  if (selected.slide) {
+    if (dr === 0 && dc !== 0) return [0, dc > 0 ? 1 : -1];
+    if (dc === 0 && dr !== 0) return [dr > 0 ? 1 : -1, 0];
+  }
+  return null;
+}
+
+function onTileClick(id) {
+  const piece = pieces.find(p => p.id === id);
+  if (selectedId === null) {
+    if (piece.fixed) { setMessage("このタイルは動かせません"); return; }
+    selectedId = id;
+    setMessage("");
+    renderBoard();
+    return;
+  }
+  if (selectedId === id) { selectedId = null; renderBoard(); return; }
+
+  const selected = pieces.find(p => p.id === selectedId);
+  const dir = directionTo(selected, piece.row, piece.col);
+  if (dir) {
+    attemptMove(selected, dir[0], dir[1]);
+  } else if (piece.fixed) {
+    setMessage("このタイルは動かせません");
+  } else {
+    selectedId = id;
+    setMessage("");
+    renderBoard();
+  }
+}
+
+function onCellClick(row, col) {
+  if (selectedId === null) return;
+  const selected = pieces.find(p => p.id === selectedId);
+  if (!selected) return;
+  if (selected.row === row && selected.col === col) { selectedId = null; renderBoard(); return; }
+  const dir = directionTo(selected, row, col);
+  if (dir) attemptMove(selected, dir[0], dir[1]);
+}
+
+function attemptMove(piece, dr, dc) {
+  if (piece.fixed) { setMessage("このタイルは動かせません"); return; }
+  if (piece.slide) { attemptSlide(piece, dr, dc); return; }
+
+  const nr = piece.row + dr, nc = piece.col + dc, size = currentLevel.size;
+  if (nr < 0 || nr >= size || nc < 0 || nc >= size) return;
+  if (isWall(nr, nc)) { setMessage("壁があるため移動できません"); return; }
+
+  const target = findPieceAt(nr, nc);
+  if (!target) {
+    saveHistory();
+    piece.row = nr; piece.col = nc;
+    moveCount++; selectedId = null; setMessage("");
+    renderBoard();
+    return;
+  }
+
+  const result = tryMerge(piece.tokens, target.tokens);
+  if (!result.allowed) {
+    if (result.reason === "both-number")        setMessage("数字どうしはぶつけられません");
+    else if (result.reason === "both-operator") setMessage("演算子どうしはぶつけられません");
+    else                                        setMessage("この組み合わせでは計算できません");
+    return;
+  }
+
+  saveHistory();
+  target.tokens = result.tokens;              // target の位置と固定フラグは維持
+  pieces = pieces.filter(p => p.id !== piece.id);
+  moveCount++; selectedId = null; setMessage("");
+  renderBoard();
+}
+
+/* 滑るタイル: 壁・盤の縁・結合できないタイルに当たるまで一気に進む（まとめて1手） */
+function attemptSlide(piece, dr, dc) {
+  const size = currentLevel.size;
+  let cr = piece.row, cc = piece.col;
+  let hit = null;
+  while (true) {
+    const nr = cr + dr, nc = cc + dc;
+    if (nr < 0 || nr >= size || nc < 0 || nc >= size) break;
+    if (isWall(nr, nc)) break;
+    const occupant = findPieceAt(nr, nc);
+    if (occupant) { hit = occupant; break; }
+    cr = nr; cc = nc;
+  }
+
+  if (hit) {
+    const result = tryMerge(piece.tokens, hit.tokens);
+    if (result.allowed) {
+      saveHistory();
+      hit.tokens = result.tokens;
+      pieces = pieces.filter(p => p.id !== piece.id);
+      moveCount++; selectedId = null; setMessage("");
+      renderBoard();
+      return;
+    }
+  }
+
+  if (cr === piece.row && cc === piece.col) {
+    setMessage(hit ? "ぶつかる相手と結合できないので動けません" : "その向きには動けません");
+    return;
+  }
+
+  saveHistory();
+  piece.row = cr; piece.col = cc;
+  moveCount++; selectedId = null; setMessage("");
+  renderBoard();
+}
+
+function onExitClick(exit) {
+  const piece = findPieceAt(exit.row, exit.col);
+  if (!piece) { setMessage("出口のマスにタイルがありません"); return; }
+  if (piece.tokens.length !== 1 || !isNum(piece.tokens[0])) {
+    setMessage("完成した数字だけが出口を通れます");
+    return;
+  }
+  if (!canExit(piece.tokens, exit)) {
+    setMessage("この出口から出せるのは " + exitLabel(exit) + " です");
+    return;
+  }
+  saveHistory();
+  pieces = pieces.filter(p => p.id !== piece.id);
+  moveCount++; selectedId = null; setMessage("");
+  renderBoard();
+}
+
+/* ---------- クリア判定: 数字タイルが全て無くなればクリア ---------- */
+function checkWin() {
+  if (pieces.every(p => !hasNumber(p.tokens))) {
+    recordClear(currentLevel.levelId, moveCount);
+    showWinOverlay();
+  }
+}
+
+function showWinOverlay() {
+  if (document.getElementById("winOverlay")) return;
+  const overlay = document.createElement("div");
+  overlay.className = "win-overlay";
+  overlay.id = "winOverlay";
+  const idx = LEVELS.findIndex(l => l.levelId === currentLevel.levelId);
+  const hasNext = idx >= 0 && idx < LEVELS.length - 1;
+  const perfect = moveCount <= currentLevel.par;
+  overlay.innerHTML =
+    '<div class="win-card">' +
+      '<h2>クリア！</h2>' +
+      '<p>' + moveCount + ' 手（最短 ' + currentLevel.par + ' 手）' +
+        (perfect ? '<br>最短クリア！' : '') + '</p>' +
+      '<div class="actions">' +
+        '<button class="secondary" onclick="closeWinOverlay(); goToLevelSelect();">レベル選択</button>' +
+        (hasNext ? '<button onclick="closeWinOverlay(); startLevel(\'' + LEVELS[idx + 1].levelId + '\');">次へ</button>' : '') +
+      '</div>' +
+    '</div>';
+  document.body.appendChild(overlay);
+}
+function closeWinOverlay() {
+  const el = document.getElementById("winOverlay");
+  if (el) el.remove();
+}
+
+/* ---------- 初期化 ---------- */
+renderLevelSelect();
+window.addEventListener("resize", () => {
+  if (currentLevel && document.getElementById("puzzleScreen").style.display !== "none") {
+    const markers = document.querySelectorAll(".exit-marker");
+    currentLevel.exits.forEach((exit, i) => {
+      if (markers[i]) positionExitMarker(markers[i], exit, currentLevel.size);
+    });
+    renderBoard();
+  }
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "poc",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["-m", "http.server", "8777"],
+      "port": 8777
+    },
+    {
+      "name": "flutter_web",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["-m", "http.server", "8888", "--directory", "C:\\dev\\number_puzzle\\build\\web"],
+      "port": 8888
+    }
+  ]
+}

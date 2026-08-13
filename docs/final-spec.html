@@ -1,0 +1,622 @@
+<title>数式パズル v3 最終仕様</title>
+<style>
+  :root {
+    --ground:#FAF7EE; --surface:#FFFFFF; --surface-2:#F4F1E6;
+    --rule:#C7D3E4; --grid:#E3E8EF; --ink:#24344A; --muted:#857F72;
+    --accent:#C1442D; --accent-soft:#F2DCD5; --ok:#1F7A6B; --ice:#CFE4EE;
+    --step--1:0.8125rem; --step-0:1rem; --step-1:1.1875rem;
+    --step-2:1.5rem; --step-3:2.125rem;
+    --sans: ui-sans-serif, -apple-system, "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Meiryo", sans-serif;
+    --mono: ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Yu Gothic UI", monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground:#12161C; --surface:#1A1F27; --surface-2:#212831;
+      --rule:#38485F; --grid:#202832; --ink:#E7E3D6; --muted:#9A9385;
+      --accent:#E8735A; --accent-soft:#3A2019; --ok:#4FB6A1; --ice:#22404E;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground:#12161C; --surface:#1A1F27; --surface-2:#212831;
+    --rule:#38485F; --grid:#202832; --ink:#E7E3D6; --muted:#9A9385;
+    --accent:#E8735A; --accent-soft:#3A2019; --ok:#4FB6A1; --ice:#22404E;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin:0; background:var(--ground); color:var(--ink);
+    font-family:var(--sans); font-size:var(--step-0); line-height:1.9;
+    -webkit-text-size-adjust:100%;
+  }
+  .wrap { max-width:780px; margin:0 auto; padding:0 20px 96px; }
+
+  .masthead {
+    margin:0 0 56px; padding:56px 20px 40px;
+    background-color:var(--surface-2);
+    background-image:
+      linear-gradient(to right, var(--grid) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--grid) 1px, transparent 1px);
+    background-size:26px 26px; border-bottom:1px solid var(--rule);
+  }
+  .masthead-inner { max-width:780px; margin:0 auto; }
+  .eyebrow {
+    font-family:var(--mono); font-size:var(--step--1);
+    letter-spacing:.14em; color:var(--accent); margin:0 0 10px;
+  }
+  h1 {
+    font-size:var(--step-3); line-height:1.35; letter-spacing:-.02em;
+    font-weight:800; margin:0 0 14px; text-wrap:balance;
+  }
+  .lede { margin:0; max-width:36em; }
+  .status {
+    display:flex; flex-wrap:wrap; gap:8px 10px; margin:24px 0 0; padding:0;
+    list-style:none; font-family:var(--mono); font-size:var(--step--1); color:var(--muted);
+  }
+  .status li {
+    background:var(--surface); border:1px solid var(--rule); border-radius:999px;
+    padding:3px 12px; font-variant-numeric:tabular-nums;
+  }
+
+  section { margin:0 0 64px; }
+  .kicker {
+    font-family:var(--mono); font-size:var(--step--1);
+    letter-spacing:.14em; color:var(--muted); margin:0 0 6px;
+  }
+  h2 {
+    font-size:var(--step-2); line-height:1.4; letter-spacing:-.015em; font-weight:700;
+    margin:0 0 20px; padding-bottom:12px; border-bottom:2px solid var(--ink);
+    text-wrap:balance;
+  }
+  h3 { font-size:var(--step-1); font-weight:700; margin:32px 0 10px; letter-spacing:-.01em; }
+  p { margin:0 0 18px; }
+
+  code, .tok {
+    font-family:var(--mono); font-size:.9em; background:var(--surface-2);
+    border:1px solid var(--rule); border-radius:4px; padding:1px 5px; white-space:nowrap;
+  }
+  pre {
+    background:var(--surface); border:1px solid var(--rule); border-radius:8px;
+    padding:16px 18px; overflow-x:auto; font-family:var(--mono);
+    font-size:var(--step--1); line-height:1.7; margin:0 0 18px;
+  }
+  pre code { background:none; border:none; padding:0; white-space:pre; }
+
+  .scroll { overflow-x:auto; margin:0 0 8px; }
+  table { width:100%; border-collapse:collapse; font-size:var(--step--1); line-height:1.7; min-width:480px; }
+  th, td { text-align:left; vertical-align:top; padding:10px 12px; border-bottom:1px solid var(--rule); }
+  thead th {
+    font-family:var(--mono); font-weight:600; letter-spacing:.06em;
+    color:var(--muted); border-bottom:1.5px solid var(--ink); white-space:nowrap;
+  }
+  tbody th { font-weight:700; white-space:nowrap; }
+  td.num, .num { font-family:var(--mono); font-variant-numeric:tabular-nums; }
+
+  ol.steps { counter-reset:step; list-style:none; margin:0 0 18px; padding:0; }
+  ol.steps > li {
+    counter-increment:step; position:relative; padding:0 0 0 42px; margin-bottom:16px;
+  }
+  ol.steps > li::before {
+    content:counter(step); position:absolute; left:0; top:2px;
+    width:26px; height:26px; border-radius:50%;
+    background:var(--ink); color:var(--ground);
+    font-family:var(--mono); font-size:var(--step--1); font-weight:700;
+    display:flex; align-items:center; justify-content:center;
+  }
+  ol.steps ul { margin:8px 0 0; padding-left:1.2em; font-size:var(--step--1); line-height:1.8; }
+
+  ul.plain, ol.plain { margin:0 0 18px; padding-left:1.35em; }
+  ul.plain li, ol.plain li { margin-bottom:8px; }
+
+  figure {
+    margin:28px 0; padding:20px 18px 16px;
+    background:var(--surface); border:1px solid var(--rule); border-radius:10px;
+  }
+  figure .scroll { margin:0; }
+  figure svg { display:block; width:100%; height:auto; min-width:540px; }
+  figcaption {
+    margin-top:14px; padding-top:12px; border-top:1px solid var(--rule);
+    font-size:var(--step--1); line-height:1.7; color:var(--muted);
+  }
+
+  .note {
+    margin:0 0 20px; padding:16px 20px; background:var(--accent-soft);
+    border-left:4px solid var(--accent); border-radius:0 8px 8px 0;
+  }
+  .note p:last-child { margin-bottom:0; }
+  .note strong { font-weight:800; }
+
+  .chip {
+    display:inline-flex; align-items:center; justify-content:center;
+    min-width:22px; height:22px; padding:0 6px; border-radius:4px;
+    font-family:var(--mono); font-size:12px; font-weight:700;
+    background:var(--accent); color:#fff;
+  }
+  .chip.floor { background:var(--surface-2); color:var(--ink); border:1px solid var(--rule); }
+  .chip.iceb { background:var(--ice); color:var(--ink); border:1px solid var(--rule); }
+
+  @media (max-width:560px) {
+    :root { --step-3:1.75rem; --step-2:1.3125rem; }
+    .masthead { padding:40px 20px 32px; }
+  }
+</style>
+
+<header class="masthead">
+  <div class="masthead-inner">
+    <p class="eyebrow">最終仕様 v3 ／ 2026-08-13</p>
+    <h1>数式パズル 仕様書</h1>
+    <p class="lede">
+      本番実装（Flutter）への引き継ぎ用。ルール・データ形式・レベル検証の要件を確定版としてまとめる。
+      ここに書かれた挙動は、Python のソルバーと HTML の POC の двух実装で一致が確認済み。
+    </p>
+    <ul class="status">
+      <li>収録 10 レベル</li>
+      <li>par 3〜14</li>
+      <li>制限 = 最短手数</li>
+      <li>解法 1 通り</li>
+      <li>床は全て必須</li>
+    </ul>
+  </div>
+</header>
+
+<div class="wrap">
+
+<section>
+  <p class="kicker">概要</p>
+  <h2>ゲームの骨格</h2>
+  <p>
+    マス目の上で数字タイルを動かし、ぶつけて計算し、出口から出し切るソロパズル。
+    <strong>盤上にあるのは数字タイルだけ</strong>で、演算子はタイルの<strong>辺</strong>に付いている。
+    どの向きから当てるかで使う演算子と計算の左右が決まるため、算数ではなく
+    「空間と順序」が難しさの中心になる。
+  </p>
+  <p>
+    特殊効果（滑る・回す・入れ替える・√・!）は<strong>床（マス）の性質</strong>として持たせる。
+    タイルの素性ではないので、合体しても効果が消えるといった例外が発生しない。
+    全レベルに<strong>最短手数ちょうどの手数制限</strong>があり、遠回りすると間に合わない。
+  </p>
+</section>
+
+<section>
+  <p class="kicker">ルール</p>
+  <h2>1 手の解決手順</h2>
+
+  <p>
+    実装で最も間違えやすいのが処理の順序。次の順で確定する。
+    <strong>いずれの理由でも成立しなかった場合、手数は消費しない。</strong>
+  </p>
+
+  <figure>
+    <div class="scroll">
+      <svg viewBox="0 0 720 330" role="img"
+           aria-label="1手の解決フロー。1マスずつ進み、氷なら滑り続け、タイルに阻まれたら衝突判定、そうでなければ移動先の床効果を適用する">
+        <defs>
+          <marker id="fa" viewBox="0 0 10 10" refX="9" refY="5"
+                  markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <polygon points="0,1 10,5 0,9" fill="currentColor"></polygon>
+          </marker>
+        </defs>
+
+        <rect x="0" y="24" width="118" height="46" rx="6" fill="none"
+              stroke="currentColor" stroke-width="1.5"></rect>
+        <text x="59" y="44" font-size="12" text-anchor="middle" fill="currentColor">向きを選ぶ</text>
+        <text x="59" y="60" font-size="11" text-anchor="middle" fill="currentColor" opacity=".6">固定タイルは不可</text>
+
+        <line x1="122" y1="47" x2="156" y2="47" stroke="currentColor" stroke-width="1.5" marker-end="url(#fa)"></line>
+
+        <rect x="160" y="24" width="128" height="46" rx="6" fill="none"
+              stroke="currentColor" stroke-width="1.5"></rect>
+        <text x="224" y="44" font-size="12" text-anchor="middle" fill="currentColor">1 マス進む</text>
+        <text x="224" y="60" font-size="11" text-anchor="middle" fill="currentColor" opacity=".6">氷なら進み続ける</text>
+
+        <path d="M224 74 L224 92" fill="none" stroke="currentColor" stroke-width="1.5"></path>
+        <text x="234" y="88" font-size="11" fill="currentColor" opacity=".7">止まった理由は？</text>
+
+        <path d="M224 92 L224 104 L92 104 L92 128" fill="none" stroke="currentColor"
+              stroke-width="1.5" marker-end="url(#fa)"></path>
+        <path d="M224 92 L224 104 L470 104 L470 128" fill="none" stroke="currentColor"
+              stroke-width="1.5" marker-end="url(#fa)"></path>
+
+        <text x="92" y="122" font-size="11" text-anchor="middle" fill="currentColor" opacity=".7">タイルに阻まれた</text>
+        <text x="470" y="122" font-size="11" text-anchor="middle" fill="currentColor" opacity=".7">壁・縁・普通の床</text>
+
+        <!-- 左枝: 衝突 -->
+        <rect x="0" y="132" width="184" height="58" rx="6" fill="none"
+              stroke="#C1442D" stroke-width="2"></rect>
+        <text x="92" y="152" font-size="12" text-anchor="middle" fill="#C1442D">接触する 2 辺を見る</text>
+        <text x="92" y="169" font-size="11" text-anchor="middle" fill="currentColor" opacity=".7">進行方向の辺 と</text>
+        <text x="92" y="183" font-size="11" text-anchor="middle" fill="currentColor" opacity=".7">相手のその逆向きの辺</text>
+
+        <line x1="92" y1="194" x2="92" y2="222" stroke="currentColor" stroke-width="1.5" marker-end="url(#fa)"></line>
+        <text x="102" y="212" font-size="11" fill="currentColor" opacity=".7">片方だけ演算子？</text>
+
+        <rect x="0" y="226" width="184" height="62" rx="6" fill="none"
+              stroke="currentColor" stroke-width="1.5"></rect>
+        <text x="92" y="246" font-size="12" text-anchor="middle" fill="currentColor">計算して合体</text>
+        <text x="92" y="263" font-size="11" text-anchor="middle" fill="currentColor" opacity=".7">ぶつけた側が左辺</text>
+        <text x="92" y="278" font-size="11" text-anchor="middle" fill="#C1442D">床効果は起きない</text>
+
+        <line x1="188" y1="257" x2="222" y2="257" stroke="currentColor" stroke-width="1.5" marker-end="url(#fa)"></line>
+        <rect x="226" y="234" width="150" height="46" rx="6" fill="none"
+              stroke="currentColor" stroke-width="1.5" stroke-dasharray="4 3"></rect>
+        <text x="301" y="254" font-size="12" text-anchor="middle" fill="currentColor">それ以外は却下</text>
+        <text x="301" y="270" font-size="11" text-anchor="middle" fill="currentColor" opacity=".6">手数は減らない</text>
+
+        <!-- 右枝: 移動 -->
+        <rect x="386" y="132" width="184" height="58" rx="6" fill="none"
+              stroke="currentColor" stroke-width="1.5"></rect>
+        <text x="478" y="152" font-size="12" text-anchor="middle" fill="currentColor">止まったマスの床効果</text>
+        <text x="478" y="169" font-size="11" text-anchor="middle" fill="currentColor" opacity=".7">回す / 入れ替える</text>
+        <text x="478" y="183" font-size="11" text-anchor="middle" fill="currentColor" opacity=".7">√ / ! を適用</text>
+
+        <line x1="478" y1="194" x2="478" y2="222" stroke="currentColor" stroke-width="1.5" marker-end="url(#fa)"></line>
+
+        <rect x="386" y="226" width="184" height="62" rx="6" fill="none"
+              stroke="currentColor" stroke-width="1.5"></rect>
+        <text x="478" y="246" font-size="12" text-anchor="middle" fill="currentColor">残り回数を 1 減らす</text>
+        <text x="478" y="263" font-size="11" text-anchor="middle" fill="currentColor" opacity=".7">適用できない値なら</text>
+        <text x="478" y="278" font-size="11" text-anchor="middle" fill="currentColor" opacity=".7">そのマスに入れない</text>
+
+        <line x1="574" y1="257" x2="608" y2="257" stroke="currentColor" stroke-width="1.5" marker-end="url(#fa)"></line>
+        <rect x="612" y="234" width="108" height="46" rx="6" fill="none"
+              stroke="currentColor" stroke-width="1.5"></rect>
+        <text x="666" y="261" font-size="12" text-anchor="middle" fill="currentColor">手数 +1</text>
+      </svg>
+    </div>
+    <figcaption>
+      衝突と移動は排他。<span style="color:var(--accent)">合体した結果には床効果がかからない</span>（新しいマスへ移動していないため）。
+      滑って移動した先の床効果は、滑り終えた 1 マスにだけ適用される。
+    </figcaption>
+  </figure>
+
+  <ol class="steps">
+    <li>
+      <strong>タイルと向きを選ぶ。</strong>
+      固定タイルは動かせない（ぶつけられる側にはなれる）。
+      操作は「タイルを選択 → 同じ行・列のマスをタップ」。
+    </li>
+    <li>
+      <strong>1 マスずつ進める。</strong>
+      次のマスが盤外・壁なら停止（衝突なし）。次のマスにタイルがあれば停止（衝突あり）。
+      進入したマスが<strong>氷</strong>なら、同じ向きに進み続ける。
+    </li>
+    <li>
+      <strong>タイルに阻まれて止まった場合は衝突判定。</strong>
+      接触する 2 辺のうち<strong>ちょうど片方だけ</strong>に演算子があるときのみ成立。
+      両方にある／どちらにも無い場合はぶつかれない（壁と同じ扱い）。
+    </li>
+    <li>
+      <strong>計算する。</strong>
+      <span class="tok">ぶつけた側 演算子 ぶつけられた側</span> の順。
+      成立しない結果ならその衝突ごと無効：
+      <ul>
+        <li>割り切れない割り算・0 での割り算</li>
+        <li>引いて負になる向き（マイナスは扱わない）</li>
+        <li>結果が 100000 を超える</li>
+      </ul>
+    </li>
+    <li>
+      <strong>合体の後始末。</strong>
+      ぶつけた側は消える。ぶつけられた側は位置と固定フラグを保ち、値が計算結果になる。
+      辺は<strong>ぶつけられた側の、使わなかった辺だけ</strong>が残る。
+    </li>
+    <li>
+      <strong>衝突せずに動いた場合は、止まったマスの床効果を適用。</strong>
+      適用できない値なら（√ に平方数以外など）そのマスには入れず、手ごと却下。
+      残り回数が設定された床は 1 消費し、0 になった床はただの床になる。
+    </li>
+    <li>
+      <strong>成立したら手数を 1 消費。</strong>
+      移動・衝突・出口はいずれも 1 手。
+    </li>
+  </ol>
+</section>
+
+<section>
+  <p class="kicker">ルール</p>
+  <h2>衝突と辺</h2>
+
+  <figure>
+    <div class="scroll">
+      <svg viewBox="0 0 720 250" role="img"
+           aria-label="衝突の3パターンと、計算後に残る辺。片方だけに演算子があるときのみ計算でき、残るのはぶつけられた側の未使用の辺だけ">
+        <!-- 行1: 成立 -->
+        <rect x="0" y="14" width="52" height="46" rx="6" fill="none" stroke="currentColor" stroke-width="1.5"></rect>
+        <text x="26" y="43" font-family="ui-monospace, monospace" font-size="16" text-anchor="middle" fill="currentColor">7</text>
+
+        <rect x="78" y="14" width="52" height="46" rx="6" fill="none" stroke="currentColor" stroke-width="1.5"></rect>
+        <text x="104" y="43" font-family="ui-monospace, monospace" font-size="16" text-anchor="middle" fill="currentColor">3</text>
+        <rect x="65" y="26" width="19" height="22" rx="3" fill="#C1442D"></rect>
+        <text x="74" y="42" font-family="ui-monospace, monospace" font-size="13" text-anchor="middle" fill="#FAF7EE">−</text>
+        <rect x="93" y="2" width="22" height="19" rx="3" fill="none" stroke="currentColor" stroke-width="1.2" opacity=".55"></rect>
+        <text x="104" y="16" font-family="ui-monospace, monospace" font-size="12" text-anchor="middle" fill="currentColor" opacity=".7">×</text>
+
+        <text x="152" y="43" font-size="15" fill="#1F7A6B" font-weight="700">✓</text>
+        <text x="176" y="32" font-size="12" fill="currentColor">片方だけに演算子 → 成立</text>
+        <text x="176" y="50" font-size="11" fill="currentColor" opacity=".7">7 − 3 = 4（ぶつけた側が左辺）</text>
+
+        <text x="420" y="43" font-size="14" fill="currentColor" opacity=".55">⇒</text>
+        <rect x="450" y="14" width="52" height="46" rx="6" fill="none" stroke="currentColor" stroke-width="1.5"></rect>
+        <text x="476" y="43" font-family="ui-monospace, monospace" font-size="16" text-anchor="middle" fill="currentColor">4</text>
+        <rect x="465" y="2" width="22" height="19" rx="3" fill="none" stroke="currentColor" stroke-width="1.2" opacity=".55"></rect>
+        <text x="476" y="16" font-family="ui-monospace, monospace" font-size="12" text-anchor="middle" fill="currentColor" opacity=".7">×</text>
+        <text x="516" y="32" font-size="11" fill="#C1442D">使った − だけ消える</text>
+        <text x="516" y="50" font-size="11" fill="currentColor" opacity=".7">ぶつけた側の辺は全て消える</text>
+
+        <line x1="0" y1="86" x2="720" y2="86" stroke="currentColor" stroke-width="1" opacity=".18"></line>
+
+        <!-- 行2: 両方 -->
+        <rect x="0" y="104" width="52" height="46" rx="6" fill="none" stroke="currentColor" stroke-width="1.5"></rect>
+        <text x="26" y="133" font-family="ui-monospace, monospace" font-size="16" text-anchor="middle" fill="currentColor">7</text>
+        <rect x="46" y="116" width="19" height="22" rx="3" fill="#C1442D"></rect>
+        <text x="55" y="132" font-family="ui-monospace, monospace" font-size="13" text-anchor="middle" fill="#FAF7EE">+</text>
+        <rect x="78" y="104" width="52" height="46" rx="6" fill="none" stroke="currentColor" stroke-width="1.5"></rect>
+        <text x="104" y="133" font-family="ui-monospace, monospace" font-size="16" text-anchor="middle" fill="currentColor">3</text>
+        <rect x="65" y="116" width="19" height="22" rx="3" fill="#C1442D"></rect>
+        <text x="74" y="132" font-family="ui-monospace, monospace" font-size="13" text-anchor="middle" fill="#FAF7EE">−</text>
+
+        <text x="152" y="133" font-size="15" fill="#C1442D" font-weight="700">✕</text>
+        <text x="176" y="128" font-size="12" fill="currentColor">両方に演算子 → 壁と同じ。回転の床で逃がすしかない</text>
+
+        <line x1="0" y1="172" x2="720" y2="172" stroke="currentColor" stroke-width="1" opacity=".18"></line>
+
+        <!-- 行3: なし -->
+        <rect x="0" y="190" width="52" height="46" rx="6" fill="none" stroke="currentColor" stroke-width="1.5"></rect>
+        <text x="26" y="219" font-family="ui-monospace, monospace" font-size="16" text-anchor="middle" fill="currentColor">7</text>
+        <rect x="78" y="190" width="52" height="46" rx="6" fill="none" stroke="currentColor" stroke-width="1.5"></rect>
+        <text x="104" y="219" font-family="ui-monospace, monospace" font-size="16" text-anchor="middle" fill="currentColor">3</text>
+        <text x="152" y="219" font-size="15" fill="#C1442D" font-weight="700">✕</text>
+        <text x="176" y="214" font-size="12" fill="currentColor">どちらにも無い → ぶつかれない</text>
+      </svg>
+    </div>
+    <figcaption>
+      演算子の付いた面は「硬い面」として通行を妨げるので、辺の向きそのものが地形になる。
+      同じ演算子 1 つで両方向の計算ができる（当てる向きで左辺が決まる）。
+    </figcaption>
+  </figure>
+
+  <div class="note">
+    <p>
+      <strong>マイナスは扱わない。</strong>
+      同じ演算子でも当てる向きで <span class="tok">A−B</span> と <span class="tok">B−A</span> を選べるため、
+      符号は常にプレイヤーが選択できてしまう。よって引いて負になる向きは衝突自体を不成立とし、
+      「大きい方から当てる」という制約として機能させる。0 は許容する。
+    </p>
+  </div>
+</section>
+
+<section>
+  <p class="kicker">ルール</p>
+  <h2>床・出口・勝敗</h2>
+
+  <h3>床（マスの性質）</h3>
+  <div class="scroll">
+    <table>
+      <thead>
+        <tr><th>種類</th><th>表示</th><th>効果</th><th>回数</th></tr>
+      </thead>
+      <tbody>
+        <tr><th>ice</th><td><span class="chip iceb">≈</span></td>
+            <td>そのマスでは止まらず、同じ向きに進み続ける</td><td>無制限</td></tr>
+        <tr><th>rotate</th><td><span class="chip floor">↻</span></td>
+            <td>辺を時計回りに 90 度回す<br><span class="tok">(上,右,下,左) → (左,上,右,下)</span></td><td>uses で指定</td></tr>
+        <tr><th>swap</th><td><span class="chip floor">⇄</span></td>
+            <td>全ての辺の <span class="tok">+ ↔ −</span>、<span class="tok">× ↔ ÷</span> を入れ替える</td><td>uses で指定</td></tr>
+        <tr><th>sqrt</th><td><span class="chip floor">√</span></td>
+            <td>値を平方根にする。<strong>平方数でないとそのマスに入れない</strong></td><td>uses で指定</td></tr>
+        <tr><th>fact</th><td><span class="chip floor">!</span></td>
+            <td>値を階乗にする。<strong>0〜8 でないと入れない</strong></td><td>uses で指定</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>
+    <span class="tok">uses</span> 未指定なら無制限。0 になった床は効果を失い、ただの床として通過できる。
+    残り回数は右下に小さく表示し、使い切ったマスは薄く描く。
+  </p>
+
+  <h3>出口</h3>
+  <ul class="plain">
+    <li>盤の<strong>縁のマス</strong>に、外向きの方向を持って置く（<span class="tok">up</span> なら <span class="tok">row=0</span>、<span class="tok">right</span> なら <span class="tok">col=cols-1</span>）。マーカーは盤の外側に描く。</li>
+    <li><span class="tok">value</span> で単一値、または <span class="tok">minValue</span>／<span class="tok">maxValue</span> で範囲を指定。どちらも無ければ任意の値を通す。</li>
+    <li>そのマスに乗っているタイルの値が条件に合うときだけ、タップで盤外へ出せる（1 手）。</li>
+  </ul>
+
+  <h3>勝敗と手数</h3>
+  <ul class="plain">
+    <li><strong>クリア</strong>：盤上のタイルが全て無くなる。</li>
+    <li><strong>失敗</strong>：手数制限を使い切った時点でタイルが残っている。「1手戻す」「やり直す」を提示する。</li>
+    <li><strong>手数制限</strong>：全レベルで<strong>最短手数ちょうど</strong>。余裕は無い。</li>
+    <li><strong>Undo</strong>：1 手ごとに（タイル配置・値・辺・固定フラグ・床の残り回数・手数）のスナップショットを積む。</li>
+    <li>クリア判定は失敗判定より優先する（最後の 1 手で出し切った場合はクリア）。</li>
+  </ul>
+</section>
+
+<section>
+  <p class="kicker">データ</p>
+  <h2>レベルデータ形式</h2>
+  <p>
+    アプリはこの JSON を読むだけでよい。<span class="tok">par</span> と <span class="tok">limit</span> は
+    検証ツールが総当たり探索で算出して埋めるので、アプリ側で計算する必要はない。
+  </p>
+<pre><code>{
+  "levelId": "v3_004",
+  "title": "硬い面どうし",
+  "hint": "両方に演算子があると当たらない",
+  "tutorial": false,          // 任意。難易度の足切りを免除する印
+  "size": 4,                  // 正方形のとき。N×M なら rows / cols を使う
+  "rows": 4, "cols": 5,       // 任意。size より優先
+
+  "tiles": [
+    { "id": "a", "row": 3, "col": 1, "value": 6,
+      "edges": { "right": "×" },   // up / right / down / left から任意に
+      "fixed": false }             // 任意。true なら自分から動けない
+  ],
+  "walls":  [ { "row": 1, "col": 1 } ],
+  "floors": [ { "row": 3, "col": 0, "type": "rotate", "uses": 1 } ],
+  "exits":  [ { "row": 0, "col": 3, "direction": "up", "value": 26 } ],
+  //         範囲出口なら "minValue": 20, "maxValue": 25
+
+  "par": 12,                  // 検証ツールが算出
+  "limit": 12                 // 手数制限（= par）
+}</code></pre>
+  <p>
+    演算子は <span class="tok">+</span> <span class="tok">−</span>（U+2212）
+    <span class="tok">×</span> <span class="tok">÷</span> の 4 種のみ。
+    <strong>ハイフンではなく全角マイナス記号</strong>を使っている点に注意。
+  </p>
+</section>
+
+<section>
+  <p class="kicker">品質</p>
+  <h2>レベル検証の要件</h2>
+  <p>
+    出題する全レベルは、総当たり探索による以下のチェックを通すこと。
+    <span class="tok">python tools/v3_levels.py</span> が検証と JSON 出力を行う。
+  </p>
+  <div class="scroll">
+    <table>
+      <thead>
+        <tr><th>項目</th><th>条件</th><th>理由</th></tr>
+      </thead>
+      <tbody>
+        <tr><th>クリア可能</th><td>解が存在する</td><td>—</td></tr>
+        <tr><th>手数制限</th><td>limit ≥ par。既定は limit = par</td><td>par 以下で必ずクリアできることを保証</td></tr>
+        <tr><th>解法</th><td>最短手数での解法がちょうど 1 通り</td><td>別解があると意図した気付きが迂回される</td></tr>
+        <tr><th>床の必要性</th><td>床を 1 枚ずつ外すと、制限内で解けなくなる</td><td>飾りの床を置かない</td></tr>
+        <tr><th>出口</th><td>盤の縁にあり、壁の上でない</td><td>マーカーが盤内に埋まらない</td></tr>
+        <tr><th>盤サイズ</th><td>使われない行・列が無い</td><td>無駄に広い盤を作らない</td></tr>
+        <tr><th>単調解</th><td>1 方向だけの移動では解けない</td><td>「右に動かすだけ」を防ぐ</td></tr>
+        <tr><th>長さ<span style="color:var(--muted)">※</span></th><td>par ≥ 8</td><td>短いと総当たりで解けてしまう</td></tr>
+        <tr><th>一本道率<span style="color:var(--muted)">※</span></th><td>≤ 0.45</td><td>選択の余地がない局面ばかりだと作業になる</td></tr>
+        <tr><th>迷いどころ<span style="color:var(--muted)">※</span></th><td>1 局面あたりの外れ手 ≥ 2.0</td><td>考える必要を担保する</td></tr>
+        <tr><th>ひっかけ<span style="color:var(--muted)">※</span></th><td>作れるが出せない値が 2 種以上</td><td>正解以外の道筋を用意する</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p style="font-size:var(--step--1); color:var(--muted)">
+    ※ は <span class="tok">"tutorial": true</span> のレベルでは免除。
+  </p>
+</section>
+
+<section>
+  <p class="kicker">内容</p>
+  <h2>収録レベル</h2>
+  <div class="scroll">
+    <table>
+      <thead>
+        <tr><th>Lv</th><th>タイトル</th><th class="num">制限</th><th>盤</th><th>教える / 問う内容</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="num">1</td><td>辺で計算する</td><td class="num">3</td><td class="num">3×3</td><td>演算子のある辺に当てる</td></tr>
+        <tr><td class="num">2</td><td>当てる向き</td><td class="num">3</td><td class="num">3×3</td><td>演算子の無い辺には入れない</td></tr>
+        <tr><td class="num">3</td><td>氷の床</td><td class="num">6</td><td class="num">4×4</td><td>氷では止まらない</td></tr>
+        <tr><td class="num">4</td><td>硬い面どうし</td><td class="num">12</td><td class="num">4×4</td><td>両面に演算子 → 回転が必須</td></tr>
+        <tr><td class="num">5</td><td>平方根の床</td><td class="num">10</td><td class="num">4×4</td><td>平方数でないと入れない</td></tr>
+        <tr><td class="num">6</td><td>階乗の床</td><td class="num">14</td><td class="num">4×4</td><td>4・3・2 では 42 に届かない</td></tr>
+        <tr><td class="num">7</td><td>大きい方から引く</td><td class="num">7</td><td class="num">3×5</td><td>負になる向きには当てられない</td></tr>
+        <tr><td class="num">8</td><td>演算子を入れ替える</td><td class="num">9</td><td class="num">4×3</td><td>＋のままでは目標値が作れない</td></tr>
+        <tr><td class="num">9</td><td>向きを作り直す</td><td class="num">10</td><td class="num">4×4</td><td>噛み合わない辺を回して逃がす</td></tr>
+        <tr><td class="num">10</td><td>総仕上げ</td><td class="num">12</td><td class="num">4×5</td><td>氷と回転の複合</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>Lv.1・2・3・7 はチュートリアル扱い（難易度の足切りを免除）。</p>
+</section>
+
+<section>
+  <p class="kicker">画面</p>
+  <h2>UI 仕様</h2>
+
+  <h3>デザイントークン</h3>
+  <div class="scroll">
+    <table>
+      <thead><tr><th>用途</th><th>色</th><th>適用先</th></tr></thead>
+      <tbody>
+        <tr><th>paper</th><td class="num">#FAF7EE</td><td>背景（方眼紙の紙色）</td></tr>
+        <tr><th>gridLine</th><td class="num">#B9C9E0</td><td>グリッド罫線・壁のハッチング</td></tr>
+        <tr><th>ink</th><td class="num">#24344A</td><td>数字タイルの地色・本文</td></tr>
+        <tr><th>pencil</th><td class="num">#8B8578</td><td>補助テキスト</td></tr>
+        <tr><th>red</th><td class="num">#C1442D</td><td>辺の演算子・出口・警告</td></tr>
+        <tr><th>fixed</th><td class="num">#6E7A88</td><td>固定タイル（破線枠）</td></tr>
+        <tr><th>ice</th><td class="num">#CFE4EE</td><td>氷の床</td></tr>
+        <tr><th>floor</th><td class="num">#EDE3D2</td><td>回転・入替・√・! の床</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>数字・演算子は等幅フォント、UI ラベルはシステムのゴシック体。</p>
+
+  <h3>画面①：レベル選択</h3>
+  <ul class="plain">
+    <li>グリッド表示。各カードに レベル番号／タイトル／<span class="tok">N手以内</span>／クリア済みなら ✓ と best 手数。</li>
+    <li>順序制限は設けない（全レベル最初から選べる）。</li>
+  </ul>
+
+  <h3>画面②：パズル</h3>
+  <ul class="plain">
+    <li>上部に <span class="tok">残り手数 N / M手以内</span>、「戻す」「リセット」。残り 2 手以下で赤く表示。</li>
+    <li>ヒント文を 1 行表示。</li>
+    <li>タイルはマス内に収め、辺の演算子はタイルの外周に小さなタブとして描く。</li>
+    <li>出口は盤の外側に丸いマーカー（矢印＋値）。出せる状態のときは脈動させる。</li>
+    <li>操作：タイルをタップで選択 → 同じ行・列のマスをタップでその向きへ。</li>
+    <li>成立しない操作は、理由を短文で表示する（例：「両方に演算子があるのでぶつかれません」「引くとマイナスになるので当てられません」「平方数でないと √ のマスに入れません」）。</li>
+    <li>クリア時：手数と制限を表示し「レベル選択」「次へ」。失敗時：「1手戻す」「やり直す」。</li>
+  </ul>
+
+  <h3>保存</h3>
+  <p>
+    <span class="tok">shared_preferences</span> に、レベルごとの
+    <span class="tok">{ cleared: bool, bestMoves: int }</span> のみ保存する。
+    保存に失敗してもゲーム進行は継続すること（ストレージ不可の環境がある）。
+  </p>
+</section>
+
+<section>
+  <p class="kicker">引き継ぎ</p>
+  <h2>本番実装への移行</h2>
+
+  <h3>移植するもの / しないもの</h3>
+  <ul class="plain">
+    <li><strong>移植する</strong>：コアルール（本書 2〜3 章）と、検証済みレベル JSON。</li>
+    <li><strong>移植しない</strong>：POC の HTML/JS そのもの、Python のソルバー。ソルバーはレベル製作用のツールとして手元に残す。</li>
+  </ul>
+
+  <h3>推奨する構成</h3>
+<pre><code>assets/levels/levels_v3.json     検証済みレベル（ツールが生成）
+lib/game/rules.dart              純粋関数：applyOp / collide / rotate / swap / slide / land
+lib/game/level.dart              データモデル（Level / TileData / FloorData / ExitData）
+lib/game/game_state.dart         盤面状態・手数・Undo スタック
+lib/screens/level_select.dart    画面①
+lib/screens/puzzle.dart          画面②
+test/rules_test.dart             ルールの単体テスト
+test/solutions_test.dart         最短手順の再生テスト</code></pre>
+
+  <div class="note">
+    <p>
+      <strong>移植の正しさは、最短手順の再生で検証できる。</strong>
+      <span class="tok">tools/solutions_v3.json</span> に全レベルの最短手順が操作列として入っている。
+      これを Dart 側で再生し、<strong>全レベルが制限手数ちょうどでクリアになる</strong>ことを確認すれば、
+      ルールの移植ミスはまず検出できる。POC でも同じテストを通してある。
+    </p>
+  </div>
+
+  <h3>レベルを追加するときの手順</h3>
+  <ol class="plain">
+    <li><span class="tok">tools/v3_levels.py</span> の <span class="tok">LEVELS</span> に候補を書く</li>
+    <li><span class="tok">python tools/v3_levels.py --report</span> で検証（不合格なら理由が出る）</li>
+    <li>合格したら <span class="tok">python tools/v3_levels.py</span> で JSON と最短手順を出力</li>
+    <li>アプリの assets に反映し、再生テストを回す</li>
+  </ol>
+</section>
+
+<section>
+  <p class="kicker">範囲</p>
+  <h2>スコープ外</h2>
+  <ul class="plain">
+    <li>通信・サーバー・アカウント（完全オフラインで動作すること）</li>
+    <li>UGC・チャット・ランキング共有</li>
+    <li>レベルの自動生成（ツールに実験用の生成器はあるが、出題は手作り＋検証で行う）</li>
+    <li>タイマー・ヒント機能・広告・課金</li>
+    <li>押し（ブロックを押しのける仕様）… 検討したが、難易度指標が変わらず不可逆性を弱めるため不採用</li>
+    <li>マイナス値・絶対値・符号反転 … 当てる向きで符号を選べるため意味を持たず不採用</li>
+  </ul>
+</section>
+
+</div>

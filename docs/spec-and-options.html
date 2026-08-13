@@ -1,0 +1,782 @@
+<title>数式パズル｜現行仕様と設計案の比較</title>
+<style>
+  :root {
+    --ground:      #FAF7EE;
+    --surface:     #FFFFFF;
+    --surface-2:   #F4F1E6;
+    --rule:        #C7D3E4;
+    --grid:        #E3E8EF;
+    --ink:         #24344A;
+    --muted:       #857F72;
+    --accent:      #C1442D;
+    --accent-soft: #F2DCD5;
+    --ok:          #1F7A6B;
+    --ok-soft:     #DCECE8;
+
+    --step--1: 0.8125rem;
+    --step-0:  1rem;
+    --step-1:  1.1875rem;
+    --step-2:  1.5rem;
+    --step-3:  2.125rem;
+
+    --sans: ui-sans-serif, -apple-system, "Hiragino Kaku Gothic ProN",
+            "Yu Gothic UI", "Meiryo", sans-serif;
+    --mono: ui-monospace, SFMono-Regular, "SF Mono", Consolas,
+            "Yu Gothic UI", monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground:      #12161C;
+      --surface:     #1A1F27;
+      --surface-2:   #212831;
+      --rule:        #38485F;
+      --grid:        #202832;
+      --ink:         #E7E3D6;
+      --muted:       #9A9385;
+      --accent:      #E8735A;
+      --accent-soft: #3A2019;
+      --ok:          #4FB6A1;
+      --ok-soft:     #14322C;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground:      #12161C;
+    --surface:     #1A1F27;
+    --surface-2:   #212831;
+    --rule:        #38485F;
+    --grid:        #202832;
+    --ink:         #E7E3D6;
+    --muted:       #9A9385;
+    --accent:      #E8735A;
+    --accent-soft: #3A2019;
+    --ok:          #4FB6A1;
+    --ok-soft:     #14322C;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: var(--step-0);
+    line-height: 1.9;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  .wrap {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 0 20px 96px;
+  }
+
+  /* ---------- ヘッダー（方眼紙） ---------- */
+  .masthead {
+    margin: 0 -20px 56px;
+    padding: 56px 20px 40px;
+    background-color: var(--surface-2);
+    background-image:
+      linear-gradient(to right, var(--grid) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--grid) 1px, transparent 1px);
+    background-size: 26px 26px;
+    border-bottom: 1px solid var(--rule);
+  }
+  .masthead-inner { max-width: 760px; margin: 0 auto; }
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: var(--step--1);
+    letter-spacing: 0.14em;
+    color: var(--accent);
+    margin: 0 0 10px;
+  }
+  h1 {
+    font-size: var(--step-3);
+    line-height: 1.35;
+    letter-spacing: -0.02em;
+    font-weight: 800;
+    margin: 0 0 14px;
+    text-wrap: balance;
+  }
+  .lede { margin: 0; max-width: 34em; color: var(--ink); }
+  .status {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 10px;
+    margin-top: 24px;
+    padding: 0;
+    list-style: none;
+    font-family: var(--mono);
+    font-size: var(--step--1);
+    color: var(--muted);
+  }
+  .status li {
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 999px;
+    padding: 3px 12px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ---------- セクション ---------- */
+  section { margin: 0 0 64px; }
+  .kicker {
+    font-family: var(--mono);
+    font-size: var(--step--1);
+    letter-spacing: 0.14em;
+    color: var(--muted);
+    margin: 0 0 6px;
+  }
+  h2 {
+    font-size: var(--step-2);
+    line-height: 1.4;
+    letter-spacing: -0.015em;
+    font-weight: 700;
+    margin: 0 0 20px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--ink);
+    text-wrap: balance;
+  }
+  h3 {
+    font-size: var(--step-1);
+    font-weight: 700;
+    margin: 32px 0 10px;
+    letter-spacing: -0.01em;
+  }
+  p { margin: 0 0 18px; }
+  .stack { display: flex; flex-direction: column; gap: 18px; }
+
+  code, .tok {
+    font-family: var(--mono);
+    font-size: 0.9em;
+    background: var(--surface-2);
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    padding: 1px 5px;
+    white-space: nowrap;
+  }
+
+  /* ---------- 表 ---------- */
+  .scroll { overflow-x: auto; margin: 0 0 8px; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--step--1);
+    line-height: 1.7;
+    min-width: 460px;
+  }
+  th, td {
+    text-align: left;
+    vertical-align: top;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--rule);
+  }
+  thead th {
+    font-family: var(--mono);
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+    border-bottom: 1.5px solid var(--ink);
+    white-space: nowrap;
+  }
+  tbody th { font-weight: 700; white-space: nowrap; }
+  td.num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+  .yes { color: var(--ok); font-weight: 700; }
+  .no  { color: var(--accent); font-weight: 700; }
+
+  /* ---------- 案カード ---------- */
+  .opt {
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 10px;
+    padding: 22px 24px;
+  }
+  .opt.pick { border-color: var(--accent); border-width: 2px; }
+  .opt-head {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 4px;
+  }
+  .tag {
+    font-family: var(--mono);
+    font-size: var(--step--1);
+    letter-spacing: 0.1em;
+    color: var(--accent);
+  }
+  .opt h3 { margin: 0; font-size: var(--step-1); }
+  .opt p { margin: 12px 0 0; }
+  .pn {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 6px 12px;
+    margin: 16px 0 0;
+    padding: 0;
+    font-size: var(--step--1);
+    line-height: 1.75;
+  }
+  .pn dt {
+    font-family: var(--mono);
+    letter-spacing: 0.06em;
+    white-space: nowrap;
+  }
+  .pn dt.p { color: var(--ok); }
+  .pn dt.m { color: var(--accent); }
+  .pn dd { margin: 0; }
+
+  /* ---------- 図 ---------- */
+  figure {
+    margin: 28px 0;
+    padding: 20px 18px 16px;
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 10px;
+  }
+  figure .scroll { margin: 0; }
+  figure svg { display: block; width: 100%; height: auto; min-width: 520px; }
+  figcaption {
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid var(--rule);
+    font-size: var(--step--1);
+    line-height: 1.7;
+    color: var(--muted);
+  }
+
+  /* ---------- 引用・強調 ---------- */
+  .quote {
+    margin: 0 0 24px;
+    padding: 14px 20px;
+    background: var(--surface-2);
+    border-left: 3px solid var(--muted);
+    font-size: var(--step--1);
+    line-height: 1.8;
+    color: var(--ink);
+  }
+  .rec {
+    margin: 0;
+    padding: 22px 24px;
+    background: var(--accent-soft);
+    border-left: 4px solid var(--accent);
+    border-radius: 0 8px 8px 0;
+  }
+  .rec p:last-child { margin-bottom: 0; }
+  .rec strong { font-weight: 800; }
+
+  ul.plain, ol.plain { margin: 0 0 18px; padding-left: 1.35em; }
+  ul.plain li, ol.plain li { margin-bottom: 8px; }
+  ol.plain { padding-left: 1.5em; }
+
+  .decide {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .decide li {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 12px;
+    align-items: start;
+    padding: 12px 16px;
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    font-size: var(--step--1);
+    line-height: 1.75;
+  }
+  .decide .q {
+    font-family: var(--mono);
+    color: var(--accent);
+    font-size: var(--step--1);
+  }
+
+  @media (max-width: 560px) {
+    :root { --step-3: 1.75rem; --step-2: 1.3125rem; }
+    .masthead { padding: 40px 20px 32px; }
+  }
+</style>
+
+<header class="masthead">
+  <div class="masthead-inner">
+    <p class="eyebrow">設計メモ ／ 2026-08-13</p>
+    <h1>式をどこに置くか</h1>
+    <p class="lede">
+      現行仕様（v2）を確定させたうえで、「途中でできる数字＋演算子タイルがいまいち」という
+      引っかかりを起点に、コアメカニクスの代案を並べて比較する。決めるのは
+      <strong>式をどこに持たせるか</strong>の一点で、それ以外の要素はどの案でも流用できる。
+    </p>
+    <ul class="status">
+      <li>POC = HTML/JS（動作中）</li>
+      <li>検証ツール = Python ソルバー</li>
+      <li>収録 12 レベル ／ par 3〜12</li>
+      <li>本実装 Flutter = 未着手</li>
+    </ul>
+  </div>
+</header>
+
+<div class="wrap">
+
+<section>
+  <p class="kicker">仕様</p>
+  <h2>現行仕様 v2</h2>
+
+  <p>
+    すべてソルバーで検証済みの状態。以下がいま実際に動いているルールで、
+    レベルデータ・POC・検証ツールの三者で一致している。
+  </p>
+
+  <h3>盤とタイル</h3>
+  <div class="scroll">
+    <table>
+      <thead>
+        <tr><th>要素</th><th>仕様</th></tr>
+      </thead>
+      <tbody>
+        <tr><th>盤</th><td>N×N の正方グリッド（現行 3〜4）。壁マスを任意に配置できる。</td></tr>
+        <tr><th>タイル</th><td>トークンの配列。トークンは数値または演算子。<br><span class="tok">[8]</span> <span class="tok">["÷", 4]</span> <span class="tok">[8, "÷", 4]</span></td></tr>
+        <tr><th>演算子</th><td>二項 <span class="tok">+ − × ÷ ^</span>／前置 <span class="tok">√</span>（直後の数に作用）／後置 <span class="tok">!</span>（直前の数に作用）</td></tr>
+        <tr><th>通常タイル</th><td>上下左右へ 1 マス動く。</td></tr>
+        <tr><th>固定タイル</th><td>自分からは動けない。ぶつけられる側にはなれる。</td></tr>
+        <tr><th>滑るタイル</th><td>壁・盤の縁・結合できないタイルに当たるまで一気に進む。まとめて 1 手。</td></tr>
+        <tr><th>出口</th><td>盤の縁のマス＋外向き。固定値または範囲を指定。トークン 1 個の数値タイルだけが通れる。</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>結合と計算</h3>
+  <p>
+    動かした側を mover、動かされた側を target と呼ぶ。
+    <span class="tok">mover の末尾</span> と <span class="tok">target の先頭</span> が
+    数字↔演算子で噛み合うときだけ結合でき、数字どうし・演算子どうしは弾かれる。
+    連結順は必ず <strong>mover が前、target が後</strong>。
+    この非対称性が「8 を ÷4 にぶつけると 8÷4、逆はできない」を生んでいる。
+  </p>
+  <p>
+    結合後、単項演算子（√ ・ !）を先に簡約し、構造の妥当性を確認したうえで、
+    <strong>両端が数値なら左から順に計算する</strong>（優先順位なし）。
+    割り切れない除算などで計算が成立しない場合は、結合そのものが起きなかったことになる。
+  </p>
+
+  <h3>勝敗と手数</h3>
+  <ul class="plain">
+    <li><strong>クリア条件</strong>：数字を含むタイルが盤上から全て無くなること。演算子タイルは余らせてよい。</li>
+    <li><strong>手数</strong>：移動・結合・出口からの排出をそれぞれ 1 手として数える。Undo あり。</li>
+    <li><strong>検証</strong>：全状態探索で、クリア可能性・最短手数・解法の数・詰み手・「作れるのに出せない値」・一方向だけで解けないか・使われない行や列がないかを毎回チェックしている。</li>
+  </ul>
+</section>
+
+<section>
+  <p class="kicker">論点</p>
+  <h2>いま引っかかっている 2 点</h2>
+
+  <p class="quote">
+    「結合後、氷効果がなくなるのが効果として弱いかも」<br>
+    「数字ブロックと演算子ブロックを分けているので途中で数字＆演算子ブロックができるが、これがいまいち」
+  </p>
+
+  <p>
+    後者はメカニクスの根に触れている。現行方式では、式がタイルの内側に文字列として蓄積されるため、
+    プレイヤーは盤面を見るだけでなく<strong>各タイルが何をどこまで抱えているかを記憶し続ける</strong>必要がある。
+    <span class="tok">3 +</span> のような中間状態は、盤面上では「まだ何でもない物体」で、
+    読む負荷だけを増やして意思決定の材料になっていない。引っかかりの正体はここだと考えている。
+  </p>
+  <p>
+    前者（滑るタイル）は独立した小さい論点なので、後半でまとめて扱う。
+  </p>
+</section>
+
+<section>
+  <p class="kicker">案</p>
+  <h2>式をどこに置くか — 3 つの案</h2>
+
+  <p>
+    メカニクスの違いは結局「式という情報をどこに保持するか」に集約される。
+    タイルの中（現行）、タイルの辺、盤面の並び、の 3 通り。
+  </p>
+
+  <figure>
+    <div class="scroll">
+      <svg viewBox="0 0 720 350" role="img"
+           aria-label="式をタイルの中に持つ現行案、タイルの辺に持つ案B、盤面の並びとして持つ案Gの比較図">
+        <defs>
+          <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5"
+                  markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <polygon points="0,1 10,5 0,9" fill="currentColor"></polygon>
+          </marker>
+        </defs>
+
+        <!-- ===== 行1: 現行A ===== -->
+        <text x="0" y="34" font-family="ui-monospace, monospace" font-size="13"
+              font-weight="700" fill="currentColor">現行A</text>
+        <text x="0" y="52" font-family="ui-monospace, monospace" font-size="11"
+              fill="currentColor" opacity="0.6">式はタイルの中</text>
+
+        <rect x="120" y="18" width="46" height="42" rx="6"
+              fill="none" stroke="currentColor" stroke-width="1.5"></rect>
+        <text x="143" y="45" font-family="ui-monospace, monospace" font-size="15"
+              text-anchor="middle" fill="currentColor">3</text>
+
+        <line x1="172" y1="39" x2="204" y2="39" stroke="currentColor"
+              stroke-width="1.5" marker-end="url(#ah)"></line>
+
+        <rect x="210" y="18" width="42" height="42" rx="6"
+              fill="none" stroke="currentColor" stroke-width="1.5"></rect>
+        <text x="231" y="45" font-family="ui-monospace, monospace" font-size="15"
+              text-anchor="middle" fill="currentColor">+</text>
+
+        <text x="272" y="45" font-size="14" text-anchor="middle" fill="currentColor"
+              opacity="0.55">⇒</text>
+
+        <rect x="292" y="18" width="62" height="42" rx="6"
+              fill="none" stroke="#C1442D" stroke-width="2.5"></rect>
+        <text x="323" y="45" font-family="ui-monospace, monospace" font-size="15"
+              text-anchor="middle" fill="#C1442D">3 +</text>
+        <text x="323" y="76" font-family="ui-monospace, monospace" font-size="11"
+              text-anchor="middle" fill="#C1442D">中間状態</text>
+
+        <line x1="362" y1="39" x2="392" y2="39" stroke="currentColor"
+              stroke-width="1.5" marker-end="url(#ah)"></line>
+
+        <rect x="398" y="18" width="46" height="42" rx="6"
+              fill="none" stroke="currentColor" stroke-width="1.5"></rect>
+        <text x="421" y="45" font-family="ui-monospace, monospace" font-size="15"
+              text-anchor="middle" fill="currentColor">5</text>
+
+        <text x="464" y="45" font-size="14" text-anchor="middle" fill="currentColor"
+              opacity="0.55">⇒</text>
+
+        <rect x="484" y="18" width="46" height="42" rx="6"
+              fill="none" stroke="currentColor" stroke-width="1.5"></rect>
+        <text x="507" y="45" font-family="ui-monospace, monospace" font-size="15"
+              text-anchor="middle" fill="currentColor">8</text>
+
+        <line x1="0" y1="100" x2="720" y2="100" stroke="currentColor"
+              stroke-width="1" opacity="0.18"></line>
+
+        <!-- ===== 行2: 案B ===== -->
+        <text x="0" y="152" font-family="ui-monospace, monospace" font-size="13"
+              font-weight="700" fill="currentColor">案B</text>
+        <text x="0" y="170" font-family="ui-monospace, monospace" font-size="11"
+              fill="currentColor" opacity="0.6">式はタイルの辺</text>
+
+        <rect x="120" y="136" width="46" height="42" rx="6"
+              fill="none" stroke="currentColor" stroke-width="1.5"></rect>
+        <text x="143" y="163" font-family="ui-monospace, monospace" font-size="15"
+              text-anchor="middle" fill="currentColor">7</text>
+
+        <line x1="172" y1="157" x2="212" y2="157" stroke="currentColor"
+              stroke-width="1.5" marker-end="url(#ah)"></line>
+        <text x="192" y="148" font-family="ui-monospace, monospace" font-size="10"
+              text-anchor="middle" fill="currentColor" opacity="0.7">左から当てる</text>
+
+        <rect x="228" y="136" width="46" height="42" rx="6"
+              fill="none" stroke="currentColor" stroke-width="1.5"></rect>
+        <text x="251" y="163" font-family="ui-monospace, monospace" font-size="15"
+              text-anchor="middle" fill="currentColor">3</text>
+        <rect x="216" y="147" width="18" height="20" rx="3" fill="#C1442D"></rect>
+        <text x="225" y="162" font-family="ui-monospace, monospace" font-size="12"
+              text-anchor="middle" fill="#FAF7EE">−</text>
+        <rect x="241" y="124" width="20" height="18" rx="3"
+              fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.5"></rect>
+        <text x="251" y="138" font-family="ui-monospace, monospace" font-size="11"
+              text-anchor="middle" fill="currentColor" opacity="0.6">×</text>
+
+        <text x="296" y="163" font-size="14" text-anchor="middle" fill="currentColor"
+              opacity="0.55">⇒</text>
+
+        <rect x="316" y="136" width="46" height="42" rx="6"
+              fill="none" stroke="currentColor" stroke-width="1.5"></rect>
+        <text x="339" y="163" font-family="ui-monospace, monospace" font-size="15"
+              text-anchor="middle" fill="currentColor">4</text>
+        <rect x="329" y="124" width="20" height="18" rx="3"
+              fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.5"></rect>
+        <text x="339" y="138" font-family="ui-monospace, monospace" font-size="11"
+              text-anchor="middle" fill="currentColor" opacity="0.6">×</text>
+
+        <text x="382" y="157" font-family="ui-monospace, monospace" font-size="11"
+              fill="currentColor" opacity="0.7">触れた辺の − だけを使い、× は残る</text>
+        <text x="382" y="174" font-family="ui-monospace, monospace" font-size="11"
+              fill="currentColor" opacity="0.7">中間状態は無く、常に数字</text>
+
+        <line x1="0" y1="218" x2="720" y2="218" stroke="currentColor"
+              stroke-width="1" opacity="0.18"></line>
+
+        <!-- ===== 行3: 案G ===== -->
+        <text x="0" y="270" font-family="ui-monospace, monospace" font-size="13"
+              font-weight="700" fill="currentColor">案G</text>
+        <text x="0" y="288" font-family="ui-monospace, monospace" font-size="11"
+              fill="currentColor" opacity="0.6">式は盤面の並び</text>
+
+        <rect x="120" y="252" width="46" height="42" rx="6"
+              fill="none" stroke="currentColor" stroke-width="1.5"></rect>
+        <text x="143" y="279" font-family="ui-monospace, monospace" font-size="15"
+              text-anchor="middle" fill="currentColor">3</text>
+        <rect x="168" y="252" width="46" height="42" rx="6"
+              fill="none" stroke="currentColor" stroke-width="1.5"></rect>
+        <text x="191" y="279" font-family="ui-monospace, monospace" font-size="15"
+              text-anchor="middle" fill="currentColor">+</text>
+        <rect x="216" y="252" width="46" height="42" rx="6"
+              fill="none" stroke="currentColor" stroke-width="1.5"></rect>
+        <text x="239" y="279" font-family="ui-monospace, monospace" font-size="15"
+              text-anchor="middle" fill="currentColor">5</text>
+
+        <path d="M120 304 L120 312 L262 312 L262 304" fill="none"
+              stroke="#C1442D" stroke-width="1.5"></path>
+        <text x="191" y="330" font-family="ui-monospace, monospace" font-size="11"
+              text-anchor="middle" fill="#C1442D">並びがそのまま式</text>
+
+        <line x1="278" y1="273" x2="310" y2="273" stroke="currentColor"
+              stroke-width="1.5" marker-end="url(#ah)"></line>
+
+        <rect x="316" y="252" width="46" height="42" rx="6"
+              fill="none" stroke="currentColor" stroke-width="1.5"></rect>
+        <text x="339" y="279" font-family="ui-monospace, monospace" font-size="15"
+              text-anchor="middle" fill="currentColor">8</text>
+
+        <text x="382" y="273" font-family="ui-monospace, monospace" font-size="11"
+              fill="currentColor" opacity="0.7">並べ終えた瞬間に 1 つへ潰れる</text>
+      </svg>
+    </div>
+    <figcaption>
+      同じ計算をどう表現するかの違い。現行Aだけが、盤面から意味を読み取れない
+      <span style="color:var(--accent)">中間状態</span>を作る。案Bは接触した辺の演算子だけを消費し、
+      案Gは盤面の並び自体が式になるので、どちらも中間状態が生まれない。
+    </figcaption>
+  </figure>
+
+  <div class="stack">
+    <div class="opt">
+      <div class="opt-head"><span class="tag">現行A</span><h3>式はタイルの中（トークン連結）</h3></div>
+      <p>
+        数字ブロックと演算子ブロックが別々にあり、ぶつけると内部の配列が連結される。
+        両端が数字になった時点で計算される。
+      </p>
+      <dl class="pn">
+        <dt class="p">得</dt><dd>3 項以上の長い式が自然に作れる。ぶつける順序がそのまま式の順序になる。</dd>
+        <dt class="m">損</dt><dd>中間状態が「読めない物体」になる。「ぶつけた側が前」という規則が盤面に現れず、覚えるしかない。演算子ブロックが場所を取り、盤面が混む。</dd>
+      </dl>
+    </div>
+
+    <div class="opt pick">
+      <div class="opt-head"><span class="tag">案B</span><h3>式は数字タイルの辺（提案されている案）</h3></div>
+      <p>
+        数字タイルの 4 辺のうち任意の辺に演算子を付ける。ぶつかったとき、
+        接触する 2 辺のうち<strong>片方だけに演算子がある場合に限り</strong>その演算子で計算する。
+        両方にある／どちらにも無い組み合わせはぶつかれない。ぶつけた側が左辺になる規則は現行のまま維持できる。
+      </p>
+      <dl class="pn">
+        <dt class="p">得</dt><dd>盤面上の物体が常に「数字」なので一目で読める。どの向きから当てるかが主要な資源になり、滑る・押すギミックと強く噛み合う。演算子が独立ブロックとして場所を取らない。</dd>
+        <dt class="m">損</dt><dd>1 回の衝突が 1 個の二項演算に限られる（ただし多段の式は衝突を重ねれば表現できるので、実質の表現力は現行と大きく変わらない）。辺の向きが固定なので配置の自由度は下がる。</dd>
+      </dl>
+    </div>
+
+    <div class="opt">
+      <div class="opt-head"><span class="tag">案G</span><h3>式は盤面の並び（隣接した行を式として読む）</h3></div>
+      <p>
+        数字と演算子は別ブロックのまま、タイルは連結しない。縦横に連続した並びが
+        完成した式として読めるようになった時点で、その並びが 1 つの数字に潰れる。
+      </p>
+      <dl class="pn">
+        <dt class="p">得</dt><dd>式が文字通り盤面に見えている。「ぶつけた側が前」という見えない規則が消え、左から右の並びがそのまま順序になる。長い式も作れる。</dd>
+        <dt class="m">損</dt><dd>1 手では式が完成せず、ブロックを並べる作業感が出やすい。盤面を広く使うので 3×3 では窮屈になり、盤が大きくなると検証コストも上がる。</dd>
+      </dl>
+    </div>
+  </div>
+
+  <h3>案Bで決めるべき細部</h3>
+  <p>
+    案Bを採るなら、接触の可否だけは早めに固めておきたい。以下が骨格で、
+    これが決まればソルバー側もそのまま書き換えられる。
+  </p>
+
+  <figure>
+    <div class="scroll">
+      <svg viewBox="0 0 720 250" role="img"
+           aria-label="案Bにおける接触判定の3パターン。片側だけ演算子があるときのみ計算でき、両方にある場合とどちらにも無い場合はぶつかれない">
+        <!-- 行1 -->
+        <rect x="0" y="18" width="46" height="42" rx="6" fill="none"
+              stroke="currentColor" stroke-width="1.5"></rect>
+        <text x="23" y="45" font-family="ui-monospace, monospace" font-size="15"
+              text-anchor="middle" fill="currentColor">7</text>
+        <rect x="70" y="18" width="46" height="42" rx="6" fill="none"
+              stroke="currentColor" stroke-width="1.5"></rect>
+        <text x="93" y="45" font-family="ui-monospace, monospace" font-size="15"
+              text-anchor="middle" fill="currentColor">3</text>
+        <rect x="58" y="29" width="18" height="20" rx="3" fill="#C1442D"></rect>
+        <text x="67" y="44" font-family="ui-monospace, monospace" font-size="12"
+              text-anchor="middle" fill="#FAF7EE">−</text>
+        <text x="140" y="39" font-size="15" fill="#1F7A6B" font-weight="700">✓</text>
+        <text x="162" y="44" font-size="13" fill="currentColor">片側だけに演算子 → その演算子で計算する（7 − 3 = 4）</text>
+
+        <!-- 行2 -->
+        <rect x="0" y="102" width="46" height="42" rx="6" fill="none"
+              stroke="currentColor" stroke-width="1.5"></rect>
+        <text x="23" y="129" font-family="ui-monospace, monospace" font-size="15"
+              text-anchor="middle" fill="currentColor">7</text>
+        <rect x="34" y="113" width="18" height="20" rx="3" fill="#C1442D"></rect>
+        <text x="43" y="128" font-family="ui-monospace, monospace" font-size="12"
+              text-anchor="middle" fill="#FAF7EE">+</text>
+        <rect x="70" y="102" width="46" height="42" rx="6" fill="none"
+              stroke="currentColor" stroke-width="1.5"></rect>
+        <text x="93" y="129" font-family="ui-monospace, monospace" font-size="15"
+              text-anchor="middle" fill="currentColor">3</text>
+        <rect x="58" y="113" width="18" height="20" rx="3" fill="#C1442D"></rect>
+        <text x="67" y="128" font-family="ui-monospace, monospace" font-size="12"
+              text-anchor="middle" fill="#FAF7EE">−</text>
+        <text x="140" y="123" font-size="15" fill="#C1442D" font-weight="700">✕</text>
+        <text x="162" y="128" font-size="13" fill="currentColor">両方に演算子 → ぶつかれない（壁として振る舞う）</text>
+
+        <!-- 行3 -->
+        <rect x="0" y="186" width="46" height="42" rx="6" fill="none"
+              stroke="currentColor" stroke-width="1.5"></rect>
+        <text x="23" y="213" font-family="ui-monospace, monospace" font-size="15"
+              text-anchor="middle" fill="currentColor">7</text>
+        <rect x="70" y="186" width="46" height="42" rx="6" fill="none"
+              stroke="currentColor" stroke-width="1.5"></rect>
+        <text x="93" y="213" font-family="ui-monospace, monospace" font-size="15"
+              text-anchor="middle" fill="currentColor">3</text>
+        <text x="140" y="207" font-size="15" fill="#C1442D" font-weight="700">✕</text>
+        <text x="162" y="212" font-size="13" fill="currentColor">どちらにも無い → ぶつかれない</text>
+      </svg>
+    </div>
+    <figcaption>
+      接触する 2 辺の組み合わせだけで可否が決まる。演算子を持つ辺は「通れない面」でもあるので、
+      向きを揃える配置そのものがパズルになる。
+    </figcaption>
+  </figure>
+
+  <ul class="decide">
+    <li><span class="q">Q1</span><span><strong>計算後の辺はどうなるか。</strong>
+      ぶつけられた側の未使用の辺だけを残すのが素直。両者の残り辺を合成すると、
+      辺が増え続けて盤面が読みにくくなる。</span></li>
+    <li><span class="q">Q2</span><span><strong>回転を許すか。</strong>
+      「回転 1 手」を入れると、駒の種類を増やさずに動詞が 1 つ増える。
+      許さない場合は配置の妙が全てになり、難度は上がるが詰みやすくもなる。</span></li>
+    <li><span class="q">Q3</span><span><strong>演算子ブロックを併存させるか。</strong>
+      案Bに寄せるなら廃止した方がよい。併存させると読みやすさという利点が薄れる。</span></li>
+    <li><span class="q">Q4</span><span><strong>√ と ! はどう置くか。</strong>
+      単項演算子は二項と性質が違うので、辺ではなく「盤面のマス」（通ると作用する）に置く方が収まりがよい。</span></li>
+  </ul>
+</section>
+
+<section>
+  <p class="kicker">論点</p>
+  <h2>滑るタイルをどう持続させるか</h2>
+
+  <p>
+    現行は「ぶつけられた側の性質を引き継ぐ」ため、滑るタイルを他にぶつけた瞬間に効果が消える。
+    弱く感じるのはその通りで、選択肢は以下。
+  </p>
+
+  <div class="scroll">
+    <table>
+      <thead>
+        <tr><th>案</th><th>ルール</th><th>効いてくるところ</th></tr>
+      </thead>
+      <tbody>
+        <tr><th>現行</th><td>ぶつけられた側の性質を引き継ぐ</td><td>実装は単純だが、効果が 1 回で消える</td></tr>
+        <tr><th>継承</th><td>ぶつけた側の性質を引き継ぐ</td><td>「滑る性質を相手に移す」動きが生まれる</td></tr>
+        <tr><th>伝染</th><td>どちらかが滑るなら結果も滑る</td><td>進むほど盤面が滑りやすくなり、終盤が自然に難しくなる</td></tr>
+        <tr><th>床属性</th><td>タイルではなく<strong>マス</strong>を氷にする。氷マスに入った物は滑る</td><td>継承の問題が消え、壁と同じくレベルデザインの道具になる</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p>
+    <strong>床属性を基本にするのが筋が良い</strong>と考えている。滑るかどうかがタイルの素性ではなく
+    場所の性質になるため、「結合したら消えるのか」という問いがそもそも発生しない。
+    壁と同じ語彙で語れるので、レベル生成器にもそのまま組み込める。
+    タイル側の性質として残したい場合は「伝染」を併用すると効果が持続する。
+  </p>
+</section>
+
+<section>
+  <p class="kicker">参照</p>
+  <h2>他のパズルから引ける示唆</h2>
+
+  <div class="scroll">
+    <table>
+      <thead>
+        <tr><th>作品</th><th>コアの仕組み</th><th>この企画への示唆</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th>倉庫番</th>
+          <td>押すことしかできず、押し戻せない</td>
+          <td>動詞が 1 つでも、不可逆性があれば深くなる。ルールを足す前に不可逆性を使い切る</td>
+        </tr>
+        <tr>
+          <th>Baba Is You</th>
+          <td>盤上のブロックが並んで文になり、ルールそのものが変わる</td>
+          <td>「並びが意味を持つ」表現は実際に成立する。案Gの裏付けになる</td>
+        </tr>
+        <tr>
+          <th>Snakebird ／<br>Stephen's Sausage Roll</th>
+          <td>小さい盤・少ない駒で、先読みと詰みを読ませる</td>
+          <td>盤を広げるより駒の相互作用で難しくする方向が正しい</td>
+        </tr>
+        <tr>
+          <th>Threes ／ 2048</th>
+          <td>同じ数どうしが合体する</td>
+          <td>算数の負荷はほぼゼロで、難しさは空間と先読みにある</td>
+        </tr>
+        <tr>
+          <th>氷床の迷路<br>（ポケモン等）</th>
+          <td>止まるまで滑る</td>
+          <td>滑りは<strong>床の性質</strong>として扱うのが一般的で、直感に合う</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p>
+    ロジックパズルとして評価されている作品はどれも、
+    <strong>盤面を見れば現在の状態が完全に分かる</strong>という性質を守っている。
+    そして数式を題材にした作品でも、算数そのものは一目で検算できる水準に抑えられ、
+    難しさは順序と空間に置かれている。
+  </p>
+  <p>
+    この基準で見ると、現行Aの中間状態は「盤面を見ても分からない情報」を作っている点で例外的で、
+    引っかかりの直感は方向として正しい。算数の負荷を上げても手応えは増えず、
+    読む負担だけが増える。
+  </p>
+</section>
+
+<section>
+  <p class="kicker">提案</p>
+  <h2>次にやること</h2>
+
+  <div class="rec">
+    <p>
+      <strong>案B（辺に演算子）を主軸に v3 プロトタイプを作り、現行Aと同じ題材で比較する。</strong>
+      案Bは中間状態を消したうえで、「どの向きから当てるか」という現行に無い判断を持ち込む。
+      滑る・押すといったギミックとも噛み合い、滑りは床属性に移す。
+      案Gは「長い式を見せたい」となった場合の対抗案として残す。
+    </p>
+  </div>
+
+  <h3>比較のやり方</h3>
+  <p>
+    既存の Python ソルバーはルール部分が分離してあるので、結合判定だけ差し替えれば
+    案Bの盤面もそのまま検証できる。同じ計算内容（例：<span class="tok">24 ÷ (7 − 3) = 6</span>）を
+    A と B の両方で組み、同じ指標で並べれば、感覚ではなく数字で選べる。
+  </p>
+  <ol class="plain">
+    <li>結合判定を差し替えた案B版ソルバーを用意する</li>
+    <li>同じ題材のレベルを A / B それぞれで作り、最短手数・外れ手・詰み手・ひっかけの数を比較する</li>
+    <li>POC に案Bモードを足し、実際に触って「一目で読めるか」を確認する</li>
+    <li>どちらで行くか決めてから Flutter の本実装に入る</li>
+  </ol>
+
+  <p>
+    本実装を止めているのは正しい判断で、コアメカニクスが決まる前に Dart へ移植すると、
+    決め直しのたびに二重に作業が発生する。逆に、ここが決まればルールとレベルデータは
+    すでに検証済みの資産として、そのまま移植できる。
+  </p>
+</section>
+
+</div>

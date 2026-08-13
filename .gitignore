@@ -1,0 +1,21 @@
+# Flutter / Dart のビルド生成物
+number_puzzle/build/
+number_puzzle/.dart_tool/
+number_puzzle/.flutter-plugins
+number_puzzle/.flutter-plugins-dependencies
+number_puzzle/android/.gradle/
+number_puzzle/ios/Flutter/ephemeral/
+number_puzzle/ios/Pods/
+number_puzzle/ios/.symlinks/
+*.iml
+.idea/
+
+# Python
+__pycache__/
+*.pyc
+
+# 検証スクリプトの一時出力（_ 始まりは使い捨て）
+tools/_*.txt
+
+# バージョンスナップショット（履歴は git 側で持つ）
+bk/

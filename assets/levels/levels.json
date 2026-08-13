@@ -1,0 +1,775 @@
+{
+  "levels": [
+    {
+      "levelId": "level_001",
+      "title": "はじめての結合",
+      "hint": "数字を演算子にぶつける",
+      "tutorial": true,
+      "size": 3,
+      "pieces": [
+        {
+          "id": "a",
+          "row": 1,
+          "col": 0,
+          "tokens": [
+            8
+          ]
+        },
+        {
+          "id": "b",
+          "row": 1,
+          "col": 1,
+          "tokens": [
+            "÷",
+            4
+          ]
+        }
+      ],
+      "walls": [
+        {
+          "row": 0,
+          "col": 0
+        },
+        {
+          "row": 0,
+          "col": 1
+        },
+        {
+          "row": 0,
+          "col": 2
+        },
+        {
+          "row": 2,
+          "col": 0
+        },
+        {
+          "row": 2,
+          "col": 1
+        },
+        {
+          "row": 2,
+          "col": 2
+        }
+      ],
+      "exits": [
+        {
+          "row": 1,
+          "col": 2,
+          "direction": "right",
+          "value": 2
+        }
+      ],
+      "par": 3,
+      "routes": 1
+    },
+    {
+      "levelId": "level_002",
+      "title": "ぶつける向き",
+      "hint": "ぶつけた側が式の前になる",
+      "tutorial": true,
+      "size": 3,
+      "pieces": [
+        {
+          "id": "a",
+          "row": 1,
+          "col": 0,
+          "tokens": [
+            3
+          ]
+        },
+        {
+          "id": "b",
+          "row": 1,
+          "col": 1,
+          "tokens": [
+            "+"
+          ]
+        },
+        {
+          "id": "c",
+          "row": 1,
+          "col": 2,
+          "tokens": [
+            5
+          ]
+        },
+        {
+          "id": "d",
+          "row": 0,
+          "col": 0,
+          "tokens": [
+            "×"
+          ]
+        }
+      ],
+      "walls": [
+        {
+          "row": 2,
+          "col": 0
+        },
+        {
+          "row": 2,
+          "col": 1
+        },
+        {
+          "row": 2,
+          "col": 2
+        },
+        {
+          "row": 0,
+          "col": 1
+        }
+      ],
+      "exits": [
+        {
+          "row": 1,
+          "col": 2,
+          "direction": "right",
+          "value": 8
+        }
+      ],
+      "par": 3,
+      "routes": 1
+    },
+    {
+      "levelId": "level_003",
+      "title": "動かせないタイル",
+      "hint": "灰色のタイルは動かせない",
+      "tutorial": true,
+      "size": 3,
+      "pieces": [
+        {
+          "id": "a",
+          "row": 2,
+          "col": 0,
+          "tokens": [
+            6
+          ]
+        },
+        {
+          "id": "b",
+          "row": 1,
+          "col": 0,
+          "tokens": [
+            "×"
+          ]
+        },
+        {
+          "id": "c",
+          "row": 0,
+          "col": 0,
+          "tokens": [
+            7
+          ],
+          "fixed": true
+        }
+      ],
+      "walls": [
+        {
+          "row": 0,
+          "col": 1
+        },
+        {
+          "row": 1,
+          "col": 1
+        },
+        {
+          "row": 2,
+          "col": 1
+        },
+        {
+          "row": 0,
+          "col": 2
+        },
+        {
+          "row": 1,
+          "col": 2
+        },
+        {
+          "row": 2,
+          "col": 2
+        }
+      ],
+      "exits": [
+        {
+          "row": 0,
+          "col": 0,
+          "direction": "up",
+          "value": 42
+        }
+      ],
+      "par": 3,
+      "routes": 1
+    },
+    {
+      "levelId": "level_004",
+      "title": "順番がすべて",
+      "hint": "先に引き算を作る",
+      "size": 4,
+      "pieces": [
+        {
+          "id": "a",
+          "row": 0,
+          "col": 0,
+          "tokens": [
+            24
+          ]
+        },
+        {
+          "id": "b",
+          "row": 2,
+          "col": 2,
+          "tokens": [
+            "÷"
+          ]
+        },
+        {
+          "id": "c",
+          "row": 3,
+          "col": 0,
+          "tokens": [
+            7
+          ]
+        },
+        {
+          "id": "d",
+          "row": 3,
+          "col": 2,
+          "tokens": [
+            "−"
+          ]
+        },
+        {
+          "id": "e",
+          "row": 1,
+          "col": 3,
+          "tokens": [
+            3
+          ]
+        }
+      ],
+      "walls": [
+        {
+          "row": 1,
+          "col": 1
+        }
+      ],
+      "exits": [
+        {
+          "row": 0,
+          "col": 3,
+          "direction": "up",
+          "value": 6
+        }
+      ],
+      "par": 12,
+      "routes": 1
+    },
+    {
+      "levelId": "level_005",
+      "title": "ちょうどに収める",
+      "hint": "20〜25 に収まる形を探す",
+      "size": 4,
+      "pieces": [
+        {
+          "id": "a",
+          "row": 0,
+          "col": 0,
+          "tokens": [
+            9
+          ]
+        },
+        {
+          "id": "b",
+          "row": 1,
+          "col": 2,
+          "tokens": [
+            "×"
+          ]
+        },
+        {
+          "id": "c",
+          "row": 3,
+          "col": 1,
+          "tokens": [
+            3
+          ]
+        },
+        {
+          "id": "d",
+          "row": 2,
+          "col": 0,
+          "tokens": [
+            "−"
+          ]
+        },
+        {
+          "id": "e",
+          "row": 3,
+          "col": 3,
+          "tokens": [
+            5
+          ]
+        }
+      ],
+      "walls": [
+        {
+          "row": 1,
+          "col": 1
+        }
+      ],
+      "exits": [
+        {
+          "row": 0,
+          "col": 3,
+          "direction": "up",
+          "minValue": 20,
+          "maxValue": 25
+        }
+      ],
+      "par": 12,
+      "routes": 1
+    },
+    {
+      "levelId": "level_006",
+      "title": "動かない的",
+      "hint": "固定タイルへ式を運ぶ",
+      "size": 4,
+      "pieces": [
+        {
+          "id": "a",
+          "row": 0,
+          "col": 0,
+          "tokens": [
+            24
+          ],
+          "fixed": true
+        },
+        {
+          "id": "b",
+          "row": 3,
+          "col": 0,
+          "tokens": [
+            96
+          ]
+        },
+        {
+          "id": "c",
+          "row": 3,
+          "col": 2,
+          "tokens": [
+            "÷"
+          ]
+        },
+        {
+          "id": "d",
+          "row": 2,
+          "col": 3,
+          "tokens": [
+            4
+          ]
+        },
+        {
+          "id": "e",
+          "row": 1,
+          "col": 2,
+          "tokens": [
+            "+"
+          ]
+        }
+      ],
+      "walls": [
+        {
+          "row": 1,
+          "col": 1
+        },
+        {
+          "row": 2,
+          "col": 1
+        }
+      ],
+      "exits": [
+        {
+          "row": 0,
+          "col": 0,
+          "direction": "up",
+          "value": 48
+        }
+      ],
+      "par": 9,
+      "routes": 1
+    },
+    {
+      "levelId": "level_007",
+      "title": "平方根",
+      "hint": "√ を使う相手を間違えない",
+      "size": 4,
+      "pieces": [
+        {
+          "id": "a",
+          "row": 1,
+          "col": 2,
+          "tokens": [
+            "√"
+          ]
+        },
+        {
+          "id": "b",
+          "row": 0,
+          "col": 1,
+          "tokens": [
+            36
+          ]
+        },
+        {
+          "id": "c",
+          "row": 3,
+          "col": 0,
+          "tokens": [
+            "+"
+          ]
+        },
+        {
+          "id": "d",
+          "row": 1,
+          "col": 3,
+          "tokens": [
+            4
+          ]
+        },
+        {
+          "id": "e",
+          "row": 2,
+          "col": 2,
+          "tokens": [
+            "×"
+          ]
+        }
+      ],
+      "walls": [
+        {
+          "row": 1,
+          "col": 1
+        }
+      ],
+      "exits": [
+        {
+          "row": 0,
+          "col": 3,
+          "direction": "up",
+          "value": 10
+        }
+      ],
+      "par": 10,
+      "routes": 1
+    },
+    {
+      "levelId": "level_008",
+      "title": "階乗",
+      "hint": "! は数字の後ろにつく",
+      "size": 4,
+      "pieces": [
+        {
+          "id": "a",
+          "row": 3,
+          "col": 0,
+          "tokens": [
+            4
+          ]
+        },
+        {
+          "id": "b",
+          "row": 2,
+          "col": 2,
+          "tokens": [
+            "!"
+          ]
+        },
+        {
+          "id": "c",
+          "row": 0,
+          "col": 1,
+          "tokens": [
+            "÷"
+          ]
+        },
+        {
+          "id": "d",
+          "row": 1,
+          "col": 3,
+          "tokens": [
+            6
+          ]
+        },
+        {
+          "id": "e",
+          "row": 3,
+          "col": 2,
+          "tokens": [
+            "+"
+          ]
+        }
+      ],
+      "walls": [
+        {
+          "row": 1,
+          "col": 1
+        }
+      ],
+      "exits": [
+        {
+          "row": 0,
+          "col": 3,
+          "direction": "up",
+          "value": 4
+        }
+      ],
+      "par": 9,
+      "routes": 1
+    },
+    {
+      "levelId": "level_009",
+      "title": "ふたつの出口",
+      "hint": "数字ごとに行き先が違う",
+      "size": 4,
+      "pieces": [
+        {
+          "id": "a",
+          "row": 3,
+          "col": 0,
+          "tokens": [
+            2
+          ]
+        },
+        {
+          "id": "b",
+          "row": 2,
+          "col": 2,
+          "tokens": [
+            "×"
+          ]
+        },
+        {
+          "id": "c",
+          "row": 3,
+          "col": 3,
+          "tokens": [
+            3
+          ]
+        },
+        {
+          "id": "d",
+          "row": 0,
+          "col": 1,
+          "tokens": [
+            5
+          ]
+        },
+        {
+          "id": "e",
+          "row": 1,
+          "col": 0,
+          "tokens": [
+            "−"
+          ]
+        }
+      ],
+      "walls": [
+        {
+          "row": 2,
+          "col": 1
+        }
+      ],
+      "exits": [
+        {
+          "row": 0,
+          "col": 0,
+          "direction": "up",
+          "value": 6
+        },
+        {
+          "row": 0,
+          "col": 3,
+          "direction": "up",
+          "value": 5
+        }
+      ],
+      "par": 11,
+      "routes": 2
+    },
+    {
+      "levelId": "level_010",
+      "title": "累乗",
+      "hint": "^ の右に来る数で決まる",
+      "size": 4,
+      "pieces": [
+        {
+          "id": "a",
+          "row": 3,
+          "col": 0,
+          "tokens": [
+            3
+          ]
+        },
+        {
+          "id": "b",
+          "row": 2,
+          "col": 2,
+          "tokens": [
+            "^"
+          ]
+        },
+        {
+          "id": "c",
+          "row": 3,
+          "col": 3,
+          "tokens": [
+            3
+          ]
+        },
+        {
+          "id": "d",
+          "row": 1,
+          "col": 0,
+          "tokens": [
+            "−"
+          ]
+        },
+        {
+          "id": "e",
+          "row": 0,
+          "col": 2,
+          "tokens": [
+            7
+          ]
+        }
+      ],
+      "walls": [
+        {
+          "row": 1,
+          "col": 2
+        }
+      ],
+      "exits": [
+        {
+          "row": 0,
+          "col": 0,
+          "direction": "up",
+          "value": 20
+        }
+      ],
+      "par": 10,
+      "routes": 1
+    },
+    {
+      "levelId": "level_011",
+      "title": "滑るタイル",
+      "hint": "緑のタイルは止まるまで滑る",
+      "tutorial": true,
+      "size": 3,
+      "pieces": [
+        {
+          "id": "a",
+          "row": 2,
+          "col": 0,
+          "tokens": [
+            12
+          ],
+          "slide": true
+        },
+        {
+          "id": "b",
+          "row": 2,
+          "col": 2,
+          "tokens": [
+            "÷"
+          ]
+        },
+        {
+          "id": "c",
+          "row": 0,
+          "col": 1,
+          "tokens": [
+            4
+          ]
+        }
+      ],
+      "walls": [],
+      "exits": [
+        {
+          "row": 0,
+          "col": 1,
+          "direction": "up",
+          "value": 3
+        }
+      ],
+      "par": 5,
+      "routes": 1
+    },
+    {
+      "levelId": "level_012",
+      "title": "止め方を考える",
+      "hint": "滑る先に何を置くか",
+      "size": 4,
+      "pieces": [
+        {
+          "id": "a",
+          "row": 3,
+          "col": 0,
+          "tokens": [
+            30
+          ],
+          "slide": true
+        },
+        {
+          "id": "b",
+          "row": 1,
+          "col": 1,
+          "tokens": [
+            "÷"
+          ]
+        },
+        {
+          "id": "c",
+          "row": 3,
+          "col": 3,
+          "tokens": [
+            5
+          ]
+        },
+        {
+          "id": "d",
+          "row": 0,
+          "col": 2,
+          "tokens": [
+            "+"
+          ]
+        },
+        {
+          "id": "e",
+          "row": 2,
+          "col": 0,
+          "tokens": [
+            4
+          ]
+        }
+      ],
+      "walls": [
+        {
+          "row": 2,
+          "col": 2
+        }
+      ],
+      "exits": [
+        {
+          "row": 0,
+          "col": 0,
+          "direction": "up",
+          "value": 10
+        }
+      ],
+      "par": 11,
+      "routes": 1
+    }
+  ]
+}

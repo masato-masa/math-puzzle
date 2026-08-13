@@ -1,0 +1,71 @@
+[
+  {
+    "levelId": "gen_0195",
+    "title": "生成",
+    "size": 4,
+    "pieces": [
+      {
+        "id": "n0",
+        "row": 2,
+        "col": 1,
+        "tokens": [
+          3
+        ]
+      },
+      {
+        "id": "n1",
+        "row": 0,
+        "col": 3,
+        "tokens": [
+          36
+        ]
+      },
+      {
+        "id": "n2",
+        "row": 1,
+        "col": 3,
+        "tokens": [
+          20
+        ]
+      },
+      {
+        "id": "o0",
+        "row": 3,
+        "col": 0,
+        "tokens": [
+          "÷"
+        ]
+      },
+      {
+        "id": "o1",
+        "row": 1,
+        "col": 1,
+        "tokens": [
+          "÷"
+        ]
+      }
+    ],
+    "walls": [
+      {
+        "row": 1,
+        "col": 2
+      },
+      {
+        "row": 2,
+        "col": 0
+      },
+      {
+        "row": 2,
+        "col": 3
+      }
+    ],
+    "exits": [
+      {
+        "row": 0,
+        "col": 0,
+        "direction": "up",
+        "minValue": 12,
+        "maxValue": 20
+      }
+    ],
+    "_wallset": 

@@ -1,0 +1,1292 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>数式パズル v3 POC</title>
+<style>
+  :root {
+    --paper: #FAF7EE;
+    --gridLine: #B9C9E0;
+    --ink: #24344A;
+    --pencil: #8B8578;
+    --red: #C1442D;
+    --ice: #CFE4EE;
+    --iceInk: #2F6E86;
+    --floor: #EDE3D2;
+    --floorInk: #7A5C2E;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--paper); color: var(--ink);
+    font-family: -apple-system, "Hiragino Sans", "Yu Gothic", sans-serif;
+    display: flex; flex-direction: column; align-items: center;
+    min-height: 100vh; padding: 20px 12px 60px;
+  }
+  h1 { font-size: 20px; letter-spacing: .05em; margin: 0 0 4px; }
+  .subtitle { color: var(--pencil); font-size: 12px; margin-bottom: 20px; }
+
+  #levelSelect { width: 100%; max-width: 460px; }
+  .level-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .level-card {
+    background: #fff; border: 2px solid var(--gridLine); border-radius: 10px;
+    padding: 12px 8px; text-align: center; cursor: pointer; font-weight: bold;
+    position: relative;
+  }
+  .level-card:hover { border-color: var(--red); }
+  .level-card .cleared-mark { position: absolute; top: 4px; right: 6px; color: var(--red); font-size: 12px; }
+  .level-card .name {
+    font-size: 11px; color: var(--pencil); font-weight: normal; margin-top: 2px;
+    min-height: 28px; display: flex; align-items: center; justify-content: center;
+  }
+  .level-card .par { display: block; font-size: 10px; color: var(--pencil); font-weight: normal; }
+  .level-card .best { display: block; font-size: 10px; color: var(--red); font-weight: normal; }
+
+  #puzzleScreen { display: none; width: 100%; max-width: 460px; }
+  .hud { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; font-size: 13px; }
+  .hud button {
+    background: #fff; border: 1px solid var(--gridLine); border-radius: 6px;
+    padding: 6px 10px; font-size: 12px; cursor: pointer; color: var(--ink);
+  }
+  .hud button:hover { border-color: var(--red); color: var(--red); }
+  .hint { font-size: 11px; color: var(--pencil); text-align: center; }
+
+  .board-wrap { position: relative; margin: 46px auto 26px; width: min(84vw, 360px); }
+  .board {
+    position: relative; display: grid; background: var(--paper);
+    border: 2px solid var(--gridLine); width: 100%; aspect-ratio: 1;
+  }
+  .cell { position: relative; border: 1px solid var(--gridLine); min-width: 0; min-height: 0; }
+  .cell.wall { background: repeating-linear-gradient(45deg, var(--gridLine) 0 4px, transparent 4px 8px); }
+
+  /* 床 */
+  .cell.floor-ice { background: var(--ice); }
+  .cell.floor-rotate, .cell.floor-swap,
+  .cell.floor-sqrt, .cell.floor-fact { background: var(--floor); }
+  .floor-mark {
+    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    font-family: "SFMono-Regular", Consolas, monospace; font-weight: bold;
+    font-size: 15px; pointer-events: none;
+  }
+  .cell.floor-ice .floor-mark { color: var(--iceInk); opacity: .7; }
+  .cell.floor-rotate .floor-mark, .cell.floor-swap .floor-mark,
+  .cell.floor-sqrt .floor-mark,
+  .cell.floor-fact .floor-mark { color: var(--floorInk); opacity: .8; }
+  .floor-uses {
+    position: absolute; right: 2px; bottom: 0px; font-size: 10px; font-weight: bold;
+    font-family: "SFMono-Regular", Consolas, monospace; color: var(--floorInk);
+    pointer-events: none;
+  }
+  .cell.spent .floor-mark, .cell.spent .floor-uses { opacity: .25; }
+
+  /* タイル本体と辺の演算子 */
+  .tile {
+    position: absolute; inset: 14%; border-radius: 6px;
+    background: var(--ink); color: var(--paper);
+    display: flex; align-items: center; justify-content: center;
+    font-family: "SFMono-Regular", Consolas, monospace; font-weight: bold;
+    cursor: pointer; user-select: none; line-height: 1; z-index: 1;
+  }
+  .tile.fixed { background: #6E7A88; border: 2px dashed rgba(250,247,238,.85); cursor: not-allowed; }
+  .tile.selected { outline: 3px solid var(--red); outline-offset: 2px; z-index: 3; }
+  .edge {
+    position: absolute; background: var(--red); color: #fff;
+    font-family: "SFMono-Regular", Consolas, monospace; font-weight: bold;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 3px; z-index: 2; pointer-events: none;
+  }
+
+  .exit-marker {
+    position: absolute; display: flex; align-items: center; justify-content: center;
+    gap: 1px; height: 26px; min-width: 34px; padding: 0 7px; border-radius: 13px;
+    background: var(--red); color: #fff;
+    font-family: "SFMono-Regular", Consolas, monospace; font-size: 12px; font-weight: bold;
+    cursor: pointer; box-shadow: 0 0 0 2px var(--paper); white-space: nowrap; z-index: 4;
+  }
+  .exit-marker .arrow { font-size: 11px; opacity: .9; }
+  .exit-marker.ready { animation: pulse 1s infinite; }
+  @keyframes pulse { 0%,100% { box-shadow: 0 0 0 2px var(--paper); } 50% { box-shadow: 0 0 0 5px var(--paper); } }
+
+  .message { min-height: 20px; text-align: center; color: var(--red); font-size: 13px; }
+  .win-overlay { position: fixed; inset: 0; background: rgba(36,52,74,.85); display: flex; align-items: center; justify-content: center; z-index: 10; }
+  .win-card { background: var(--paper); border-radius: 12px; padding: 28px 32px; text-align: center; }
+  .win-card h2 { color: var(--red); margin: 0 0 8px; }
+  .win-card p { color: var(--pencil); margin: 0 0 20px; }
+  .win-card .actions { display: flex; gap: 10px; justify-content: center; }
+  .win-card button { background: var(--ink); color: var(--paper); border: none; border-radius: 6px; padding: 8px 16px; cursor: pointer; font-size: 13px; }
+  .win-card button.secondary { background: transparent; color: var(--ink); border: 1px solid var(--gridLine); }
+
+  .rule-note { max-width: 460px; font-size: 11px; color: var(--pencil); text-align: left; margin-top: 24px; line-height: 1.9; }
+  .rule-note b { color: var(--ink); }
+  .legend { display: flex; flex-wrap: wrap; gap: 6px 14px; margin: 10px 0 0; }
+  .legend span { display: inline-flex; align-items: center; gap: 5px; }
+  .swatch { width: 15px; height: 15px; border-radius: 3px; border: 1px solid var(--gridLine); display: inline-block; }
+  .back-link { background: none; border: none; color: var(--pencil); font-size: 12px; cursor: pointer; margin-bottom: 12px; padding: 0; }
+</style>
+</head>
+<body>
+
+<h1>数式パズル <span style="color:var(--red)">v3</span></h1>
+<div class="subtitle">演算子はタイルの辺 ／ 単項演算子と特殊効果は床</div>
+
+<div id="levelSelect">
+  <div class="level-grid" id="levelGrid"></div>
+  <div class="rule-note">
+    ・盤上にあるのは<b>数字タイルだけ</b>。演算子は数字タイルの<b>辺</b>に付いている<br>
+    ・タイルを選び、動かしたい向きのマスをタップして 1 マス動かす<br>
+    ・ぶつかったとき、<b>接触する 2 辺のうち片方だけに演算子がある</b>ときだけ計算できる<br>
+    　両方にある／どちらにも無い組み合わせは、壁と同じでぶつかれない<br>
+    ・計算は <b>ぶつけた側 演算子 ぶつけられた側</b> の順<br>
+    ・<b>マイナスは扱わない</b>。割り切れない割り算と、引くと負になる向きは成立しない<br>
+    ・計算後に残るのは<b>ぶつけられた側の、使わなかった辺</b>だけ<br>
+    ・出口の数字と一致するタイルだけが盤外へ出られる。<b>全部出せばクリア</b><br>
+    ・<b>手数制限あり</b>。遠回りすると間に合わないので、床や地形を使う必要がある
+    <div class="legend">
+      <span><i class="swatch" style="background:var(--ice)"></i>≈ 氷：止まるまで滑る（何度でも）</span>
+      <span><i class="swatch" style="background:var(--floor)"></i>↻ 辺を回す</span>
+      <span><i class="swatch" style="background:var(--floor)"></i>⇄ ＋と−、×と÷を入れ替える</span>
+      <span><i class="swatch" style="background:var(--floor)"></i>√ ・ ! ：値に作用</span>
+    </div>
+    <div style="margin-top:8px">床の右下の数字は<b>残り回数</b>。使い切ると効果が消えます。</div>
+  </div>
+</div>
+
+<div id="puzzleScreen">
+  <button class="back-link" onclick="goToLevelSelect()">← レベル選択に戻る</button>
+  <div class="hud">
+    <div>残り手数: <b id="movesLeft">-</b> <span style="color:var(--pencil)">/ <b id="limitLabel">-</b></span></div>
+    <div style="display:flex; gap:8px;">
+      <button onclick="undo()">戻す</button>
+      <button onclick="resetLevel()">リセット</button>
+    </div>
+  </div>
+  <div class="hint" id="hintLabel"></div>
+  <div class="board-wrap" id="boardWrap"><div class="board" id="board"></div></div>
+  <div class="message" id="message"></div>
+</div>
+
+<script>
+/* ============================================================
+   v3 コアルール（tools/v3_rules.py と 1:1 対応）
+   辺は必ず [up, right, down, left] の順で持つ
+   ============================================================ */
+const DIRS = ["up", "right", "down", "left"];
+const DIR_DELTA = { up: [-1, 0], right: [0, 1], down: [1, 0], left: [0, -1] };
+const DIR_INDEX = { up: 0, right: 1, down: 2, left: 3 };
+const OPPOSITE = { up: "down", right: "left", down: "up", left: "right" };
+
+const MAX_ABS_VALUE = 100000;
+const MAX_FACTORIAL_INPUT = 8;
+
+/* マイナスは扱わない。引いて負になる向きは衝突自体が成立しない
+   （同じ演算子でも当てる向きで A−B / B−A を選べるため、
+     「大きい方から当てる」という制約になる） */
+function applyOp(op, a, b) {
+  let r;
+  if (op === "+") r = a + b;
+  else if (op === "−") {
+    if (a < b) return null;                    // 負になる向きには当てられない
+    r = a - b;
+  }
+  else if (op === "×") r = a * b;
+  else if (op === "÷") {
+    if (b === 0 || a % b !== 0) return null;   // 割り切れないなら成立しない
+    r = a / b;
+  } else return null;
+  return r > MAX_ABS_VALUE ? null : r;
+}
+
+function applyUnary(kind, value) {
+  if (kind === "sqrt") {
+    if (value < 0) return null;
+    const r = Math.round(Math.sqrt(value));
+    return r * r === value ? r : null;
+  }
+  if (kind === "fact") {
+    if (value < 0 || value > MAX_FACTORIAL_INPUT) return null;
+    let f = 1;
+    for (let i = 2; i <= value; i++) f *= i;
+    return f;
+  }
+  return null;
+}
+
+function rotateEdgesCw(e) { return [e[3], e[0], e[1], e[2]]; }
+
+const SWAP_PAIRS = { "+": "−", "−": "+", "×": "÷", "÷": "×" };
+function swapEdges(e) { return e.map(op => (op === null ? null : (SWAP_PAIRS[op] || op))); }
+
+const EDGE_FLOORS = ["rotate", "swap"];
+
+/* 接触する 2 辺のうち片方だけに演算子があるときだけ成立する。
+   ぶつけた側が左辺。残るのはぶつけられた側の使わなかった辺だけ。 */
+function collide(moverValue, moverEdges, targetValue, targetEdges, direction) {
+  const mEdge = moverEdges[DIR_INDEX[direction]];
+  const tEdge = targetEdges[DIR_INDEX[OPPOSITE[direction]]];
+  if ((mEdge === null) === (tEdge === null)) return null;
+  const op = mEdge !== null ? mEdge : tEdge;
+  const value = applyOp(op, moverValue, targetValue);
+  if (value === null) return null;
+  const edges = targetEdges.slice();
+  edges[DIR_INDEX[OPPOSITE[direction]]] = null;
+  return { value, edges };
+}
+
+function canExit(value, exit) {
+  if (exit.minValue !== undefined && exit.maxValue !== undefined) {
+    return value >= exit.minValue && value <= exit.maxValue;
+  }
+  if (exit.value === undefined || exit.value === null) return true;
+  return value === exit.value;
+}
+function exitLabel(exit) {
+  if (exit.minValue !== undefined && exit.maxValue !== undefined) return exit.minValue + "-" + exit.maxValue;
+  return (exit.value === undefined || exit.value === null) ? "" : String(exit.value);
+}
+function edgesFromDict(d) {
+  d = d || {};
+  return DIRS.map(name => (d[name] === undefined ? null : d[name]));
+}
+
+/* ============================================================
+   レベルデータ（tools/v3_levels.py が検証して生成）
+   ============================================================ */
+/* LEVELS:BEGIN */
+const LEVELS = [
+  {
+    "levelId": "v3_001",
+    "title": "辺で計算する",
+    "hint": "演算子のある辺に当てる",
+    "tutorial": true,
+    "size": 3,
+    "tiles": [
+      {
+        "id": "a",
+        "row": 1,
+        "col": 0,
+        "value": 7
+      },
+      {
+        "id": "b",
+        "row": 1,
+        "col": 1,
+        "value": 3,
+        "edges": {
+          "left": "−"
+        }
+      }
+    ],
+    "walls": [
+      {
+        "row": 0,
+        "col": 0
+      },
+      {
+        "row": 0,
+        "col": 1
+      },
+      {
+        "row": 0,
+        "col": 2
+      },
+      {
+        "row": 2,
+        "col": 0
+      },
+      {
+        "row": 2,
+        "col": 1
+      },
+      {
+        "row": 2,
+        "col": 2
+      }
+    ],
+    "floors": [],
+    "exits": [
+      {
+        "row": 1,
+        "col": 2,
+        "direction": "right",
+        "value": 4
+      }
+    ],
+    "par": 3,
+    "limit": 3
+  },
+  {
+    "levelId": "v3_002",
+    "title": "当てる向き",
+    "hint": "演算子の無い辺には入れない",
+    "tutorial": true,
+    "size": 3,
+    "tiles": [
+      {
+        "id": "a",
+        "row": 2,
+        "col": 1,
+        "value": 12
+      },
+      {
+        "id": "b",
+        "row": 1,
+        "col": 1,
+        "value": 4,
+        "edges": {
+          "down": "÷"
+        }
+      }
+    ],
+    "walls": [
+      {
+        "row": 0,
+        "col": 0
+      },
+      {
+        "row": 1,
+        "col": 0
+      },
+      {
+        "row": 2,
+        "col": 0
+      },
+      {
+        "row": 0,
+        "col": 2
+      },
+      {
+        "row": 1,
+        "col": 2
+      },
+      {
+        "row": 2,
+        "col": 2
+      }
+    ],
+    "floors": [],
+    "exits": [
+      {
+        "row": 0,
+        "col": 1,
+        "direction": "up",
+        "value": 3
+      }
+    ],
+    "par": 3,
+    "limit": 3
+  },
+  {
+    "levelId": "v3_003",
+    "title": "氷の床",
+    "hint": "氷の上では止まらない",
+    "tutorial": true,
+    "size": 4,
+    "tiles": [
+      {
+        "id": "a",
+        "row": 3,
+        "col": 0,
+        "value": 9
+      },
+      {
+        "id": "b",
+        "row": 3,
+        "col": 3,
+        "value": 4,
+        "edges": {
+          "left": "−"
+        }
+      },
+      {
+        "id": "c",
+        "row": 0,
+        "col": 0,
+        "value": 6,
+        "edges": {
+          "down": "+"
+        }
+      }
+    ],
+    "walls": [],
+    "floors": [
+      {
+        "row": 3,
+        "col": 1,
+        "type": "ice"
+      },
+      {
+        "row": 3,
+        "col": 2,
+        "type": "ice"
+      }
+    ],
+    "exits": [
+      {
+        "row": 0,
+        "col": 0,
+        "direction": "up",
+        "value": 11
+      }
+    ],
+    "par": 6,
+    "limit": 6
+  },
+  {
+    "levelId": "v3_004",
+    "title": "硬い面どうし",
+    "hint": "両方に演算子があると当たらない",
+    "size": 4,
+    "tiles": [
+      {
+        "id": "a",
+        "row": 3,
+        "col": 1,
+        "value": 6,
+        "edges": {
+          "right": "×"
+        }
+      },
+      {
+        "id": "b",
+        "row": 3,
+        "col": 2,
+        "value": 4,
+        "edges": {
+          "left": "+"
+        }
+      },
+      {
+        "id": "c",
+        "row": 0,
+        "col": 3,
+        "value": 2,
+        "edges": {
+          "down": "+"
+        }
+      }
+    ],
+    "walls": [
+      {
+        "row": 1,
+        "col": 1
+      },
+      {
+        "row": 2,
+        "col": 1
+      },
+      {
+        "row": 1,
+        "col": 2
+      },
+      {
+        "row": 2,
+        "col": 2
+      }
+    ],
+    "floors": [
+      {
+        "row": 3,
+        "col": 0,
+        "type": "rotate",
+        "uses": 1
+      }
+    ],
+    "exits": [
+      {
+        "row": 0,
+        "col": 3,
+        "direction": "up",
+        "value": 26
+      }
+    ],
+    "par": 12,
+    "limit": 12
+  },
+  {
+    "levelId": "v3_005",
+    "title": "平方根の床",
+    "hint": "平方数でないと入れない",
+    "size": 4,
+    "tiles": [
+      {
+        "id": "a",
+        "row": 3,
+        "col": 0,
+        "value": 4
+      },
+      {
+        "id": "b",
+        "row": 3,
+        "col": 2,
+        "value": 9,
+        "edges": {
+          "left": "×"
+        }
+      },
+      {
+        "id": "c",
+        "row": 0,
+        "col": 0,
+        "value": 2,
+        "edges": {
+          "down": "+"
+        }
+      }
+    ],
+    "walls": [
+      {
+        "row": 1,
+        "col": 1
+      },
+      {
+        "row": 2,
+        "col": 2
+      }
+    ],
+    "floors": [
+      {
+        "row": 3,
+        "col": 3,
+        "type": "sqrt",
+        "uses": 1
+      }
+    ],
+    "exits": [
+      {
+        "row": 0,
+        "col": 0,
+        "direction": "up",
+        "value": 8
+      }
+    ],
+    "par": 10,
+    "limit": 10
+  },
+  {
+    "levelId": "v3_006",
+    "title": "階乗の床",
+    "hint": "42 は 4・3・2 だけでは作れない",
+    "size": 4,
+    "tiles": [
+      {
+        "id": "a",
+        "row": 3,
+        "col": 0,
+        "value": 4
+      },
+      {
+        "id": "b",
+        "row": 0,
+        "col": 3,
+        "value": 3,
+        "edges": {
+          "down": "−"
+        }
+      },
+      {
+        "id": "c",
+        "row": 3,
+        "col": 3,
+        "value": 2,
+        "edges": {
+          "up": "×"
+        }
+      }
+    ],
+    "walls": [
+      {
+        "row": 1,
+        "col": 1
+      },
+      {
+        "row": 2,
+        "col": 2
+      }
+    ],
+    "floors": [
+      {
+        "row": 3,
+        "col": 1,
+        "type": "fact",
+        "uses": 1
+      }
+    ],
+    "exits": [
+      {
+        "row": 3,
+        "col": 3,
+        "direction": "down",
+        "value": 42
+      }
+    ],
+    "par": 14,
+    "limit": 14
+  },
+  {
+    "levelId": "v3_007",
+    "title": "大きい方から引く",
+    "hint": "負になる向きには当てられない",
+    "tutorial": true,
+    "rows": 3,
+    "cols": 5,
+    "tiles": [
+      {
+        "id": "a",
+        "row": 2,
+        "col": 0,
+        "value": 9
+      },
+      {
+        "id": "b",
+        "row": 2,
+        "col": 4,
+        "value": 4,
+        "edges": {
+          "left": "−"
+        }
+      },
+      {
+        "id": "c",
+        "row": 0,
+        "col": 0,
+        "value": 2,
+        "edges": {
+          "down": "×"
+        }
+      }
+    ],
+    "walls": [
+      {
+        "row": 1,
+        "col": 2
+      }
+    ],
+    "floors": [
+      {
+        "row": 2,
+        "col": 2,
+        "type": "ice"
+      }
+    ],
+    "exits": [
+      {
+        "row": 0,
+        "col": 0,
+        "direction": "up",
+        "value": 10
+      }
+    ],
+    "par": 7,
+    "limit": 7
+  },
+  {
+    "levelId": "v3_008",
+    "title": "演算子を入れ替える",
+    "hint": "＋のままでは 8 が作れない",
+    "rows": 4,
+    "cols": 3,
+    "tiles": [
+      {
+        "id": "a",
+        "row": 3,
+        "col": 0,
+        "value": 12
+      },
+      {
+        "id": "b",
+        "row": 0,
+        "col": 2,
+        "value": 4,
+        "edges": {
+          "down": "+"
+        }
+      },
+      {
+        "id": "c",
+        "row": 3,
+        "col": 2,
+        "value": 2,
+        "edges": {
+          "up": "×"
+        }
+      }
+    ],
+    "walls": [
+      {
+        "row": 1,
+        "col": 1
+      }
+    ],
+    "floors": [
+      {
+        "row": 0,
+        "col": 0,
+        "type": "swap",
+        "uses": 1
+      }
+    ],
+    "exits": [
+      {
+        "row": 3,
+        "col": 2,
+        "direction": "down",
+        "value": 16
+      }
+    ],
+    "par": 9,
+    "limit": 9
+  },
+  {
+    "levelId": "v3_009",
+    "title": "向きを作り直す",
+    "hint": "邪魔な演算子を横へ逃がす",
+    "rows": 4,
+    "cols": 4,
+    "tiles": [
+      {
+        "id": "a",
+        "row": 3,
+        "col": 0,
+        "value": 20,
+        "edges": {
+          "up": "÷"
+        }
+      },
+      {
+        "id": "b",
+        "row": 2,
+        "col": 0,
+        "value": 5,
+        "edges": {
+          "down": "−"
+        }
+      },
+      {
+        "id": "c",
+        "row": 0,
+        "col": 3,
+        "value": 3,
+        "edges": {
+          "down": "×"
+        }
+      }
+    ],
+    "walls": [
+      {
+        "row": 1,
+        "col": 1
+      },
+      {
+        "row": 2,
+        "col": 2
+      }
+    ],
+    "floors": [
+      {
+        "row": 2,
+        "col": 1,
+        "type": "rotate",
+        "uses": 1
+      }
+    ],
+    "exits": [
+      {
+        "row": 0,
+        "col": 3,
+        "direction": "up",
+        "value": 12
+      }
+    ],
+    "par": 10,
+    "limit": 10
+  },
+  {
+    "levelId": "v3_010",
+    "title": "総仕上げ",
+    "hint": "床は使い切りに注意",
+    "rows": 4,
+    "cols": 5,
+    "tiles": [
+      {
+        "id": "a",
+        "row": 3,
+        "col": 0,
+        "value": 4
+      },
+      {
+        "id": "b",
+        "row": 3,
+        "col": 4,
+        "value": 6,
+        "edges": {
+          "left": "÷"
+        }
+      },
+      {
+        "id": "c",
+        "row": 0,
+        "col": 0,
+        "value": 20,
+        "edges": {
+          "down": "−"
+        }
+      },
+      {
+        "id": "d",
+        "row": 0,
+        "col": 4,
+        "value": 2,
+        "edges": {
+          "down": "×"
+        }
+      }
+    ],
+    "walls": [
+      {
+        "row": 1,
+        "col": 2
+      },
+      {
+        "row": 2,
+        "col": 2
+      }
+    ],
+    "floors": [
+      {
+        "row": 3,
+        "col": 2,
+        "type": "ice"
+      },
+      {
+        "row": 1,
+        "col": 4,
+        "type": "rotate",
+        "uses": 1
+      }
+    ],
+    "exits": [
+      {
+        "row": 0,
+        "col": 0,
+        "direction": "up",
+        "value": 8
+      }
+    ],
+    "par": 12,
+    "limit": 12
+  }
+];
+/* LEVELS:END */
+
+/* ============================================================
+   ゲーム状態
+   ============================================================ */
+let currentLevel = null;
+let tiles = [];
+let floorUses = {};          // "r,c" -> 残り回数（無制限なら未登録）
+let moveCount = 0;
+let selectedId = null;
+let history = [];
+
+const PROGRESS_KEY = "number_puzzle_v3_progress";
+function loadProgress() { try { return JSON.parse(localStorage.getItem(PROGRESS_KEY)) || {}; } catch (e) { return {}; } }
+function saveProgress(p) { try { localStorage.setItem(PROGRESS_KEY, JSON.stringify(p)); } catch (e) {} }
+function recordClear(id, moves) {
+  const p = loadProgress();
+  const prev = p[id] && p[id].bestMoves;
+  p[id] = { cleared: true, bestMoves: prev ? Math.min(prev, moves) : moves };
+  saveProgress(p);
+}
+
+function renderLevelSelect() {
+  const progress = loadProgress();
+  const grid = document.getElementById("levelGrid");
+  grid.innerHTML = "";
+  LEVELS.forEach((level, idx) => {
+    const card = document.createElement("div");
+    card.className = "level-card";
+    const p = progress[level.levelId];
+    card.innerHTML =
+      (p && p.cleared ? '<div class="cleared-mark">✓</div>' : '') +
+      '<div>Lv.' + (idx + 1) + '</div>' +
+      '<div class="name">' + level.title + '</div>' +
+      '<span class="par">' + (level.limit !== undefined ? level.limit : level.par) + '手以内</span>' +
+      (p && p.cleared ? '<span class="best">best ' + p.bestMoves + '手</span>' : '');
+    card.onclick = () => startLevel(level.levelId);
+    grid.appendChild(card);
+  });
+}
+function goToLevelSelect() {
+  document.getElementById("puzzleScreen").style.display = "none";
+  document.getElementById("levelSelect").style.display = "block";
+  renderLevelSelect();
+}
+
+function startLevel(levelId) {
+  closeWinOverlay(); closeFailOverlay();
+  currentLevel = LEVELS.find(l => l.levelId === levelId);
+  tiles = currentLevel.tiles.map(t => ({
+    id: t.id, row: t.row, col: t.col, value: t.value,
+    edges: edgesFromDict(t.edges), fixed: !!t.fixed
+  }));
+  floorUses = {};
+  (currentLevel.floors || []).forEach(f => {
+    if (f.type !== "ice" && f.uses !== undefined) floorUses[f.row + "," + f.col] = f.uses;
+  });
+  moveCount = 0; selectedId = null; history = [];
+  document.getElementById("levelSelect").style.display = "none";
+  document.getElementById("puzzleScreen").style.display = "block";
+  document.getElementById("limitLabel").textContent = moveLimit() + "手以内";
+  document.getElementById("hintLabel").textContent = currentLevel.hint || "";
+  buildBoard(); renderBoard(); setMessage("");
+}
+
+/* 盤は N×M。size しか無い旧形式は正方形として扱う */
+function boardRows() { return currentLevel.rows !== undefined ? currentLevel.rows : currentLevel.size; }
+function boardCols() { return currentLevel.cols !== undefined ? currentLevel.cols : currentLevel.size; }
+/* 手数制限。指定が無ければ最短手数ちょうど。 */
+function moveLimit() {
+  return currentLevel.limit !== undefined ? currentLevel.limit : currentLevel.par;
+}
+function movesLeft() { return moveLimit() - moveCount; }
+
+function tileAt(row, col) { return tiles.find(t => t.row === row && t.col === col) || null; }
+function isWall(row, col) { return currentLevel.walls.some(w => w.row === row && w.col === col); }
+function floorAt(row, col) { return (currentLevel.floors || []).find(f => f.row === row && f.col === col) || null; }
+function usesLeft(f) {
+  const k = f.row + "," + f.col;
+  return floorUses[k] === undefined ? null : floorUses[k];
+}
+
+function saveHistory() {
+  history.push({
+    tiles: tiles.map(t => ({ ...t, edges: t.edges.slice() })),
+    floorUses: { ...floorUses },
+    moveCount
+  });
+}
+function undo() {
+  if (!history.length) return;
+  const s = history.pop();
+  tiles = s.tiles; floorUses = s.floorUses; moveCount = s.moveCount;
+  selectedId = null; setMessage(""); renderBoard();
+}
+function resetLevel() { startLevel(currentLevel.levelId); }
+function setMessage(m) { document.getElementById("message").textContent = m; }
+
+/* ---------- 盤面 ---------- */
+function buildBoard() {
+  const board = document.getElementById("board");
+  const rows = boardRows(), cols = boardCols();
+  board.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+  board.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
+  board.style.aspectRatio = cols + " / " + rows;
+  board.innerHTML = "";
+  const marks = { ice: "≈", rotate: "↻", swap: "⇄", sqrt: "√", fact: "!" };
+
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const cell = document.createElement("div");
+      const f = floorAt(r, c);
+      cell.className = "cell" + (isWall(r, c) ? " wall" : "") + (f ? " floor-" + f.type : "");
+      cell.dataset.row = r; cell.dataset.col = c;
+      if (f) {
+        const m = document.createElement("div");
+        m.className = "floor-mark"; m.textContent = marks[f.type] || "?";
+        cell.appendChild(m);
+        if (f.uses !== undefined && f.type !== "ice") {
+          const u = document.createElement("div");
+          u.className = "floor-uses"; u.dataset.uses = r + "," + c;
+          cell.appendChild(u);
+        }
+      }
+      cell.onclick = () => onCellClick(r, c);
+      board.appendChild(cell);
+    }
+  }
+
+  const wrap = document.getElementById("boardWrap");
+  wrap.querySelectorAll(".exit-marker").forEach(e => e.remove());
+  currentLevel.exits.forEach(exit => {
+    const marker = document.createElement("div");
+    marker.className = "exit-marker";
+    const arrow = { up: "↑", down: "↓", left: "←", right: "→" }[exit.direction] || "•";
+    marker.innerHTML = '<span class="arrow">' + arrow + '</span><span>' + exitLabel(exit) + '</span>';
+    marker.dataset.row = exit.row; marker.dataset.col = exit.col;
+    marker.onclick = () => onExitClick(exit);
+    wrap.appendChild(marker);
+    positionExitMarker(marker, exit);
+  });
+}
+
+function positionExitMarker(marker, exit) {
+  const wrap = document.getElementById("boardWrap");
+  requestAnimationFrame(() => {
+    const board = document.getElementById("board");
+    const rect = board.getBoundingClientRect();
+    const wrapRect = wrap.getBoundingClientRect();
+    if (!rect.width) return;
+    const cw = rect.width / boardCols(), ch = rect.height / boardRows();
+    const left = rect.left - wrapRect.left + exit.col * cw;
+    const top = rect.top - wrapRect.top + exit.row * ch;
+    const mw = marker.offsetWidth, mh = marker.offsetHeight, gap = 8;
+    let x = left + cw / 2 - mw / 2, y = top + ch / 2 - mh / 2;
+    if (exit.direction === "up") y = top - mh - gap;
+    if (exit.direction === "down") y = top + ch + gap;
+    if (exit.direction === "left") x = left - mw - gap;
+    if (exit.direction === "right") x = left + cw + gap;
+    marker.style.left = x + "px"; marker.style.top = y + "px";
+  });
+}
+
+function renderBoard() {
+  const board = document.getElementById("board");
+  board.querySelectorAll(".tile, .edge").forEach(e => e.remove());
+  const rect = board.getBoundingClientRect();
+  const cellPx = Math.min(rect.width / boardCols(), rect.height / boardRows()) || 90;
+
+  tiles.forEach(t => {
+    const cell = board.querySelector('.cell[data-row="' + t.row + '"][data-col="' + t.col + '"]');
+    if (!cell) return;
+    const tile = document.createElement("div");
+    tile.className = "tile" + (t.fixed ? " fixed" : "") + (t.id === selectedId ? " selected" : "");
+    tile.textContent = t.value;
+    const len = String(t.value).length;
+    tile.style.fontSize = Math.max(11, Math.min(cellPx * 0.34, cellPx * 0.95 / len)) + "px";
+    tile.onclick = (e) => { e.stopPropagation(); onTileClick(t.id); };
+    cell.appendChild(tile);
+
+    // 辺の演算子
+    const s = Math.max(13, cellPx * 0.26);
+    t.edges.forEach((op, i) => {
+      if (op === null) return;
+      const b = document.createElement("div");
+      b.className = "edge";
+      b.textContent = op;
+      b.style.width = s + "px"; b.style.height = s + "px";
+      b.style.fontSize = (s * 0.72) + "px";
+      const name = DIRS[i];
+      if (name === "up")    { b.style.top = "1px";    b.style.left = "50%"; b.style.transform = "translateX(-50%)"; }
+      if (name === "down")  { b.style.bottom = "1px"; b.style.left = "50%"; b.style.transform = "translateX(-50%)"; }
+      if (name === "left")  { b.style.left = "1px";   b.style.top = "50%";  b.style.transform = "translateY(-50%)"; }
+      if (name === "right") { b.style.right = "1px";  b.style.top = "50%";  b.style.transform = "translateY(-50%)"; }
+      cell.appendChild(b);
+    });
+  });
+
+  // 床の残り回数
+  board.querySelectorAll(".floor-uses").forEach(el => {
+    const left = floorUses[el.dataset.uses];
+    el.textContent = left;
+    el.parentElement.classList.toggle("spent", left <= 0);
+  });
+
+  const left = movesLeft();
+  const leftEl = document.getElementById("movesLeft");
+  leftEl.textContent = left;
+  leftEl.style.color = left <= 0 ? "var(--red)" : (left <= 2 ? "var(--red)" : "");
+
+  document.querySelectorAll(".exit-marker").forEach(m => {
+    const r = +m.dataset.row, c = +m.dataset.col;
+    const exit = currentLevel.exits.find(e => e.row === r && e.col === c);
+    const t = tileAt(r, c);
+    m.classList.toggle("ready", !!(exit && t && canExit(t.value, exit)));
+  });
+
+  checkWin();
+}
+
+/* ---------- 床に止まったときの効果 ---------- */
+function land(value, edges, row, col) {
+  const f = floorAt(row, col);
+  if (!f || f.type === "ice") return { ok: true };
+  const left = usesLeft(f);
+  if (left !== null && left <= 0) return { ok: true };     // 使い切ったマスはただの床
+  if (EDGE_FLOORS.includes(f.type)) {
+    const e = f.type === "rotate" ? rotateEdgesCw(edges) : swapEdges(edges);
+    return { ok: true, edges: e, spend: f };
+  }
+  const v = applyUnary(f.type, value);
+  if (v === null) {
+    return { ok: false, reason: f.type === "sqrt" ? "平方数でないと √ のマスに入れません"
+                                                  : "この値では ! のマスに入れません" };
+  }
+  return { ok: true, value: v, spend: f };
+}
+
+function spendFloor(f) {
+  if (!f) return;
+  const k = f.row + "," + f.col;
+  if (floorUses[k] !== undefined) floorUses[k] -= 1;
+}
+
+/* start から direction へ止まるところまで進む。
+   戻り値 { cell, hit }。hit は「他のタイルに塞がれて止まった」ときだけ入る。 */
+function slide(start, direction, ignoreCell) {
+  const rows = boardRows(), cols = boardCols();
+  const [dr, dc] = DIR_DELTA[direction];
+  let [cr, cc] = start;
+  while (true) {
+    const nr = cr + dr, nc = cc + dc;
+    if (nr < 0 || nr >= rows || nc < 0 || nc >= cols) return { cell: [cr, cc], hit: null };
+    if (isWall(nr, nc)) return { cell: [cr, cc], hit: null };
+    const occ = tileAt(nr, nc);
+    if (occ && !(ignoreCell && ignoreCell[0] === nr && ignoreCell[1] === nc)) {
+      return { cell: [cr, cc], hit: occ };
+    }
+    cr = nr; cc = nc;
+    const f = floorAt(cr, cc);
+    if (f && f.type === "ice") continue;      // 氷の上では止まらない
+    return { cell: [cr, cc], hit: null };
+  }
+}
+
+/* ---------- 移動と衝突 ---------- */
+function attemptMove(tile, direction) {
+  if (tile.fixed) { setMessage("このタイルは動かせません"); return; }
+
+  const { cell, hit } = slide([tile.row, tile.col], direction);
+  const [cr, cc] = cell;
+
+  if (hit) {
+    // --- 計算できるか ---
+    const result = collide(tile.value, tile.edges, hit.value, hit.edges, direction);
+    if (result) {
+      saveHistory();
+      hit.value = result.value;
+      hit.edges = result.edges;
+      tiles = tiles.filter(t => t.id !== tile.id);
+      moveCount++; selectedId = null; setMessage("");
+      renderBoard();
+      return;
+    }
+
+    if (cr === tile.row && cc === tile.col) {
+      const mEdge = tile.edges[DIR_INDEX[direction]];
+      const tEdge = hit.edges[DIR_INDEX[OPPOSITE[direction]]];
+      if (mEdge !== null && tEdge !== null) {
+        setMessage("両方に演算子があるのでぶつかれません");
+      } else if (mEdge === null && tEdge === null) {
+        setMessage("どちらにも演算子が無いのでぶつかれません");
+      } else {
+        const op = mEdge !== null ? mEdge : tEdge;
+        setMessage(op === "−" && tile.value < hit.value ? "引くとマイナスになるので当てられません"
+                 : op === "÷" ? "割り切れないので当てられません"
+                 : "この組み合わせでは計算できません");
+      }
+      return;
+    }
+  }
+
+  if (cr === tile.row && cc === tile.col) { setMessage("その向きには動けません"); return; }
+
+  const landed = land(tile.value, tile.edges, cr, cc);
+  if (!landed.ok) { setMessage(landed.reason); return; }
+
+  saveHistory();
+  tile.row = cr; tile.col = cc;
+  if (landed.edges) tile.edges = landed.edges;
+  if (landed.value !== undefined) tile.value = landed.value;
+  spendFloor(landed.spend);
+  moveCount++; selectedId = null; setMessage("");
+  renderBoard();
+}
+
+/* ---------- 操作 ---------- */
+function directionTo(tile, row, col) {
+  const dr = row - tile.row, dc = col - tile.col;
+  if (dr === 0 && dc === 0) return null;
+  if (dr === 0) return dc > 0 ? "right" : "left";
+  if (dc === 0) return dr > 0 ? "down" : "up";
+  return null;
+}
+
+function onTileClick(id) {
+  const t = tiles.find(x => x.id === id);
+  if (selectedId === null) {
+    if (t.fixed) { setMessage("このタイルは動かせません"); return; }
+    selectedId = id; setMessage(""); renderBoard(); return;
+  }
+  if (selectedId === id) { selectedId = null; renderBoard(); return; }
+  const sel = tiles.find(x => x.id === selectedId);
+  const dir = directionTo(sel, t.row, t.col);
+  if (dir) attemptMove(sel, dir);
+  else if (t.fixed) setMessage("このタイルは動かせません");
+  else { selectedId = id; setMessage(""); renderBoard(); }
+}
+
+function onCellClick(row, col) {
+  if (selectedId === null) return;
+  const sel = tiles.find(x => x.id === selectedId);
+  if (!sel) return;
+  if (sel.row === row && sel.col === col) { selectedId = null; renderBoard(); return; }
+  const dir = directionTo(sel, row, col);
+  if (dir) attemptMove(sel, dir);
+}
+
+function onExitClick(exit) {
+  const t = tileAt(exit.row, exit.col);
+  if (!t) { setMessage("出口のマスにタイルがありません"); return; }
+  if (!canExit(t.value, exit)) { setMessage("この出口から出せるのは " + exitLabel(exit) + " です"); return; }
+  saveHistory();
+  tiles = tiles.filter(x => x.id !== t.id);
+  moveCount++; selectedId = null; setMessage("");
+  renderBoard();
+}
+
+/* ---------- クリア判定: 盤上のタイルが全て無くなる ---------- */
+function checkWin() {
+  if (tiles.length === 0) {
+    recordClear(currentLevel.levelId, moveCount);
+    showWinOverlay();
+    return;
+  }
+  if (movesLeft() <= 0) showFailOverlay();   // 手数を使い切ったのにタイルが残っている
+}
+
+function showFailOverlay() {
+  if (document.getElementById("winOverlay") || document.getElementById("failOverlay")) return;
+  const overlay = document.createElement("div");
+  overlay.className = "win-overlay"; overlay.id = "failOverlay";
+  overlay.innerHTML =
+    '<div class="win-card"><h2>手数オーバー</h2>' +
+    '<p>' + moveLimit() + ' 手以内にタイルを出し切れませんでした</p>' +
+    '<div class="actions">' +
+    '<button class="secondary" onclick="closeFailOverlay(); undo();">1手戻す</button>' +
+    '<button onclick="closeFailOverlay(); resetLevel();">やり直す</button>' +
+    '</div></div>';
+  document.body.appendChild(overlay);
+}
+function closeFailOverlay() {
+  const el = document.getElementById("failOverlay");
+  if (el) el.remove();
+}
+function showWinOverlay() {
+  if (document.getElementById("winOverlay")) return;
+  const overlay = document.createElement("div");
+  overlay.className = "win-overlay"; overlay.id = "winOverlay";
+  const idx = LEVELS.findIndex(l => l.levelId === currentLevel.levelId);
+  const hasNext = idx >= 0 && idx < LEVELS.length - 1;
+  overlay.innerHTML =
+    '<div class="win-card"><h2>クリア！</h2>' +
+    '<p>' + moveCount + ' 手（制限 ' + moveLimit() + ' 手）' +
+    (moveCount <= currentLevel.par ? '<br>最短クリア！' : '') + '</p>' +
+    '<div class="actions">' +
+    '<button class="secondary" onclick="closeWinOverlay(); goToLevelSelect();">レベル選択</button>' +
+    (hasNext ? '<button onclick="closeWinOverlay(); startLevel(\'' + LEVELS[idx + 1].levelId + '\');">次へ</button>' : '') +
+    '</div></div>';
+  document.body.appendChild(overlay);
+}
+function closeWinOverlay() { const el = document.getElementById("winOverlay"); if (el) el.remove(); }
+
+renderLevelSelect();
+window.addEventListener("resize", () => {
+  if (currentLevel && document.getElementById("puzzleScreen").style.display !== "none") {
+    const markers = document.querySelectorAll(".exit-marker");
+    currentLevel.exits.forEach((e, i) => { if (markers[i]) positionExitMarker(markers[i], e); });
+    renderBoard();
+  }
+});
+</script>
+</body>
+</html>
