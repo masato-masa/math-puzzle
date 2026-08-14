@@ -243,6 +243,18 @@ class GameController {
     }
 
     if (hit != null) {
+      // 炎は計算せずに相手を燃やす。炎自身も一緒に消える。
+      if (canBurn(tile.value, hit.value)) {
+        return MoveResolution(
+          kind: MoveEventKind.burned,
+          toRow: hit.row,
+          toCol: hit.col,
+          value: hit.value,
+          edges: hit.edges,
+          slid: slid,
+          target: hit,
+        );
+      }
       final result = collide(
         moverValue: tile.value,
         moverEdges: tile.edges,
@@ -308,6 +320,29 @@ class GameController {
     }
 
     _pushHistory();
+
+    if (res.kind == MoveEventKind.burned) {
+      final target = res.target!;
+      // 炎も燃やした相手も盤から消える。選択は外す（残る物が無い）。
+      tiles.removeWhere((t) => t.id == tile.id || t.id == target.id);
+      if (selectedTileId == tile.id || selectedTileId == target.id) {
+        selectedTileId = null;
+      }
+      moveCount++;
+      message = null;
+      _checkEnd();
+      onSound?.call(GameSoundEvent.merge);
+      notifyListeners();
+      return MoveEvent(
+        kind: MoveEventKind.burned,
+        tileId: tileId,
+        fromRow: startRow,
+        fromCol: startCol,
+        toRow: res.toRow,
+        toCol: res.toCol,
+        mergedIntoId: target.id,
+      );
+    }
 
     if (res.isMerge) {
       final target = res.target!;

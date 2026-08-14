@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../game/direction.dart';
 import '../game/edges.dart';
+import '../game/game_rules.dart' show isFire;
 import '../theme/app_theme.dart';
 
 /// 演算子の色ファミリー。床の発光色（floor_cell_widget.dart）と対応させてある
@@ -41,19 +42,26 @@ class TileWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final inset = cellSize * 0.13;
     final radius = cellSize * 0.16;
+    final fire = isFire(value);
 
     final body = Container(
       margin: EdgeInsets.all(inset),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(radius),
-        gradient: fixed
-            ? null
-            : const LinearGradient(
+        gradient: fire
+            ? const LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-                colors: [AppColors.tileTop, AppColors.tileBottom],
-              ),
-        color: fixed ? AppColors.tileFixed : null,
+                colors: [Color(0xFFFF9A3C), Color(0xFFB2200E)],
+              )
+            : fixed
+                ? null
+                : const LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [AppColors.tileTop, AppColors.tileBottom],
+                  ),
+        color: fixed && !fire ? AppColors.tileFixed : null,
         // 枠線は全辺同じ色にする。角丸と「辺ごとに違う色の枠線」は
         // 併用できず描画時に弾かれるため（リリースビルドでは
         // アサーションが無効なので今まで表面化していなかった）、
@@ -68,6 +76,12 @@ class TileWidget extends StatelessWidget {
             blurRadius: 6,
             offset: const Offset(0, 3),
           ),
+          if (fire)
+            BoxShadow(
+              color: const Color(0xFFFF7A18).withValues(alpha: 0.55),
+              blurRadius: 12,
+              spreadRadius: 1,
+            ),
           if (selected)
             BoxShadow(
               color: AppColors.gold.withValues(alpha: 0.65),
@@ -91,7 +105,10 @@ class TileWidget extends StatelessWidget {
         ),
       ),
       alignment: Alignment.center,
-      child: Text(
+      // 炎は数字を持たないので、炎の記号を出す。
+      child: fire
+          ? Text('🔥', style: TextStyle(fontSize: cellSize * 0.34))
+          : Text(
         '$value',
         style: AppTextStyles.tile.copyWith(
           fontSize: _fontSizeFor(value, cellSize),

@@ -10,13 +10,14 @@
 クリア条件: 盤上のタイルが全て無くなること。
 """
 
+import copy as _copy
 from collections import deque
 from itertools import count
 
 from v3_rules import (
     DIRS, DIR_DELTA, DIR_INDEX, OPPOSITE, collide, apply_unary,
     rotate_edges_cw, swap_edges, can_exit, exit_is_on_border, edges_from_dict,
-    EDGE_FLOORS,
+    EDGE_FLOORS, FIRE, is_fire, can_burn,
 )
 
 STATE_LIMIT = 400000
@@ -47,7 +48,9 @@ def prepare(level):
 
 def initial_state(level):
     tiles = tuple(sorted(
-        (t["row"], t["col"], t["value"], edges_from_dict(t.get("edges")),
+        (t["row"], t["col"],
+         FIRE if t.get("fire") else t["value"],
+         edges_from_dict(t.get("edges")),
          bool(t.get("fixed", False)))
         for t in level["tiles"]
     ))
@@ -144,6 +147,16 @@ def _transitions(state, level, allowed_dirs=None):
             stop, hit_cell = _slide(level, (r, c), direction, occupied)
             blocker = occupied.get(hit_cell) if hit_cell else None
             nr, nc = hit_cell if hit_cell else (None, None)
+
+            # --- ぶつかった相手を燃やせるか（炎タイル） ---
+            if blocker is not None and can_burn(value, blocker[2]):
+                rest = [t for t in tiles
+                        if not (t[0] == r and t[1] == c)
+                        and not (t[0] == nr and t[1] == nc)]
+                # 炎も燃やした相手も、両方とも盤から消える
+                key = ("burn", blocker[2])
+                yield (tuple(sorted(rest)), charges), "merge", key, action
+                continue
 
             # --- ぶつかった相手と計算できるか ---
             if blocker is not None:
@@ -375,6 +388,139 @@ def difficulty(level, dist, adj, dgoal, par):
     }
 
 
+def aha_forks(level, dist, adj, dgoal, limit):
+    """「同じ結果に見えるのに、片方だけ詰む」分かれ道を数える。
+
+    合体すると、残る辺は「ぶつけられた側の、使わなかった辺」だけになる。
+    つまり同じ 2 枚を合体させても、どちらを動かしたかで
+    その後に使える演算子が変わる。盤に出ている数字は同じなので
+    その場では見分けがつかず、数手先で詰んで初めて気づく。
+
+    ここでは、ある局面から進める先を「盤上の数字の組」でまとめ、
+    同じ組の中に「まだ解ける先」と「もう解けない先」が混ざっている
+    ものを数える。これが多いほど、見落としやすい選択がある盤といえる。
+
+    戻り値: (見分けのつかない分かれ道の数, その具体例)
+    """
+    def values_of(state):
+        # 盤に出ている数字だけを見る（辺や床の残り回数は見た目に出にくい）
+        return tuple(sorted(v for (_r, _c, v, _e, _f) in state[0]))
+
+    def alive(s):
+        return s in dgoal and s in dist and dist[s] + dgoal[s] <= limit
+
+    forks = 0
+    examples = []
+    for s in dist:
+        if not alive(s):
+            continue          # そもそも詰んでいる局面からの分岐は数えない
+        groups = {}
+        for (ns, _kind, _key) in adj.get(s, ()):
+            groups.setdefault(values_of(ns), []).append(ns)
+        for vals, nss in groups.items():
+            if len(nss) < 2:
+                continue
+            good = [n for n in nss if alive(n)]
+            bad = [n for n in nss if not alive(n)]
+            if good and bad:
+                forks += 1
+                if len(examples) < 3:
+                    examples.append({"values": list(vals),
+                                     "alive": len(good), "dead": len(bad)})
+    return forks, examples
+
+
+def open_regions(level):
+    """壁で区切られた「通れるマスのかたまり」を列挙する。
+
+    盤を壁で完全に二分すると、実質は別々のパズルを 2 つ並べただけになり、
+    盤の広さのわりに考えることが増えない。それを検出するために使う。
+    """
+    rows, cols = level["_rows"], level["_cols"]
+    walls = level["_walls"]
+    seen = set()
+    regions = []
+    for r0 in range(rows):
+        for c0 in range(cols):
+            if (r0, c0) in walls or (r0, c0) in seen:
+                continue
+            stack = [(r0, c0)]
+            seen.add((r0, c0))
+            region = set()
+            while stack:
+                r, c = stack.pop()
+                region.add((r, c))
+                for dr, dc in ((-1, 0), (1, 0), (0, -1), (0, 1)):
+                    nr, nc = r + dr, c + dc
+                    if not (0 <= nr < rows and 0 <= nc < cols):
+                        continue
+                    if (nr, nc) in walls or (nr, nc) in seen:
+                        continue
+                    seen.add((nr, nc))
+                    stack.append((nr, nc))
+            regions.append(region)
+    return regions
+
+
+def walk_moves(level):
+    """最短手順のうち「ただ歩いただけ」の手が何手あるかを数える。
+
+    合体・出口・床の効果（値や辺が変わる）を伴う手を「意味のある手」とし、
+    それ以外＝盤の上を移動して位置が変わっただけの手を数える。
+
+    盤を広くすれば手数はいくらでも伸びるが、その手数には選ぶ余地が無く
+    パズルとして面白くない。手数が「絡み合いの結果」なのか
+    「ただの距離」なのかを見分けるための指標。
+
+    戻り値: (歩いただけの手数, 意味のある手数)
+    """
+    states = optimal_state_path(level)
+    if states is None:
+        return None, None
+    meaningful = 0
+    for before, after in zip(states, states[1:]):
+        bt, at = before[0], after[0]      # 状態は (タイル列, 床の残り回数)
+        # タイルの枚数が減った＝合体したか、出口から出た
+        if len(at) < len(bt):
+            meaningful += 1
+            continue
+        # 枚数が同じでも、値か辺が変わっていれば床の効果が乗っている。
+        # 辺は None と文字列が混ざるので、そのままでは並べ替えられない。
+        b = sorted(repr((v, e)) for (_r, _c, v, e, _f) in bt)
+        a = sorted(repr((v, e)) for (_r, _c, v, e, _f) in at)
+        if b != a:
+            meaningful += 1
+    return len(states) - 1 - meaningful, meaningful
+
+
+def optimal_state_path(level):
+    """最短手順をたどったときの状態列を返す（歩き手数の判定に使う）。"""
+    lv = _copy.deepcopy(level)
+    prepare(lv)
+    start = initial_state(lv)
+    parent = {start: None}
+    q = deque([start])
+    goal = None
+    while q:
+        s = q.popleft()
+        if is_goal(s):
+            goal = s
+            break
+        for ns, _action in successors_with_actions(s, lv):
+            if ns not in parent:
+                parent[ns] = s
+                q.append(ns)
+    if goal is None:
+        return None
+    path = [goal]
+    cur = goal
+    while parent[cur] is not None:
+        cur = parent[cur]
+        path.append(cur)
+    path.reverse()
+    return path
+
+
 def analyze(level):
     report = {"levelId": level["levelId"], "title": level.get("title", ""),
               "errors": [], "warnings": []}
@@ -440,13 +586,20 @@ def analyze(level):
     if len(routes) > 1:
         report["errors"].append(f"最短手数での解法が {len(routes)} 通りある")
 
+    # 最短手順のうち、何手が「中身のある手」だったか。
+    # 盤を広げれば手数はいくらでも伸びるが、それは難しさではないので、
+    # 手数の長さではなくこちらを難易度の下限に使う。
+    walked, meaningful = walk_moves(level)
+    report["walk_moves"] = walked
+    report["meaningful_moves"] = meaningful
+
     diff = difficulty(level, dist, adj, dgoal, par)
     report["difficulty"] = diff
     if not level.get("tutorial"):
         if diff["monotone_single"]:
             report["errors"].append(f"{diff['monotone_single']} に動かすだけで解けてしまう")
-        if par < 8:
-            report["errors"].append(f"最短 {par} 手では短すぎる")
+        if meaningful is not None and meaningful < 5:
+            report["errors"].append(f"中身のある手が {meaningful} 回しかない")
         if diff["forced_ratio"] > 0.45:
             report["errors"].append(f"一本道になっている（{diff['forced_ratio']}）")
         if diff["wrong_per_step"] < 2.0:
@@ -468,6 +621,48 @@ def analyze(level):
         report["errors"].append(f"使われない列がある: {unused_cols}")
     report["never_used"] = [(r, c) for r in range(rows) for c in range(cols)
                             if (r, c) not in used and (r, c) not in level["_walls"]]
+
+    # 「同じに見えるのに片方だけ詰む」分かれ道。多いほど、遊んだあとに
+    # 「そんな手があったのか」と気づける盤になる。
+    forks, fork_examples = aha_forks(level, dist, adj, dgoal, limit)
+    report["aha_forks"] = forks
+    report["aha_examples"] = fork_examples
+
+    # --- ここから「盤の作りとして無駄が無いか」の判定 ---------------------
+
+    # 壁で盤を完全に分けると、実質は別のパズルを 2 つ並べただけになる。
+    # 手数は共有していても、考えることは足し算にしかならない。
+    regions = open_regions(level)
+    big = [rg for rg in regions if len(rg) > 1]
+    report["regions"] = len(big)
+    if len(big) > 1:
+        report["errors"].append(
+            f"壁で盤が {len(big)} つに分かれている（実質それだけのパズルを並べた形）")
+
+    # 「ただ歩いただけ」の手が多い＝盤が広いだけで手数が伸びている。
+    if walked is not None and par > 0:
+        ratio = round(walked / par, 2)
+        report["walk_ratio"] = ratio
+        # 移動そのものは必要なので 0 にはならないが、半分を超えると
+        # 「移動しているだけの時間」の方が長いということになる。
+        if ratio > 0.55:
+            report["errors"].append(
+                f"歩いているだけの手が多い（{walked}/{par} 手 = {ratio}）")
+        elif ratio > 0.45:
+            report["warnings"].append(
+                f"歩いているだけの手がやや多い（{walked}/{par} 手 = {ratio}）")
+
+    # 盤の詰まり具合。タイル・壁・床のどれでもないマスばかりだと
+    # 「何も無い場所を渡っていく」だけの盤になる。
+    open_cells = rows * cols - len(level["_walls"])
+    contents = len(level["tiles"]) + len(level["_floors"])
+    if open_cells:
+        density = round(contents / open_cells, 2)
+        report["density"] = density
+        if density < 0.3:
+            report["warnings"].append(
+                f"盤がすかすか（中身 {contents} / 空きマス {open_cells} = {density}）")
+
     return report
 
 

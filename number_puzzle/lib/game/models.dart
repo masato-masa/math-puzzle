@@ -1,5 +1,6 @@
 import 'edges.dart';
 import 'floor.dart';
+import 'game_rules.dart' show kFireValue;
 
 /// レベルに定義された初期タイル（不変・レベルデータそのもの）。
 class TileSpec {
@@ -19,11 +20,15 @@ class TileSpec {
     this.fixed = false,
   });
 
+  /// 炎タイルは数字を持たない。値の側に [kFireValue] を入れて区別する
+  /// （tools/v3_rules.py の FIRE と同じ表現）。
   factory TileSpec.fromJson(Map<String, dynamic> json) => TileSpec(
         id: json['id'] as String,
         row: json['row'] as int,
         col: json['col'] as int,
-        value: json['value'] as int,
+        value: (json['fire'] as bool? ?? false)
+            ? kFireValue
+            : json['value'] as int,
         edges: Edges.fromMap(json['edges'] as Map<String, dynamic>?),
         fixed: json['fixed'] as bool? ?? false,
       );
@@ -72,6 +77,7 @@ class ExitSpec {
       );
 
   bool accepts(int tileValue) {
+    if (tileValue == kFireValue) return false; // 炎は出口から出られない
     if (minValue != null && maxValue != null) {
       return tileValue >= minValue! && tileValue <= maxValue!;
     }

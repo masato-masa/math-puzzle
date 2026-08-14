@@ -762,16 +762,20 @@ def main():
             out["limit"] = rep["limit"]
             ok.append(out)
 
-    print("=" * 100)
-    print(f"{'level':<10}{'解':<4}{'par':<5}{'制限':<6}{'解法':<5}{'一本道率':<9}"
-          f"{'外れ手':<8}{'詰み手':<7}{'ひっかけ':<9}{'状態数':<8}")
-    print("=" * 100)
+    print("=" * 108)
+    print(f"{'level':<10}{'解':<4}{'par':<5}{'歩き':<6}{'密度':<6}{'区画':<5}"
+          f"{'盤':<7}{'枚':<4}{'出口':<5}{'ひっかけ':<9}{'状態数':<8}")
+    print("=" * 108)
     for rep in results:
         if rep.get("solvable"):
             d = rep["difficulty"]
-            print(f"{rep['levelId']:<10}{'○':<4}{rep['par']:<5}{rep['limit']:<6}"
-                  f"{rep['routes']:<5}{d['forced_ratio']:<9}{d['wrong_per_step']:<8}"
-                  f"{d['trap_edges']:<7}{len(d['decoy_values']):<9}{rep['states']:<8}"
+            lv = next(x for x in targets if x["levelId"] == rep["levelId"])
+            size = f"{lv.get('rows', lv.get('size'))}x{lv.get('cols', lv.get('size'))}"
+            print(f"{rep['levelId']:<10}{'○':<4}{rep['par']:<5}"
+                  f"{str(rep.get('walk_ratio', '-')):<6}"
+                  f"{str(rep.get('density', '-')):<6}{rep.get('regions', '-'):<5}"
+                  f"{size:<7}{len(lv['tiles']):<4}{len(lv['exits']):<5}"
+                  f"{len(d['decoy_values']):<9}{rep['states']:<8}"
                   f"  {rep['title']}")
         else:
             print(f"{rep['levelId']:<10}{'×':<4}{'-':<5}{'-':<6}{'-':<5}{'-':<9}{'-':<8}"

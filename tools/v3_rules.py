@@ -87,7 +87,38 @@ def swap_edges(edges):
     return tuple(SWAP_PAIRS.get(op, op) if op is not None else None for op in edges)
 
 
+# 炎タイルの目印。盤の数字は 0 以上なので、負の値なら炎だと分かる。
+# タイルの持ち物を 1 つ増やすと、状態を展開している箇所すべてに
+# 手を入れることになるため、値の側に印を持たせている。
+FIRE = -1
+
+
+def is_fire(value):
+    return value == FIRE
+
+
+def can_burn(mover_value, target_value):
+    """炎タイルがぶつかったときに燃やせるか。
+
+    炎は数字を 1 枚燃やして消し、燃やした炎自身も消える。
+    「どのタイルを諦めるか」を 1 回だけ選べる資源になる。
+    出せない数を作ってしまっても炎で始末できる代わりに、
+    向ける先を間違えると本当に必要な数を失う。
+
+    炎どうしはぶつけられない（どちらが残るか決められないため）。
+    """
+    return is_fire(mover_value) and not is_fire(target_value)
+
+
 def collide(mover_value, mover_edges, target_value, target_edges, direction):
+    # 炎は計算に加わらない（燃やすだけ）。
+    if is_fire(mover_value) or is_fire(target_value):
+        return None
+    return _collide_numbers(mover_value, mover_edges, target_value,
+                            target_edges, direction)
+
+
+def _collide_numbers(mover_value, mover_edges, target_value, target_edges, direction):
     """ぶつかった結果を返す。
 
     direction は mover が進んだ向き。
@@ -114,6 +145,8 @@ def collide(mover_value, mover_edges, target_value, target_edges, direction):
 
 
 def can_exit(value, exit_def):
+    if is_fire(value):
+        return False              # 炎は出口から出られない（燃やして消すしかない）
     lo, hi = exit_def.get("minValue"), exit_def.get("maxValue")
     if lo is not None and hi is not None:
         return lo <= value <= hi

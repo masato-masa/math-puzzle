@@ -12,6 +12,23 @@ import 'operators.dart';
 
 const int kMaxFactorialInput = 8;
 
+/// 炎タイルの目印。盤の数字は 0 以上なので、負の値なら炎だと分かる。
+/// tools/v3_rules.py の FIRE と同じ値。
+const int kFireValue = -1;
+
+bool isFire(int value) => value == kFireValue;
+
+/// 炎タイルがぶつかったときに燃やせるか。
+///
+/// 炎は数字を 1 枚燃やして消し、燃やした炎自身も消える。
+/// 「どのタイルを諦めるか」を 1 回だけ選べる資源になる。
+/// 出せない数を作ってしまっても炎で始末できる代わりに、
+/// 向ける先を間違えると本当に必要な数を失う。
+///
+/// 炎どうしはぶつけられない（どちらが残るか決められないため）。
+bool canBurn(int moverValue, int targetValue) =>
+    isFire(moverValue) && !isFire(targetValue);
+
 int _factorial(int n) {
   var r = 1;
   for (var i = 2; i <= n; i++) {
@@ -54,6 +71,9 @@ CollideResult? collide({
   required Edges targetEdges,
   required Direction direction,
 }) {
+  // 炎は計算に加わらない（燃やすだけ）。
+  if (isFire(moverValue) || isFire(targetValue)) return null;
+
   final mEdge = moverEdges[direction];
   final tEdge = targetEdges[direction.opposite];
   final mHas = Operators.isOperator(mEdge);

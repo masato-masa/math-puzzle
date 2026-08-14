@@ -9,6 +9,9 @@ enum MoveEventKind {
   /// ぶつかって計算が成立し、mover が target に合体した
   merged,
 
+  /// 炎タイルが相手を燃やした。燃やした側・燃やされた側の両方が消える
+  burned,
+
   /// 出口から出た
   exited,
 
