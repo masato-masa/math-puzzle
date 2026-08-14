@@ -10,11 +10,27 @@ import '../theme/app_theme.dart';
 import 'controller_listener.dart';
 import 'exit_marker_widget.dart';
 import 'floor_cell_widget.dart';
+import 'move_preview_widget.dart';
 import 'tile_widget.dart';
 
 const _kMoveAnim = Duration(milliseconds: 170);
 const _kGhostAnim = Duration(milliseconds: 220);
 const _kExitMargin = 44.0;
+
+/// 選択中タイルの行き先 1 件分（表示用にほぐしたもの）。
+class _Preview {
+  final Direction direction;
+  final int row, col;
+  final bool isMerge;
+  final int? newValue;
+  const _Preview({
+    required this.direction,
+    required this.row,
+    required this.col,
+    required this.isMerge,
+    this.newValue,
+  });
+}
 
 class _GhostSpec {
   final int fromRow, fromCol, toRow, toCol, value;
@@ -117,6 +133,47 @@ class _PuzzleBoardState extends State<PuzzleBoard> {
     widget.controller.attemptExit(exit);
   }
 
+  /// 選択中のタイルについて、4 方向それぞれの行き先を調べる。
+  /// 動かせない向きは省く（盤上には「できること」だけを出す）。
+  List<_Preview> _previews() {
+    final c = widget.controller;
+    final id = c.selectedTileId;
+    if (id == null || c.isCleared || c.isFailed) return const [];
+    final tile = c.tileById(id);
+    if (tile == null) return const [];
+
+    final out = <_Preview>[];
+    for (final d in kAllDirections) {
+      final res = c.previewMove(id, d);
+      if (res.isBlocked) continue;
+      out.add(_Preview(
+        direction: d,
+        row: res.toRow,
+        col: res.toCol,
+        isMerge: res.isMerge,
+        // 床で値が変わるときだけ変化後の値を出す（変わらないなら矢印だけ）。
+        newValue: res.value != tile.value ? res.value : null,
+      ));
+    }
+    return out;
+  }
+
+  Widget _positionedPreview(_Preview p, double cellSize) {
+    return Positioned(
+      left: p.col * cellSize,
+      top: p.row * cellSize,
+      width: cellSize,
+      height: cellSize,
+      child: p.isMerge
+          ? MergeResultBadge(cellSize: cellSize, value: p.newValue ?? 0)
+          : MoveDestinationMarker(
+              cellSize: cellSize,
+              direction: p.direction,
+              newValue: p.newValue,
+            ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final level = widget.controller.level;
@@ -213,6 +270,8 @@ class _PuzzleBoardState extends State<PuzzleBoard> {
                                 ),
                               ),
                             ),
+                          // 選択中タイルの行き先プレビュー。タイルより上に重ねる。
+                          for (final p in _previews()) _positionedPreview(p, cellSize),
                           for (final g in _ghosts)
                             _FlyingGhost(ghost: g, cellSize: cellSize),
                         ],

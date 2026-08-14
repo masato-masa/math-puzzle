@@ -19,7 +19,7 @@ class NumberPuzzleApp extends StatefulWidget {
   State<NumberPuzzleApp> createState() => _NumberPuzzleAppState();
 }
 
-class _NumberPuzzleAppState extends State<NumberPuzzleApp> with WidgetsBindingObserver {
+class _NumberPuzzleAppState extends State<NumberPuzzleApp> {
   final _soundService = SoundService();
   final _progressService = ProgressService();
   final _levelRepository = LevelRepository();
@@ -34,33 +34,14 @@ class _NumberPuzzleAppState extends State<NumberPuzzleApp> with WidgetsBindingOb
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addObserver(this);
+    // 効果音の音源を先に読み込んでおく（初回のタップで無音にならないように）。
     _soundService.init();
-    _soundService.playBgm();
-  }
-
-  // ブラウザはユーザー操作を伴わない音声再生をブロックすることがある。
-  // 起動直後の playBgm() がそれで無視された場合に備え、最初のタップ／
-  // クリックのたびに再試行する（既に鳴っていれば playBgm() は何もしない）。
-  void _retryBgmOnGesture(PointerDownEvent _) {
-    _soundService.playBgm();
   }
 
   @override
   void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
     _soundService.dispose();
     super.dispose();
-  }
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    // バックグラウンドに回ったら BGM を止め、復帰したら再開する。
-    if (state == AppLifecycleState.paused || state == AppLifecycleState.inactive) {
-      _soundService.stopBgm();
-    } else if (state == AppLifecycleState.resumed) {
-      _soundService.playBgm();
-    }
   }
 
   @override
@@ -69,11 +50,6 @@ class _NumberPuzzleAppState extends State<NumberPuzzleApp> with WidgetsBindingOb
       title: '数式パズル',
       debugShowCheckedModeBanner: false,
       theme: buildAppTheme(),
-      builder: (context, child) => Listener(
-        behavior: HitTestBehavior.translucent,
-        onPointerDown: _retryBgmOnGesture,
-        child: child!,
-      ),
       home: LevelSelectScreen(
         levelRepository: _levelRepository,
         progressService: _progressService,

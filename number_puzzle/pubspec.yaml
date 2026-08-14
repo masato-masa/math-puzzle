@@ -37,7 +37,7 @@ dependencies:
 
   # レベルごとのクリア状況（{cleared, bestMoves}）を保存する
   shared_preferences: ^2.3.3
-  # BGM ループ・効果音の再生
+  # 効果音の再生
   audioplayers: ^6.1.0
 
 dev_dependencies:
@@ -64,7 +64,6 @@ flutter:
 
   assets:
     - assets/levels/main_course.json
-    - assets/audio/bgm_loop.wav
     - assets/audio/sfx_move.wav
     - assets/audio/sfx_slide.wav
     - assets/audio/sfx_merge.wav

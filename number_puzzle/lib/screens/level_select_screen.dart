@@ -31,7 +31,6 @@ class _LevelSelectScreenState extends State<LevelSelectScreen> {
   @override
   void initState() {
     super.initState();
-    widget.soundService.playBgm();
     _load();
   }
 
