@@ -6,6 +6,7 @@ import '../game/models.dart';
 import '../services/progress_service.dart';
 import '../services/sound_service.dart';
 import '../theme/app_theme.dart';
+import '../widgets/gimmick_chips.dart';
 import 'puzzle_screen.dart';
 
 class LevelSelectScreen extends StatefulWidget {
@@ -180,7 +181,13 @@ class _LevelPathNode extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                       ),
                       const SizedBox(height: 2),
-                      Text('${level.limit}手以内', style: AppTextStyles.caption),
+                      Row(
+                        children: [
+                          Text('${level.limit}手以内', style: AppTextStyles.caption),
+                          const SizedBox(width: 8),
+                          Flexible(child: GimmickChips(gimmicks: gimmicksOf(level))),
+                        ],
+                      ),
                     ],
                   ),
                 ),

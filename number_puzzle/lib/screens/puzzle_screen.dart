@@ -5,6 +5,7 @@ import '../game/models.dart';
 import '../services/progress_service.dart';
 import '../services/sound_service.dart';
 import '../theme/app_theme.dart';
+import '../widgets/clear_celebration.dart';
 import '../widgets/controller_listener.dart';
 import '../widgets/puzzle_board.dart';
 
@@ -30,6 +31,9 @@ class _PuzzleScreenState extends State<PuzzleScreen> {
   late GameController _controller;
   bool _dialogShown = false;
 
+  /// クリア演出を出している間 true。演出が終わってから結果を出す。
+  bool _celebrating = false;
+
   @override
   void initState() {
     super.initState();
@@ -49,16 +53,26 @@ class _PuzzleScreenState extends State<PuzzleScreen> {
     if (_controller.isCleared) {
       _dialogShown = true;
       widget.progressService.recordClear(widget.level.levelId, _controller.moveCount);
-      WidgetsBinding.instance.addPostFrameCallback((_) => _showClearDialog());
+      // 演出を挟んでから結果を出す（[_onCelebrationFinished] で続く）。
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) setState(() => _celebrating = true);
+      });
     } else if (_controller.isFailed) {
       _dialogShown = true;
       WidgetsBinding.instance.addPostFrameCallback((_) => _showFailDialog());
     }
   }
 
+  void _onCelebrationFinished() {
+    if (!mounted) return;
+    setState(() => _celebrating = false);
+    _showClearDialog();
+  }
+
   void _restart() {
     setState(() {
       _dialogShown = false;
+      _celebrating = false;
       _controller.restart();
     });
   }
@@ -66,6 +80,7 @@ class _PuzzleScreenState extends State<PuzzleScreen> {
   void _undoAndClearDialog() {
     setState(() {
       _dialogShown = false;
+      _celebrating = false;
       _controller.undo();
     });
   }
@@ -75,38 +90,47 @@ class _PuzzleScreenState extends State<PuzzleScreen> {
     return Scaffold(
       appBar: AppBar(title: Text(widget.level.title)),
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          child: Column(
-            children: [
-              _Hud(controller: _controller, onUndo: () {
-                setState(() => _dialogShown = false);
-                _controller.undo();
-              }, onReset: _restart),
-              const SizedBox(height: 4),
-              if (widget.level.hint.isNotEmpty)
-                Text(widget.level.hint, style: AppTextStyles.caption, textAlign: TextAlign.center),
-              Expanded(
-                child: Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: PuzzleBoard(controller: _controller),
+        child: Stack(
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Column(
+                children: [
+                  _Hud(controller: _controller, onUndo: () {
+                    setState(() => _dialogShown = false);
+                    _controller.undo();
+                  }, onReset: _restart),
+                  const SizedBox(height: 4),
+                  if (widget.level.hint.isNotEmpty)
+                    Text(widget.level.hint,
+                        style: AppTextStyles.caption, textAlign: TextAlign.center),
+                  Expanded(
+                    child: Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: PuzzleBoard(controller: _controller),
+                      ),
+                    ),
                   ),
-                ),
-              ),
-              SizedBox(
-                height: 22,
-                child: ControllerListener(
-                  controller: _controller,
-                  builder: (context) => Text(
-                    _controller.message ?? '',
-                    style: const TextStyle(color: AppColors.warn, fontSize: 13),
-                    textAlign: TextAlign.center,
+                  SizedBox(
+                    height: 22,
+                    child: ControllerListener(
+                      controller: _controller,
+                      builder: (context) => Text(
+                        _controller.message ?? '',
+                        style: const TextStyle(color: AppColors.warn, fontSize: 13),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
                   ),
-                ),
+                ],
               ),
-            ],
-          ),
+            ),
+            if (_celebrating)
+              Positioned.fill(
+                child: ClearCelebration(onFinished: _onCelebrationFinished),
+              ),
+          ],
         ),
       ),
     );
