@@ -22,14 +22,12 @@ class _Preview {
   final Direction direction;
   final int row, col;
   final bool isMerge;
-  final int? newValue;
   final bool isHint;
   const _Preview({
     required this.direction,
     required this.row,
     required this.col,
     required this.isMerge,
-    this.newValue,
     this.isHint = false,
   });
 }
@@ -245,8 +243,6 @@ class _PuzzleBoardState extends State<PuzzleBoard> {
         row: res.toRow,
         col: res.toCol,
         isMerge: res.isMerge,
-        // 床で値が変わるときだけ変化後の値を出す（変わらないなら矢印だけ）。
-        newValue: res.value != tile.value ? res.value : null,
         // ヒントで示された向きだけ、他と区別できる見た目にする。
         isHint: c.hintDirection == d,
       ));
@@ -256,12 +252,8 @@ class _PuzzleBoardState extends State<PuzzleBoard> {
 
   Widget _positionedPreview(_Preview p, double cellSize) {
     final marker = p.isMerge
-        ? MergeResultBadge(cellSize: cellSize, value: p.newValue ?? 0)
-        : MoveDestinationMarker(
-            cellSize: cellSize,
-            direction: p.direction,
-            newValue: p.newValue,
-          );
+        ? MergeResultBadge(cellSize: cellSize)
+        : MoveDestinationMarker(cellSize: cellSize, direction: p.direction);
     return Positioned(
       left: p.col * cellSize,
       top: p.row * cellSize,

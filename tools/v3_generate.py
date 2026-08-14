@@ -468,20 +468,48 @@ SPECS = {
     # --- 動かせないタイル。「動かせれば簡単なのに」を作る。
     "fixed": Spec("fixed", 4, 4, tiles=5, fixed=1, walls=2, exits=2, par=(8, 18)),
 
-    # --- 各ギミック。
-    "ice": Spec("ice", 4, 4, tiles=4, floors=["ice", "ice"], walls=1, exits=2),
-    "sqrt": Spec("sqrt", 4, 4, tiles=4, floors=["sqrt"], walls=1, exits=2),
-    "fact": Spec("fact", 4, 4, tiles=4, floors=["fact"], walls=1, exits=2),
-    "swap": Spec("swap", 4, 4, tiles=4, floors=["swap"], walls=1, exits=2),
-    "rotate": Spec("rotate", 4, 4, tiles=4, floors=["rotate"], walls=1, exits=2),
+    # --- 各ギミックの応用・ボス。b1/b1_boss（4x4, tiles=5）が確実だった
+    # ことを踏まえ、正方形の盤に統一する（横に広い盤は「使われない行」に
+    # 引っかかりやすかった）。応用は壁2、ボスは壁3・アハ下限を上げる。
+    "ice_app": Spec("ice_app", 4, 4, tiles=5, floors=["ice", "ice"], walls=2, exits=2),
+    "ice_boss": Spec("ice_boss", 4, 4, tiles=5, floors=["ice", "ice", "ice"],
+                     walls=3, exits=2, min_aha=6),
+    "sqrt_app": Spec("sqrt_app", 4, 4, tiles=5, floors=["sqrt"], walls=2, exits=2),
+    "sqrt_boss": Spec("sqrt_boss", 4, 4, tiles=5, floors=["sqrt"], walls=3,
+                      exits=2, min_aha=6),
+    "fact_app": Spec("fact_app", 4, 4, tiles=5, floors=["fact"], walls=2, exits=2),
+    "fact_boss": Spec("fact_boss", 4, 4, tiles=5, floors=["fact"], walls=3,
+                      exits=2, min_aha=6),
+    "swap_app": Spec("swap_app", 4, 4, tiles=5, floors=["swap"], walls=2, exits=2),
+    "swap_boss": Spec("swap_boss", 4, 4, tiles=5, floors=["swap"], walls=3,
+                      exits=2, min_aha=6),
+    "rotate_app": Spec("rotate_app", 4, 4, tiles=5, floors=["rotate"], walls=2, exits=2),
+    "rotate_boss": Spec("rotate_boss", 4, 4, tiles=5, floors=["rotate"], walls=3,
+                        exits=2, min_aha=6),
 
-    # --- 総仕上げ。床を複数種、タイルも出口も多め。
-    "mix2": Spec("mix2", 4, 5, tiles=5, floors=["ice", "sqrt"], walls=2, exits=3,
-                 par=(10, 22), min_aha=5),
-    "mix3": Spec("mix3", 5, 5, tiles=5, floors=["ice", "swap", "rotate"],
-                 walls=2, exits=3, par=(12, 24), min_aha=5),
-    "mix_fire": Spec("mix_fire", 4, 5, tiles=5, fire=1, floors=["ice", "swap"],
-                     walls=3, exits=3, par=(10, 22), min_aha=5),
+    # --- 複数の出口。出口3つを正面から要求する。
+    "multi_app": Spec("multi_app", 4, 4, tiles=5, walls=2, exits=3),
+    "multi_boss": Spec("multi_boss", 4, 4, tiles=5, walls=3, exits=3, min_aha=6),
+
+    # --- 範囲を受け付ける出口。出口を1つに絞ると、生き残った全タイルが
+    # 必ずそこを通るので、異なる値が同じ出口から出て自然に範囲になる。
+    "range_app": Spec("range_app", 4, 4, tiles=5, walls=2, exits=1),
+    "range_boss": Spec("range_boss", 4, 4, tiles=5, walls=3, exits=1, min_aha=6),
+
+    # --- 総仕上げ（41-50）。床を複数種、正方形〜わずかに縦長。
+    "finale_ice_sqrt": Spec("finale_ice_sqrt", 4, 4, tiles=5,
+                            floors=["ice", "ice", "sqrt"], walls=2, exits=2, min_aha=5),
+    "finale_swap_rotate": Spec("finale_swap_rotate", 4, 4, tiles=5,
+                               floors=["swap", "rotate"], walls=2, exits=2, min_aha=5),
+    "finale_fact_ice": Spec("finale_fact_ice", 4, 4, tiles=5,
+                            floors=["fact", "ice", "ice"], walls=2, exits=2, min_aha=5),
+    "finale_fire_multi": Spec("finale_fire_multi", 4, 4, tiles=5, fire=1,
+                              floors=["ice"], walls=2, exits=3, min_aha=5),
+    "finale_range_rotate": Spec("finale_range_rotate", 4, 4, tiles=5,
+                                floors=["rotate", "sqrt"], walls=2, exits=1, min_aha=5),
+    "finale_boss": Spec("finale_boss", 5, 4, tiles=6, fire=1,
+                        floors=["ice", "swap", "sqrt"], walls=3, exits=2,
+                        par=(12, 26), min_aha=8),
 }
 
 

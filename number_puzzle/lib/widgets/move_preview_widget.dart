@@ -7,25 +7,27 @@ import '../theme/app_theme.dart';
 ///
 /// ルールの中核（接する 2 辺のうち片方だけに演算子があるときだけ合体できる）は
 /// 盤を見ただけでは読み取りにくく、試して初めて分かる状態だった。
-/// 動かせる先と、合体したときの結果をあらかじめ出すことで、
+/// 動かせる先・合体できる先をあらかじめ出すことで、
 /// 「手を無駄にしないと確かめられない」状況を無くすのがねらい。
 ///
+/// 計算後の値は出さない。数字を出すと「タイル本来の数字」なのか
+/// 「計算した後の数字」なのか一見して区別がつかず、しかも床の色
+/// （床の発光色は floor_cell_widget.dart 参照）と重なって見づらかった。
+/// 計算自体は暗算できる範囲、あるいは実際に動かして確かめられる範囲に
+/// とどめてあるので、先出しの数字が無くても支障は無い。
+///
 /// 表示は 2 種類:
-///  - 移動先マス … 角の枠と中央のドット。値が変わる床なら変化後の値も出す。
-///  - 合体先タイル … 結果の値を金色のふきだしで相手タイルの上に出す。
+///  - 移動先マス … 角の枠と向きの矢印。
+///  - 合体先タイル … 相手タイルの上に「ここで合体する」印を出す。
 class MoveDestinationMarker extends StatelessWidget {
   const MoveDestinationMarker({
     super.key,
     required this.cellSize,
     required this.direction,
-    this.newValue,
   });
 
   final double cellSize;
   final Direction direction;
-
-  /// 床の効果で値が変わる場合の変化後の値（変わらないなら null）。
-  final int? newValue;
 
   @override
   Widget build(BuildContext context) {
@@ -43,27 +45,11 @@ class MoveDestinationMarker extends StatelessWidget {
             color: AppColors.gold.withValues(alpha: 0.07),
           ),
           alignment: Alignment.center,
-          child: newValue == null
-              ? Icon(
-                  _arrowFor(direction),
-                  size: cellSize * 0.26,
-                  color: AppColors.gold.withValues(alpha: 0.75),
-                )
-              : FittedBox(
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: cellSize * 0.06),
-                    child: Text(
-                      '$newValue',
-                      style: TextStyle(
-                        fontFamily: 'SFMono-Regular',
-                        fontFamilyFallback: const ['Menlo', 'Consolas', 'monospace'],
-                        fontWeight: FontWeight.w800,
-                        fontSize: cellSize * 0.3,
-                        color: AppColors.gold,
-                      ),
-                    ),
-                  ),
-                ),
+          child: Icon(
+            _arrowFor(direction),
+            size: cellSize * 0.26,
+            color: AppColors.gold.withValues(alpha: 0.75),
+          ),
         ),
       ),
     );
@@ -78,7 +64,7 @@ class MoveDestinationMarker extends StatelessWidget {
 }
 
 /// ヒントで示された向きだけを、他の行き先プレビューと区別する飾り。
-/// 中身（矢印や合体結果のふきだし）はそのまま、周りに脈打つ光の輪を足す。
+/// 中身（矢印や合体マーク）はそのまま、周りに脈打つ光の輪を足す。
 class HintGlow extends StatefulWidget {
   const HintGlow({super.key, required this.cellSize, required this.child});
 
@@ -138,33 +124,27 @@ class _HintGlowState extends State<HintGlow> with SingleTickerProviderStateMixin
   }
 }
 
-/// 合体したときの結果を、相手タイルの上に金色のふきだしで出す。
+/// 合体できる相手タイルの上に出す「ここで合体する」印。
+/// 計算結果の数字は出さない（クラスの doc コメント参照）。
 class MergeResultBadge extends StatelessWidget {
-  const MergeResultBadge({
-    super.key,
-    required this.cellSize,
-    required this.value,
-  });
+  const MergeResultBadge({super.key, required this.cellSize});
 
   final double cellSize;
-  final int value;
 
   @override
   Widget build(BuildContext context) {
     return IgnorePointer(
       child: Center(
         child: Container(
-          padding: EdgeInsets.symmetric(
-            horizontal: cellSize * 0.12,
-            vertical: cellSize * 0.05,
-          ),
+          width: cellSize * 0.34,
+          height: cellSize * 0.34,
           decoration: BoxDecoration(
             gradient: const LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [Color(0xFFFFE29A), AppColors.gold],
             ),
-            borderRadius: BorderRadius.circular(cellSize * 0.18),
+            shape: BoxShape.circle,
             border: Border.all(color: AppColors.ground, width: 1.2),
             boxShadow: [
               BoxShadow(
@@ -174,15 +154,10 @@ class MergeResultBadge extends StatelessWidget {
               ),
             ],
           ),
-          child: Text(
-            '$value',
-            style: TextStyle(
-              fontFamily: 'SFMono-Regular',
-              fontFamilyFallback: const ['Menlo', 'Consolas', 'monospace'],
-              fontWeight: FontWeight.w800,
-              fontSize: cellSize * 0.28,
-              color: AppColors.goldDeep,
-            ),
+          child: Icon(
+            Icons.close,
+            size: cellSize * 0.2,
+            color: AppColors.goldDeep,
           ),
         ),
       ),
