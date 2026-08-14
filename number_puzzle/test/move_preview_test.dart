@@ -11,6 +11,8 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:number_puzzle/game/course.dart';
 import 'package:number_puzzle/game/direction.dart';
+import 'package:number_puzzle/game/edges.dart';
+import 'package:number_puzzle/game/floor.dart';
 import 'package:number_puzzle/game/game_controller.dart';
 import 'package:number_puzzle/game/models.dart';
 import 'package:number_puzzle/game/move_event.dart';
@@ -22,15 +24,53 @@ Course _loadCourse() {
   return Course.fromJson((json['courses'] as List).first as Map<String, dynamic>);
 }
 
-Level _level(Course course, String levelId) =>
-    course.levels.firstWhere((l) => l.levelId == levelId);
+/// 実レベルは生成のたびに内容が変わるので、個別の具体例は固定
+/// フィクスチャで検証する（board_gesture_test.dart と同じ理由）。
+/// (1,0)の7 と (1,1)の3（左辺に −）。7−3=4 で合体、上下は壁。
+Level _fixture() => Level(
+      levelId: 'fixture',
+      title: 'fixture',
+      hint: '',
+      tutorial: true,
+      rows: 3,
+      cols: 3,
+      tiles: [
+        TileSpec(id: 'a', row: 1, col: 0, value: 7, edges: Edges.fromMap(null)),
+        TileSpec(id: 'b', row: 1, col: 1, value: 3, edges: Edges.fromMap({'left': '−'})),
+      ],
+      walls: const [
+        WallCell(0, 0), WallCell(0, 1), WallCell(0, 2),
+        WallCell(2, 0), WallCell(2, 1), WallCell(2, 2),
+      ],
+      floors: const [],
+      exits: const [ExitSpec(row: 1, col: 2, direction: ExitDirection.right, value: 4)],
+      par: 3,
+      limit: 3,
+    );
+
+/// 床で値が変わる例。16 が √ のマスに乗ると 4 になる。
+Level _sqrtFixture() => Level(
+      levelId: 'fixture_sqrt',
+      title: 'fixture',
+      hint: '',
+      tutorial: true,
+      rows: 1,
+      cols: 2,
+      tiles: [
+        TileSpec(id: 'a', row: 0, col: 0, value: 16, edges: Edges.fromMap(null)),
+      ],
+      walls: const [],
+      floors: const [FloorTile(row: 0, col: 1, kind: FloorKind.sqrt, uses: 1)],
+      exits: const [],
+      par: 1,
+      limit: 1,
+    );
 
 void main() {
   final course = _loadCourse();
 
   test('合体できる向きは、結果の値つきで merged が返る', () {
-    // v3_001: (1,0)の7 を (1,1)の3（左辺に −）へ当てると 7−3=4。
-    final c = GameController(_level(course, 'v3_001'));
+    final c = GameController(_fixture());
     final tile = c.tileAt(1, 0)!;
 
     final res = c.previewMove(tile.id, Direction.right);
@@ -43,9 +83,8 @@ void main() {
   });
 
   test('床で値が変わる移動は、変化後の値が返る', () {
-    // v3_011: 16 が √ のマスに乗ると 4 になる。
-    final c = GameController(_level(course, 'v3_011'));
-    final tile = c.tileAt(1, 0)!;
+    final c = GameController(_sqrtFixture());
+    final tile = c.tileAt(0, 0)!;
 
     final res = c.previewMove(tile.id, Direction.right);
 
@@ -55,7 +94,7 @@ void main() {
   });
 
   test('動かせない向きは理由つきで blocked が返る', () {
-    final c = GameController(_level(course, 'v3_001'));
+    final c = GameController(_fixture());
     final tile = c.tileAt(1, 0)!;
 
     // 上下は壁、左は盤の外。
@@ -67,7 +106,7 @@ void main() {
   });
 
   test('プレビューは盤面を一切変えない', () {
-    final c = GameController(_level(course, 'v3_001'));
+    final c = GameController(_fixture());
     final tile = c.tileAt(1, 0)!;
     final beforeRow = tile.row, beforeCol = tile.col, beforeValue = tile.value;
     final beforeTiles = c.tiles.length;
@@ -85,8 +124,7 @@ void main() {
   });
 
   test('合体したら、できあがったタイルが選択状態になる', () {
-    // v3_001: (1,0)の7 を (1,1)の3 へ当てて 4 を作る。
-    final c = GameController(_level(course, 'v3_001'));
+    final c = GameController(_fixture());
     final mover = c.tileAt(1, 0)!;
     final target = c.tileAt(1, 1)!;
     c.selectTile(mover.id);
@@ -100,8 +138,8 @@ void main() {
   });
 
   test('動かしただけなら、そのタイルの選択は続く', () {
-    final c = GameController(_level(course, 'v3_011'));
-    final tile = c.tileAt(1, 0)!;
+    final c = GameController(_sqrtFixture());
+    final tile = c.tileAt(0, 0)!;
     c.selectTile(tile.id);
 
     c.attemptMove(tile.id, Direction.right);
@@ -110,7 +148,7 @@ void main() {
   });
 
   test('選んでいないタイルが合体しても、選択は横取りされない', () {
-    final c = GameController(_level(course, 'v3_001'));
+    final c = GameController(_fixture());
     final mover = c.tileAt(1, 0)!;
     c.selectTile(null);
 

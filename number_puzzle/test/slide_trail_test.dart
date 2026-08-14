@@ -9,6 +9,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:number_puzzle/game/course.dart';
+import 'package:number_puzzle/game/edges.dart';
 import 'package:number_puzzle/game/game_controller.dart';
 import 'package:number_puzzle/game/models.dart';
 import 'package:number_puzzle/widgets/puzzle_board.dart';
@@ -20,6 +21,29 @@ Level _level(String id) {
   final course = Course.fromJson((json['courses'] as List).first as Map<String, dynamic>);
   return course.levels.firstWhere((l) => l.levelId == id);
 }
+
+/// 実レベルは生成のたびに内容が変わるので、通常移動（氷なし）の例は
+/// 固定フィクスチャで検証する（board_gesture_test.dart と同じ理由）。
+Level _plainFixture() => Level(
+      levelId: 'fixture',
+      title: 'fixture',
+      hint: '',
+      tutorial: true,
+      rows: 3,
+      cols: 3,
+      tiles: [
+        TileSpec(id: 'a', row: 1, col: 0, value: 7, edges: Edges.fromMap(null)),
+        TileSpec(id: 'b', row: 1, col: 1, value: 3, edges: Edges.fromMap({'left': '−'})),
+      ],
+      walls: const [
+        WallCell(0, 0), WallCell(0, 1), WallCell(0, 2),
+        WallCell(2, 0), WallCell(2, 1), WallCell(2, 2),
+      ],
+      floors: const [],
+      exits: const [ExitSpec(row: 1, col: 2, direction: ExitDirection.right, value: 4)],
+      par: 3,
+      limit: 3,
+    );
 
 const double _boardInset = 44.0 + 2.0;
 const double _cellSize = 100.0;
@@ -76,7 +100,7 @@ void main() {
   });
 
   testWidgets('1マスだけの通常移動では軌跡が出ない（例外を起こさない）', (tester) async {
-    final c = await _pumpBoard(tester, _level('v3_001'));
+    final c = await _pumpBoard(tester, _plainFixture());
 
     await tester.dragFrom(_cellCenter(tester, 1, 0), const Offset(120, 0));
     await tester.pump();

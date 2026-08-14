@@ -2,12 +2,14 @@
 //
 // 盤は Canvas 上に描かれるので実機の見た目からは中身を確かめられない。
 // ジェスチャーが正しく手に変換されているかは、ここで押さえておく。
-import 'dart:convert';
-import 'dart:io';
-
+//
+// 実レベル（main_course.json）は生成のたびに内容が変わるので、
+// ここでは固定の最小フィクスチャを使う。生成し直すたびにこのテストが
+// 壊れるのを避けるため（v3_001 を直接読んでいた頃、レベル内容を
+// 作り直すたびに無関係なテストまで落ちる問題が起きた）。
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:number_puzzle/game/course.dart';
+import 'package:number_puzzle/game/edges.dart';
 import 'package:number_puzzle/game/game_controller.dart';
 import 'package:number_puzzle/game/models.dart';
 import 'package:number_puzzle/widgets/puzzle_board.dart';
@@ -17,13 +19,28 @@ import 'package:number_puzzle/widgets/puzzle_board.dart';
 const double _boardInset = 44.0 + 2.0;
 const double _cellSize = 100.0;
 
-Level _level(String levelId) {
-  final json = jsonDecode(
-    File('assets/levels/main_course.json').readAsStringSync(),
-  ) as Map<String, dynamic>;
-  final course = Course.fromJson((json['courses'] as List).first as Map<String, dynamic>);
-  return course.levels.firstWhere((l) => l.levelId == levelId);
-}
+/// (1,0)の7 と (1,1)の3（左辺に −）が並ぶ 3x3 盤。上下は壁。
+/// 7−3=4 で合体し、(1,2) の右から出せる。
+Level _level(String _) => Level(
+      levelId: 'fixture',
+      title: 'fixture',
+      hint: '',
+      tutorial: true,
+      rows: 3,
+      cols: 3,
+      tiles: [
+        TileSpec(id: 'a', row: 1, col: 0, value: 7, edges: Edges.fromMap(null)),
+        TileSpec(id: 'b', row: 1, col: 1, value: 3, edges: Edges.fromMap({'left': '−'})),
+      ],
+      walls: const [
+        WallCell(0, 0), WallCell(0, 1), WallCell(0, 2),
+        WallCell(2, 0), WallCell(2, 1), WallCell(2, 2),
+      ],
+      floors: const [],
+      exits: const [ExitSpec(row: 1, col: 2, direction: ExitDirection.right, value: 4)],
+      par: 3,
+      limit: 3,
+    );
 
 /// 3×3 の盤がちょうど 1 マス 100px になる大きさで組む。
 Future<void> _pumpBoard(WidgetTester tester, GameController controller) async {

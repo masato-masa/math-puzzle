@@ -18,37 +18,72 @@ Course _course() {
   return Course.fromJson((json['courses'] as List).first as Map<String, dynamic>);
 }
 
-Level _level(Course c, String id) => c.levels.firstWhere((l) => l.levelId == id);
+/// 個別の性質（複数出口・範囲出口・床の重複）は、実レベルの内容に
+/// 左右されない固定フィクスチャで検証する。生成のたびに内容が変わる
+/// レベルを名指しすると、そのIDが入れ替わった瞬間にテストが壊れる
+/// （board_gesture_test.dart 等と同じ理由）。
+Level _fixture({
+  List<FloorTile> floors = const [],
+  List<ExitSpec> exits = const [],
+}) =>
+    Level(
+      levelId: 'fixture',
+      title: 'fixture',
+      hint: '',
+      tutorial: false,
+      rows: 3,
+      cols: 3,
+      tiles: const [],
+      walls: const [],
+      floors: floors,
+      exits: exits,
+      par: 1,
+      limit: 1,
+    );
 
 void main() {
   final course = _course();
 
   test('床の種類がそのまま仕掛けとして出る', () {
-    // v3_006 は氷だけのステージ。
-    expect(gimmicksOf(_level(course, 'v3_006')), [LevelGimmick.ice]);
-    // v3_011 は平方根だけ。
-    expect(gimmicksOf(_level(course, 'v3_011')), [LevelGimmick.sqrt]);
-    // v3_016 は階乗だけ。
-    expect(gimmicksOf(_level(course, 'v3_016')), [LevelGimmick.fact]);
+    expect(
+      gimmicksOf(_fixture(floors: const [FloorTile(row: 0, col: 0, kind: FloorKind.ice)])),
+      [LevelGimmick.ice],
+    );
+    expect(
+      gimmicksOf(_fixture(floors: const [FloorTile(row: 0, col: 0, kind: FloorKind.sqrt, uses: 1)])),
+      [LevelGimmick.sqrt],
+    );
+    expect(
+      gimmicksOf(_fixture(floors: const [FloorTile(row: 0, col: 0, kind: FloorKind.fact, uses: 1)])),
+      [LevelGimmick.fact],
+    );
   });
 
   test('仕掛けの無いステージは何も出ない', () {
-    expect(gimmicksOf(_level(course, 'v3_001')), isEmpty);
+    expect(gimmicksOf(_fixture()), isEmpty);
   });
 
   test('出口が2つ以上なら複数出口として出る', () {
-    expect(gimmicksOf(_level(course, 'v3_031')), contains(LevelGimmick.multiExit));
+    final level = _fixture(exits: const [
+      ExitSpec(row: 0, col: 0, direction: ExitDirection.up, value: 1),
+      ExitSpec(row: 0, col: 2, direction: ExitDirection.up, value: 2),
+    ]);
+    expect(gimmicksOf(level), contains(LevelGimmick.multiExit));
   });
 
   test('範囲で受け付ける出口は範囲出口として出る', () {
-    expect(gimmicksOf(_level(course, 'v3_036')), contains(LevelGimmick.rangeExit));
+    final level = _fixture(exits: const [
+      ExitSpec(row: 0, col: 0, direction: ExitDirection.up, minValue: 1, maxValue: 3),
+    ]);
+    expect(gimmicksOf(level), contains(LevelGimmick.rangeExit));
   });
 
   test('同じ種類の床が複数枚あっても 1 つにまとめる', () {
-    // v3_008 は氷を 6 枚使っているが、表示は「氷」1 つ。
-    final level = _level(course, 'v3_008');
-    final iceCount = level.floors.where((f) => f.kind == FloorKind.ice).length;
-    expect(iceCount, greaterThan(1), reason: '氷が複数枚ある前提のテスト');
+    final level = _fixture(floors: const [
+      FloorTile(row: 0, col: 0, kind: FloorKind.ice),
+      FloorTile(row: 0, col: 1, kind: FloorKind.ice),
+      FloorTile(row: 0, col: 2, kind: FloorKind.ice),
+    ]);
     expect(gimmicksOf(level).where((g) => g == LevelGimmick.ice).length, 1);
   });
 

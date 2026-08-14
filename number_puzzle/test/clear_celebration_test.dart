@@ -6,12 +6,9 @@
 //   - 失敗時には出ないこと
 // という流れは押さえておく（ここが壊れると、演出が出たまま
 // ダイアログが来ない＝操作不能になりうる）。
-import 'dart:convert';
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:number_puzzle/game/course.dart';
+import 'package:number_puzzle/game/edges.dart';
 import 'package:number_puzzle/game/direction.dart';
 import 'package:number_puzzle/game/models.dart';
 import 'package:number_puzzle/screens/puzzle_screen.dart';
@@ -20,13 +17,29 @@ import 'package:number_puzzle/services/sound_service.dart';
 import 'package:number_puzzle/widgets/clear_celebration.dart';
 import 'package:number_puzzle/widgets/puzzle_board.dart';
 
-Level _level(String id) {
-  final json = jsonDecode(
-    File('assets/levels/main_course.json').readAsStringSync(),
-  ) as Map<String, dynamic>;
-  final course = Course.fromJson((json['courses'] as List).first as Map<String, dynamic>);
-  return course.levels.firstWhere((l) => l.levelId == id);
-}
+/// 実レベルは生成のたびに内容が変わるので、固定フィクスチャを使う
+/// （board_gesture_test.dart と同じ理由）。
+/// (1,0)の7 と (1,1)の3（左辺に −）。7−3=4 で合体し、(1,2)の右から出る。
+Level _level(String _) => Level(
+      levelId: 'fixture',
+      title: 'fixture',
+      hint: '',
+      tutorial: true,
+      rows: 3,
+      cols: 3,
+      tiles: [
+        TileSpec(id: 'a', row: 1, col: 0, value: 7, edges: Edges.fromMap(null)),
+        TileSpec(id: 'b', row: 1, col: 1, value: 3, edges: Edges.fromMap({'left': '−'})),
+      ],
+      walls: const [
+        WallCell(0, 0), WallCell(0, 1), WallCell(0, 2),
+        WallCell(2, 0), WallCell(2, 1), WallCell(2, 2),
+      ],
+      floors: const [],
+      exits: const [ExitSpec(row: 1, col: 2, direction: ExitDirection.right, value: 4)],
+      par: 3,
+      limit: 3,
+    );
 
 /// 盤の外周＋枠線。マスの座標を出すのに使う。
 const double _boardInset = 44.0 + 2.0;

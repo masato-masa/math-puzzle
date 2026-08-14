@@ -9,6 +9,7 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:number_puzzle/game/course.dart';
 import 'package:number_puzzle/game/direction.dart';
+import 'package:number_puzzle/game/edges.dart';
 import 'package:number_puzzle/game/game_controller.dart';
 import 'package:number_puzzle/game/models.dart';
 
@@ -19,7 +20,30 @@ Course _course() {
   return Course.fromJson((json['courses'] as List).first as Map<String, dynamic>);
 }
 
-Level _level(Course c, String id) => c.levels.firstWhere((l) => l.levelId == id);
+/// 実レベルは生成のたびに内容が変わるので、ヒント固有の挙動は固定
+/// フィクスチャで検証する（board_gesture_test.dart と同じ理由）。
+/// (1,0)の7 を (1,1)の3 へ当てて 4 を作り、(1,2)から出る。
+Level _fixture() => Level(
+      levelId: 'fixture',
+      title: 'fixture',
+      hint: '',
+      tutorial: true,
+      rows: 3,
+      cols: 3,
+      tiles: [
+        TileSpec(id: 'a', row: 1, col: 0, value: 7, edges: Edges.fromMap(null)),
+        TileSpec(id: 'b', row: 1, col: 1, value: 3, edges: Edges.fromMap({'left': '−'})),
+      ],
+      walls: const [
+        WallCell(0, 0), WallCell(0, 1), WallCell(0, 2),
+        WallCell(2, 0), WallCell(2, 1), WallCell(2, 2),
+      ],
+      floors: const [],
+      exits: const [ExitSpec(row: 1, col: 2, direction: ExitDirection.right, value: 4)],
+      par: 3,
+      limit: 3,
+      hintMove: const HintMove(row: 1, col: 0, direction: Direction.right),
+    );
 
 void main() {
   final course = _course();
@@ -32,7 +56,7 @@ void main() {
   });
 
   test('ヒントを見ると、その一手目のタイルと向きが選択される', () {
-    final level = _level(course, 'v3_001');
+    final level = _fixture();
     final c = GameController(level);
     final hint = level.hintMove!;
 
@@ -44,7 +68,7 @@ void main() {
   });
 
   test('手を動かした後にヒントを見ても何も起きない（1手目専用）', () {
-    final level = _level(course, 'v3_001');
+    final level = _fixture();
     final c = GameController(level);
     final tile = c.tileAt(1, 0)!;
     c.attemptMove(tile.id, Direction.right);
@@ -56,7 +80,7 @@ void main() {
   });
 
   test('何も使わずクリアすると isPerfectClear が true', () {
-    final level = _level(course, 'v3_001');
+    final level = _fixture();
     final c = GameController(level);
     final tile = c.tileAt(1, 0)!;
     c.attemptMove(tile.id, Direction.right);
@@ -68,7 +92,7 @@ void main() {
   });
 
   test('ヒントを使ってクリアすると isPerfectClear が false', () {
-    final level = _level(course, 'v3_001');
+    final level = _fixture();
     final c = GameController(level);
     c.peekHint();
     final tile = c.tileAt(1, 0)!;
@@ -81,7 +105,7 @@ void main() {
   });
 
   test('アンドゥを使ってクリアすると isPerfectClear が false', () {
-    final level = _level(course, 'v3_001');
+    final level = _fixture();
     final c = GameController(level);
     final tile = c.tileAt(1, 0)!;
     c.attemptMove(tile.id, Direction.right);
@@ -95,7 +119,7 @@ void main() {
   });
 
   test('restart するとヒント・アンドゥ使用の記録がリセットされる', () {
-    final level = _level(course, 'v3_001');
+    final level = _fixture();
     final c = GameController(level);
     c.peekHint();
     expect(c.hintUsed, isTrue);
