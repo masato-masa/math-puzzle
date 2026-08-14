@@ -43,9 +43,12 @@ def _ignore(dirpath, names):
 
 
 def git(*args):
+    # Windows の既定コードページ(cp932)だと日本語のコミットメッセージを
+    # 読めずに落ちるので、必ず utf-8 として受け取る。
     try:
-        return subprocess.run(["git", *args], cwd=ROOT, capture_output=True,
-                              text=True, check=True).stdout.strip()
+        out = subprocess.run(["git", *args], cwd=ROOT, capture_output=True,
+                             check=True).stdout
+        return out.decode("utf-8", errors="replace").strip()
     except Exception:
         return "(git 情報なし)"
 
