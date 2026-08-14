@@ -84,6 +84,41 @@ void main() {
     expect(c.canUndo, isFalse, reason: '履歴が積まれてはいけない');
   });
 
+  test('合体したら、できあがったタイルが選択状態になる', () {
+    // v3_001: (1,0)の7 を (1,1)の3 へ当てて 4 を作る。
+    final c = GameController(_level(course, 'v3_001'));
+    final mover = c.tileAt(1, 0)!;
+    final target = c.tileAt(1, 1)!;
+    c.selectTile(mover.id);
+
+    c.attemptMove(mover.id, Direction.right);
+
+    expect(c.selectedTileId, target.id, reason: '合体後のタイルが選ばれているはず');
+    expect(c.tileById(c.selectedTileId!), isNotNull,
+        reason: '選択中の id が実在するタイルを指しているはず');
+    expect(c.tileById(c.selectedTileId!)!.value, 4);
+  });
+
+  test('動かしただけなら、そのタイルの選択は続く', () {
+    final c = GameController(_level(course, 'v3_011'));
+    final tile = c.tileAt(1, 0)!;
+    c.selectTile(tile.id);
+
+    c.attemptMove(tile.id, Direction.right);
+
+    expect(c.selectedTileId, tile.id);
+  });
+
+  test('選んでいないタイルが合体しても、選択は横取りされない', () {
+    final c = GameController(_level(course, 'v3_001'));
+    final mover = c.tileAt(1, 0)!;
+    c.selectTile(null);
+
+    c.attemptMove(mover.id, Direction.right);
+
+    expect(c.selectedTileId, isNull, reason: '選んでいなかったなら選択は空のまま');
+  });
+
   test('プレビューの結果は、実際に動かした結果と一致する', () {
     // 全レベルの全タイル・全方向について、プレビューと実挙動を突き合わせる。
     for (final level in course.levels) {

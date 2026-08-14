@@ -317,6 +317,12 @@ class GameController {
       tiles.removeWhere((t) => t.id == tile.id);
       moveCount++;
       message = null;
+      // 合体したら、できあがったタイルをそのまま選択状態にする。
+      // 動かしていたタイルは消えるので、ここで選び直さないと選択が
+      // 外れてしまい、続けて動かすのに毎回タップし直すことになる。
+      if (selectedTileId == tile.id) {
+        selectedTileId = targetId;
+      }
       _checkEnd();
       onSound?.call(GameSoundEvent.merge);
       notifyListeners();

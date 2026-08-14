@@ -57,12 +57,67 @@ class PuzzleBoard extends StatefulWidget {
 class _PuzzleBoardState extends State<PuzzleBoard> {
   final List<_GhostSpec> _ghosts = [];
 
+  // スワイプ操作の途中経過（なぞり始めた位置・マスと、最後の指の位置）
+  Offset? _panStart;
+  Offset _panLast = Offset.zero;
+  (int, int)? _panFrom;
+
   Direction? _directionTo(TileState from, int row, int col) {
     final dr = row - from.row, dc = col - from.col;
     if (dr == 0 && dc == 0) return null;
     if (dr == 0) return dc > 0 ? Direction.right : Direction.left;
     if (dc == 0) return dr > 0 ? Direction.down : Direction.up;
     return null; // 同じ行・列でなければ向きを決められない
+  }
+
+  /// 盤の左上を原点とした座標を、マスの位置に直す。盤の外なら null。
+  (int, int)? _cellAt(Offset pos, double cellSize) {
+    final level = widget.controller.level;
+    final col = (pos.dx / cellSize).floor();
+    final row = (pos.dy / cellSize).floor();
+    if (row < 0 || row >= level.rows || col < 0 || col >= level.cols) return null;
+    return (row, col);
+  }
+
+  void _onBoardTap(Offset pos, double cellSize) {
+    final cell = _cellAt(pos, cellSize);
+    if (cell != null) _onCellTap(cell.$1, cell.$2);
+  }
+
+  void _onPanStart(Offset pos, double cellSize) {
+    _panStart = pos;
+    _panLast = pos;
+    _panFrom = _cellAt(pos, cellSize);
+  }
+
+  /// スワイプで直接動かす。なぞり始めたマスのタイルを、
+  /// 指を動かした向き（縦横のうち移動量が大きい方）へ 1 手動かす。
+  ///
+  /// タップ 2 回（選ぶ→行き先）でも動かせるが、
+  /// 「そのタイルをその向きへ」という操作はスワイプの方が直接的なので、
+  /// 両方を受け付けるようにしてある。
+  void _onPanEnd(double cellSize) {
+    final from = _panFrom;
+    final start = _panStart;
+    _panFrom = null;
+    _panStart = null;
+    if (from == null || start == null) return;
+
+    final c = widget.controller;
+    if (c.isCleared || c.isFailed) return;
+
+    final delta = _panLast - start;
+    // 短すぎるなぞりは誤操作とみなす（タップとの取り違えを防ぐ）。
+    if (delta.distance < cellSize * 0.35) return;
+
+    final dir = delta.dx.abs() > delta.dy.abs()
+        ? (delta.dx > 0 ? Direction.right : Direction.left)
+        : (delta.dy > 0 ? Direction.down : Direction.up);
+
+    final tile = c.tileAt(from.$1, from.$2);
+    if (tile == null) return;
+    c.selectTile(tile.id);
+    _performMove(tile, dir);
   }
 
   void _onCellTap(int row, int col) {
@@ -220,7 +275,16 @@ class _PuzzleBoardState extends State<PuzzleBoard> {
                           ),
                         ],
                       ),
-                      child: Stack(
+                      // タップとスワイプを盤全体で 1 か所に受ける。
+                      // マスごとに検出器を置くと、スワイプが最初のマスで
+                      // 途切れてしまうため。
+                      child: GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onTapUp: (d) => _onBoardTap(d.localPosition, cellSize),
+                        onPanStart: (d) => _onPanStart(d.localPosition, cellSize),
+                        onPanUpdate: (d) => _panLast = d.localPosition,
+                        onPanEnd: (_) => _onPanEnd(cellSize),
+                        child: Stack(
                         clipBehavior: Clip.none,
                         children: [
                           for (var r = 0; r < level.rows; r++)
@@ -230,9 +294,7 @@ class _PuzzleBoardState extends State<PuzzleBoard> {
                                 top: r * cellSize,
                                 width: cellSize,
                                 height: cellSize,
-                                child: GestureDetector(
-                                  behavior: HitTestBehavior.opaque,
-                                  onTap: () => _onCellTap(r, c),
+                                child: IgnorePointer(
                                   child: Container(
                                     decoration: BoxDecoration(
                                       border: Border.all(
@@ -275,6 +337,7 @@ class _PuzzleBoardState extends State<PuzzleBoard> {
                           for (final g in _ghosts)
                             _FlyingGhost(ghost: g, cellSize: cellSize),
                         ],
+                      ),
                       ),
                     ),
                   ),

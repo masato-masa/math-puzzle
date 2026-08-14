@@ -54,11 +54,13 @@ class TileWidget extends StatelessWidget {
                 colors: [AppColors.tileTop, AppColors.tileBottom],
               ),
         color: fixed ? AppColors.tileFixed : null,
-        border: Border(
-          top: BorderSide(color: Colors.white.withValues(alpha: fixed ? 0.08 : 0.14), width: 1.2),
-          left: BorderSide(color: Colors.white.withValues(alpha: fixed ? 0.06 : 0.10), width: 1.2),
-          right: const BorderSide(color: Colors.black45, width: 1.2),
-          bottom: const BorderSide(color: Colors.black45, width: 1.2),
+        // 枠線は全辺同じ色にする。角丸と「辺ごとに違う色の枠線」は
+        // 併用できず描画時に弾かれるため（リリースビルドでは
+        // アサーションが無効なので今まで表面化していなかった）、
+        // 面取りの陰影は下の foregroundDecoration で表現している。
+        border: Border.all(
+          color: Colors.white.withValues(alpha: fixed ? 0.07 : 0.12),
+          width: 1.2,
         ),
         boxShadow: [
           BoxShadow(
@@ -73,6 +75,20 @@ class TileWidget extends StatelessWidget {
               spreadRadius: 1,
             ),
         ],
+      ),
+      // 左上を明るく、右下を暗く落として面取りブロックに見せる。
+      foregroundDecoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(radius),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Colors.white.withValues(alpha: fixed ? 0.06 : 0.11),
+            Colors.transparent,
+            Colors.black.withValues(alpha: fixed ? 0.18 : 0.30),
+          ],
+          stops: const [0.0, 0.45, 1.0],
+        ),
       ),
       alignment: Alignment.center,
       child: Text(
