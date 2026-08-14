@@ -1,0 +1,631 @@
+{
+  "spec": "b1",
+  "tried": 783,
+  "levels": [
+    {
+      "levelId": "gen",
+      "title": "生成",
+      "hint": "",
+      "rows": 4,
+      "cols": 4,
+      "tiles": [
+        {
+          "id": "a",
+          "row": 0,
+          "col": 3,
+          "value": 9
+        },
+        {
+          "id": "b",
+          "row": 1,
+          "col": 0,
+          "value": 5
+        },
+        {
+          "id": "c",
+          "row": 2,
+          "col": 2,
+          "value": 8
+        },
+        {
+          "id": "d",
+          "row": 3,
+          "col": 0,
+          "value": 3,
+          "edges": {
+            "down": "×",
+            "up": "−"
+          }
+        },
+        {
+          "id": "e",
+          "row": 3,
+          "col": 2,
+          "value": 2,
+          "edges": {
+            "up": "÷"
+          }
+        }
+      ],
+      "walls": [
+        {
+          "row": 2,
+          "col": 1
+        },
+        {
+          "row": 3,
+          "col": 3
+        }
+      ],
+      "floors": [],
+      "exits": [
+        {
+          "row": 2,
+          "col": 0,
+          "direction": "left",
+          "value": 8
+        },
+        {
+          "row": 0,
+          "col": 3,
+          "direction": "right",
+          "value": 9
+        }
+      ],
+      "_report": {
+        "par": 8,
+        "walk_ratio": 0.38,
+        "density": 0.36,
+        "aha_forks": 22,
+        "states": 83557
+      }
+    },
+    {
+      "levelId": "gen",
+      "title": "生成",
+      "hint": "",
+      "rows": 4,
+      "cols": 4,
+      "tiles": [
+        {
+          "id": "a",
+          "row": 0,
+          "col": 1,
+          "value": 9,
+          "edges": {
+            "down": "−"
+          }
+        },
+        {
+          "id": "b",
+          "row": 1,
+          "col": 2,
+          "value": 12
+        },
+        {
+          "id": "c",
+          "row": 1,
+          "col": 3,
+          "value": 18
+        },
+        {
+          "id": "d",
+          "row": 2,
+          "col": 0,
+          "value": 1
+        },
+        {
+          "id": "e",
+          "row": 3,
+          "col": 0,
+          "value": 17,
+          "edges": {
+            "up": "+"
+          }
+        }
+      ],
+      "walls": [
+        {
+          "row": 3,
+          "col": 1
+        },
+        {
+          "row": 2,
+          "col": 2
+        }
+      ],
+      "floors": [],
+      "exits": [
+        {
+          "row": 3,
+          "col": 0,
+          "direction": "left",
+          "value": 18
+        },
+        {
+          "row": 0,
+          "col": 3,
+          "direction": "up",
+          "minValue": 3,
+          "maxValue": 18
+        }
+      ],
+      "_report": {
+        "par": 8,
+        "walk_ratio": 0.38,
+        "density": 0.36,
+        "aha_forks": 53,
+        "states": 86971
+      }
+    },
+    {
+      "levelId": "gen",
+      "title": "生成",
+      "hint": "",
+      "rows": 4,
+      "cols": 4,
+      "tiles": [
+        {
+          "id": "a",
+          "row": 0,
+          "col": 2,
+          "value": 16
+        },
+        {
+          "id": "b",
+          "row": 0,
+          "col": 3,
+          "value": 7,
+          "edges": {
+            "left": "−"
+          }
+        },
+        {
+          "id": "c",
+          "row": 1,
+          "col": 1,
+          "value": 19
+        },
+        {
+          "id": "d",
+          "row": 2,
+          "col": 1,
+          "value": 12
+        },
+        {
+          "id": "e",
+          "row": 3,
+          "col": 0,
+          "value": 6,
+          "edges": {
+            "right": "+"
+          }
+        }
+      ],
+      "walls": [
+        {
+          "row": 3,
+          "col": 2
+        },
+        {
+          "row": 1,
+          "col": 3
+        }
+      ],
+      "floors": [],
+      "exits": [
+        {
+          "row": 0,
+          "col": 3,
+          "direction": "up",
+          "value": 9
+        },
+        {
+          "row": 2,
+          "col": 0,
+          "direction": "left",
+          "minValue": 18,
+          "maxValue": 19
+        }
+      ],
+      "_report": {
+        "par": 8,
+        "walk_ratio": 0.38,
+        "density": 0.36,
+        "aha_forks": 51,
+        "states": 123833
+      }
+    },
+    {
+      "levelId": "gen",
+      "title": "生成",
+      "hint": "",
+      "rows": 4,
+      "cols": 4,
+      "tiles": [
+        {
+          "id": "a",
+          "row": 0,
+          "col": 0,
+          "value": 12
+        },
+        {
+          "id": "b",
+          "row": 1,
+          "col": 0,
+          "value": 16
+        },
+        {
+          "id": "c",
+          "row": 2,
+          "col": 0,
+          "value": 3,
+          "edges": {
+            "up": "−",
+            "right": "+"
+          }
+        },
+        {
+          "id": "d",
+          "row": 2,
+          "col": 1,
+          "value": 5
+        },
+        {
+          "id": "e",
+          "row": 3,
+          "col": 2,
+          "value": 6
+        }
+      ],
+      "walls": [
+        {
+          "row": 3,
+          "col": 1
+        },
+        {
+          "row": 0,
+          "col": 1
+        }
+      ],
+      "floors": [],
+      "exits": [
+        {
+          "row": 3,
+          "col": 3,
+          "direction": "down",
+          "value": 6
+        },
+        {
+          "row": 0,
+          "col": 0,
+          "direction": "up",
+          "minValue": 12,
+          "maxValue": 18
+        }
+      ],
+      "_report": {
+        "par": 8,
+        "walk_ratio": 0.38,
+        "density": 0.36,
+        "aha_forks": 30,
+        "states": 153697
+      }
+    },
+    {
+      "levelId": "gen",
+      "title": "生成",
+      "hint": "",
+      "rows": 4,
+      "cols": 4,
+      "tiles": [
+        {
+          "id": "a",
+          "row": 0,
+          "col": 1,
+          "value": 1,
+          "edges": {
+            "down": "+"
+          }
+        },
+        {
+          "id": "b",
+          "row": 2,
+          "col": 0,
+          "value": 7
+        },
+        {
+          "id": "c",
+          "row": 3,
+          "col": 1,
+          "value": 5,
+          "edges": {
+            "right": "−"
+          }
+        },
+        {
+          "id": "d",
+          "row": 3,
+          "col": 2,
+          "value": 6,
+          "edges": {
+            "right": "−"
+          }
+        },
+        {
+          "id": "e",
+          "row": 3,
+          "col": 3,
+          "value": 15
+        }
+      ],
+      "walls": [
+        {
+          "row": 2,
+          "col": 2
+        },
+        {
+          "row": 2,
+          "col": 1
+        }
+      ],
+      "floors": [],
+      "exits": [
+        {
+          "row": 0,
+          "col": 0,
+          "direction": "up",
+          "value": 8
+        },
+        {
+          "row": 3,
+          "col": 0,
+          "direction": "down",
+          "value": 4
+        }
+      ],
+      "_report": {
+        "par": 8,
+        "walk_ratio": 0.38,
+        "density": 0.36,
+        "aha_forks": 29,
+        "states": 29467
+      }
+    },
+    {
+      "levelId": "gen",
+      "title": "生成",
+      "hint": "",
+      "rows": 4,
+      "cols": 4,
+      "tiles": [
+        {
+          "id": "a",
+          "row": 0,
+          "col": 2,
+          "value": 9
+        },
+        {
+          "id": "b",
+          "row": 0,
+          "col": 3,
+          "value": 1,
+          "edges": {
+            "left": "−"
+          }
+        },
+        {
+          "id": "c",
+          "row": 1,
+          "col": 0,
+          "value": 2
+        },
+        {
+          "id": "d",
+          "row": 3,
+          "col": 1,
+          "value": 5,
+          "edges": {
+            "up": "+",
+            "right": "−"
+          }
+        },
+        {
+          "id": "e",
+          "row": 3,
+          "col": 2,
+          "value": 7
+        }
+      ],
+      "walls": [
+        {
+          "row": 2,
+          "col": 2
+        },
+        {
+          "row": 2,
+          "col": 1
+        }
+      ],
+      "floors": [],
+      "exits": [
+        {
+          "row": 3,
+          "col": 0,
+          "direction": "down",
+          "value": 4
+        },
+        {
+          "row": 1,
+          "col": 3,
+          "direction": "right",
+          "value": 8
+        }
+      ],
+      "_report": {
+        "par": 8,
+        "walk_ratio": 0.38,
+        "density": 0.36,
+        "aha_forks": 31,
+        "states": 68664
+      }
+    },
+    {
+      "levelId": "gen",
+      "title": "生成",
+      "hint": "",
+      "rows": 4,
+      "cols": 4,
+      "tiles": [
+        {
+          "id": "a",
+          "row": 0,
+          "col": 1,
+          "value": 10
+        },
+        {
+          "id": "b",
+          "row": 0,
+          "col": 2,
+          "value": 8,
+          "edges": {
+            "down": "+",
+            "left": "−"
+          }
+        },
+        {
+          "id": "c",
+          "row": 0,
+          "col": 3,
+          "value": 1,
+          "edges": {
+            "left": "−"
+          }
+        },
+        {
+          "id": "d",
+          "row": 1,
+          "col": 3,
+          "value": 17
+        },
+        {
+          "id": "e",
+          "row": 3,
+          "col": 1,
+          "value": 20
+        }
+      ],
+      "walls": [
+        {
+          "row": 2,
+          "col": 3
+        },
+        {
+          "row": 1,
+          "col": 0
+        }
+      ],
+      "floors": [],
+      "exits": [
+        {
+          "row": 0,
+          "col": 3,
+          "direction": "up",
+          "minValue": 1,
+          "maxValue": 17
+        },
+        {
+          "row": 2,
+          "col": 0,
+          "direction": "left",
+          "value": 20
+        }
+      ],
+      "_report": {
+        "par": 8,
+        "walk_ratio": 0.38,
+        "density": 0.36,
+        "aha_forks": 24,
+        "states": 263216
+      }
+    },
+    {
+      "levelId": "gen",
+      "title": "生成",
+      "hint": "",
+      "rows": 4,
+      "cols": 4,
+      "tiles": [
+        {
+          "id": "a",
+          "row": 0,
+          "col": 0,
+          "value": 13
+        },
+        {
+          "id": "b",
+          "row": 0,
+          "col": 1,
+          "value": 4,
+          "edges": {
+            "left": "−",
+            "down": "−"
+          }
+        },
+        {
+          "id": "c",
+          "row": 1,
+          "col": 1,
+          "value": 13
+        },
+        {
+          "id": "d",
+          "row": 3,
+          "col": 2,
+          "value": 10
+        },
+        {
+          "id": "e",
+          "row": 3,
+          "col": 3,
+          "value": 1,
+          "edges": {
+            "left": "−"
+          }
+        }
+      ],
+      "walls": [
+        {
+          "row": 0,
+          "col": 2
+        },
+        {
+          "row": 3,
+          "col": 1
+        }
+      ],
+      "floors": [],
+      "exits": [
+        {
+          "row": 0,
+          "col": 1,
+          "direction": "up",
+          "value": 4
+        },
+        {
+          "row": 0,
+          "col": 3,
+          "direction": "right",
+          "value": 9
+        }
+      ],
+      "_report": {
+        "par": 8,
+        "walk_ratio": 0.38,
+        "density": 0.36,
+        "aha_forks": 19,
+        "states": 99762
+      }
+    }
+  ]
+}

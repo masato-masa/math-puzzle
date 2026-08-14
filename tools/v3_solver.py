@@ -569,9 +569,14 @@ def analyze(level):
     report["floors"] = necessity
     useless = [n["floor"] for n in necessity if not n["needed"]]
     if useless:
-        report["warnings"].append(
-            "無くても解ける床: " + ", ".join(f"{f['type']}({f['row']},{f['col']})"
-                                             for f in useless))
+        names = ", ".join(f"{f['type']}({f['row']},{f['col']})" for f in useless)
+        if level.get("tutorial"):
+            # チュートリアルは「その仕掛けを教える」場なので、飾りの床があると
+            # 何を学ばせたいのかがぼやける。応用編では逆に、使わない床を
+            # 置いておくのはひっかけとして有効なので警告にとどめる。
+            report["errors"].append(f"チュートリアルなのに使わない床がある: {names}")
+        else:
+            report["warnings"].append(f"無くても解ける床: {names}")
 
     start, dist, adj, truncated = explore(level, max_depth=par + 3)
     dgoal = goal_distance(dist, adj)

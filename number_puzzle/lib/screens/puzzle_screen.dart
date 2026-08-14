@@ -52,7 +52,11 @@ class _PuzzleScreenState extends State<PuzzleScreen> {
     if (_dialogShown) return;
     if (_controller.isCleared) {
       _dialogShown = true;
-      widget.progressService.recordClear(widget.level.levelId, _controller.moveCount);
+      widget.progressService.recordClear(
+        widget.level.levelId,
+        _controller.moveCount,
+        perfect: _controller.isPerfectClear,
+      );
       // 演出を挟んでから結果を出す（[_onCelebrationFinished] で続く）。
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) setState(() => _celebrating = true);
@@ -96,10 +100,15 @@ class _PuzzleScreenState extends State<PuzzleScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: Column(
                 children: [
-                  _Hud(controller: _controller, onUndo: () {
-                    setState(() => _dialogShown = false);
-                    _controller.undo();
-                  }, onReset: _restart),
+                  _Hud(
+                    controller: _controller,
+                    onUndo: () {
+                      setState(() => _dialogShown = false);
+                      _controller.undo();
+                    },
+                    onReset: _restart,
+                    onHint: () => setState(() => _controller.peekHint()),
+                  ),
                   const SizedBox(height: 4),
                   if (widget.level.hint.isNotEmpty)
                     Text(widget.level.hint,
@@ -149,9 +158,17 @@ class _PuzzleScreenState extends State<PuzzleScreen> {
           side: const BorderSide(color: AppColors.gold, width: 1.2),
         ),
         title: const Text('クリア！', style: TextStyle(color: AppColors.gold, fontWeight: FontWeight.w700)),
-        content: Text(
-          '$moves 手（制限 $limit 手）\n${moves <= limit ? "見事、規定手数で解けました。" : ""}',
-          style: AppTextStyles.body,
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('$moves 手（制限 $limit 手）\n見事、規定手数で解けました。', style: AppTextStyles.body),
+            if (_controller.isPerfectClear) ...[
+              const SizedBox(height: 8),
+              const Text('✨ ノーヒント・ノーアンドゥクリア',
+                  style: TextStyle(color: AppColors.gold, fontWeight: FontWeight.w700)),
+            ],
+          ],
         ),
         actions: [
           TextButton(
@@ -209,10 +226,16 @@ class _PuzzleScreenState extends State<PuzzleScreen> {
 }
 
 class _Hud extends StatelessWidget {
-  const _Hud({required this.controller, required this.onUndo, required this.onReset});
+  const _Hud({
+    required this.controller,
+    required this.onUndo,
+    required this.onReset,
+    required this.onHint,
+  });
   final GameController controller;
   final VoidCallback onUndo;
   final VoidCallback onReset;
+  final VoidCallback onHint;
 
   @override
   Widget build(BuildContext context) {
@@ -221,6 +244,12 @@ class _Hud extends StatelessWidget {
       builder: (context) {
         final left = controller.movesLeft;
         final warn = left <= 2;
+        // ヒントは最初の一手にしか対応していないので、1手目でしか出せない。
+        // 埋め込みが無いレベル（起きない想定だが保険）ではボタン自体を隠す。
+        final hintAvailable = controller.level.hintMove != null &&
+            controller.moveCount == 0 &&
+            !controller.isCleared &&
+            !controller.isFailed;
         return Row(
           children: [
             Text.rich(
@@ -240,6 +269,15 @@ class _Hud extends StatelessWidget {
               ),
             ),
             const Spacer(),
+            if (controller.level.hintMove != null)
+              Padding(
+                padding: const EdgeInsets.only(right: 8),
+                child: OutlinedButton.icon(
+                  onPressed: hintAvailable ? onHint : null,
+                  icon: const Icon(Icons.lightbulb_outline, size: 18),
+                  label: const Text('ヒント'),
+                ),
+              ),
             OutlinedButton(
               onPressed: controller.canUndo ? onUndo : null,
               child: const Text('戻す'),

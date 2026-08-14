@@ -174,11 +174,25 @@ class _LevelPathNode extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        level.title,
-                        style: AppTextStyles.body.copyWith(fontWeight: FontWeight.w700),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                      Row(
+                        children: [
+                          Flexible(
+                            child: Text(
+                              level.title,
+                              style: AppTextStyles.body.copyWith(fontWeight: FontWeight.w700),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          if (progress?.everPerfect ?? false)
+                            const Padding(
+                              padding: EdgeInsets.only(left: 4),
+                              child: Tooltip(
+                                message: 'ノーヒント・ノーアンドゥクリア済み',
+                                child: Text('✨', style: TextStyle(fontSize: 13)),
+                              ),
+                            ),
+                        ],
                       ),
                       const SizedBox(height: 2),
                       Row(

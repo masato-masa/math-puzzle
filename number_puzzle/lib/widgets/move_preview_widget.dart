@@ -77,6 +77,67 @@ class MoveDestinationMarker extends StatelessWidget {
       };
 }
 
+/// ヒントで示された向きだけを、他の行き先プレビューと区別する飾り。
+/// 中身（矢印や合体結果のふきだし）はそのまま、周りに脈打つ光の輪を足す。
+class HintGlow extends StatefulWidget {
+  const HintGlow({super.key, required this.cellSize, required this.child});
+
+  final double cellSize;
+  final Widget child;
+
+  @override
+  State<HintGlow> createState() => _HintGlowState();
+}
+
+class _HintGlowState extends State<HintGlow> with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 900),
+    )..repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return IgnorePointer(
+      child: AnimatedBuilder(
+        animation: _controller,
+        builder: (context, child) {
+          final t = _controller.value; // 0 -> 1 -> 0
+          return Stack(
+            alignment: Alignment.center,
+            children: [
+              Container(
+                width: widget.cellSize * (0.7 + 0.16 * t),
+                height: widget.cellSize * (0.7 + 0.16 * t),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: AppColors.gold.withValues(alpha: 0.8 - 0.5 * t),
+                    width: 2,
+                  ),
+                ),
+              ),
+              child!,
+            ],
+          );
+        },
+        child: widget.child,
+      ),
+    );
+  }
+}
+
 /// 合体したときの結果を、相手タイルの上に金色のふきだしで出す。
 class MergeResultBadge extends StatelessWidget {
   const MergeResultBadge({

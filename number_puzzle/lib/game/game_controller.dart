@@ -99,6 +99,15 @@ class GameController {
   bool _cleared = false;
   bool _failed = false;
 
+  /// ヒント／アンドゥを一度でも使ったか。「ノーヒント・ノーアンドゥ」
+  /// クリアの判定に使う（restart しても引き継がない＝その挑戦の記録）。
+  bool hintUsed = false;
+  bool undoUsed = false;
+
+  /// ヒントで示された向き。表示専用（判定には使わない）。
+  /// 実際に手を動かすと消える（1手目以外では意味を持たないため）。
+  Direction? hintDirection;
+
   final List<_Snapshot> _history = [];
   void Function(GameSoundEvent event)? onSound;
 
@@ -106,6 +115,9 @@ class GameController {
   bool get isFailed => _failed;
   int get movesLeft => level.limit - moveCount;
   bool get canUndo => _history.isNotEmpty;
+
+  /// クリア時点でヒント・アンドゥを一度も使っていなければ true。
+  bool get isPerfectClear => _cleared && !hintUsed && !undoUsed;
 
   void _load(Level lv) {
     level = lv;
@@ -129,11 +141,34 @@ class GameController {
     message = null;
     _cleared = false;
     _failed = false;
+    hintUsed = false;
+    undoUsed = false;
+    hintDirection = null;
     _history.clear();
   }
 
   void restart() {
     _load(level);
+    notifyListeners();
+  }
+
+  /// レベルに埋め込まれた最初の一手のヒントを見る。1手目にしか意味を
+  /// 持たない（それ以降の局面を解く手順は埋め込んでいない）ので、
+  /// 何か手を動かした後は呼んでも何も起きない。
+  ///
+  /// 使った時点で「ノーヒントクリア」の対象からは外れる。
+  /// 手そのものは消費しない（示すだけ）ので、見るだけなら何度でも良い。
+  void peekHint() {
+    final hint = level.hintMove;
+    if (hint == null || moveCount != 0) return;
+    hintUsed = true;
+    if (hint.direction != null && hint.row != null) {
+      final tile = tileAt(hint.row!, hint.col!);
+      if (tile != null) {
+        selectedTileId = tile.id;
+        hintDirection = hint.direction;
+      }
+    }
     notifyListeners();
   }
 
@@ -174,6 +209,7 @@ class GameController {
     message = null;
     _cleared = false;
     _failed = false;
+    undoUsed = true;
     onSound?.call(GameSoundEvent.undo);
     notifyListeners();
   }
@@ -320,6 +356,7 @@ class GameController {
     }
 
     _pushHistory();
+    hintDirection = null; // ヒントは1手目にしか対応していないので消す
 
     if (res.kind == MoveEventKind.burned) {
       final target = res.target!;
@@ -437,6 +474,7 @@ class GameController {
       return null;
     }
     _pushHistory();
+    hintDirection = null;
     final row = tile.row, col = tile.col;
     tiles.removeWhere((t) => t.id == tile.id);
     moveCount++;

@@ -40,8 +40,19 @@ def main():
 
     # 手順が無いレベルは再生テストで検証できないので、コースにも入れない
     # （検証を通っていれば必ず手順がある。念のための保険）。
-    usable = [lv for lv in levels if solutions.get(lv["levelId"], {}).get("actions")]
-    dropped = [lv["levelId"] for lv in levels if lv not in usable]
+    usable = []
+    dropped = []
+    for lv in levels:
+        actions = solutions.get(lv["levelId"], {}).get("actions")
+        if not actions:
+            dropped.append(lv["levelId"])
+            continue
+        lv = dict(lv)
+        # 最初の一手だけをヒントとして埋め込む。全余裕手数ゼロ設計なので、
+        # 最初の一手を間違えると詰みやすい。そこだけ救済する
+        # （手順全部を埋め込むと攻略情報の丸見えになるので、それは避ける）。
+        lv["hintMove"] = actions[0]
+        usable.append(lv)
     if dropped:
         print(f"手順が無いため除外: {dropped}")
 

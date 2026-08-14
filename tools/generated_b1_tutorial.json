@@ -1,0 +1,338 @@
+{
+  "spec": "b1_tutorial",
+  "tried": 197,
+  "levels": [
+    {
+      "levelId": "gen",
+      "title": "生成",
+      "hint": "",
+      "rows": 3,
+      "cols": 3,
+      "tiles": [
+        {
+          "id": "a",
+          "row": 0,
+          "col": 0,
+          "value": 2
+        },
+        {
+          "id": "b",
+          "row": 1,
+          "col": 0,
+          "value": 9,
+          "edges": {
+            "up": "×"
+          }
+        },
+        {
+          "id": "c",
+          "row": 1,
+          "col": 1,
+          "value": 8,
+          "edges": {
+            "left": "−"
+          }
+        }
+      ],
+      "walls": [
+        {
+          "row": 0,
+          "col": 1
+        }
+      ],
+      "floors": [],
+      "exits": [
+        {
+          "row": 2,
+          "col": 2,
+          "direction": "down",
+          "value": 10
+        }
+      ],
+      "tutorial": true,
+      "_report": {
+        "par": 5,
+        "walk_ratio": 0.4,
+        "density": 0.38,
+        "aha_forks": 4,
+        "states": 555
+      }
+    },
+    {
+      "levelId": "gen",
+      "title": "生成",
+      "hint": "",
+      "rows": 3,
+      "cols": 3,
+      "tiles": [
+        {
+          "id": "a",
+          "row": 0,
+          "col": 0,
+          "value": 7,
+          "edges": {
+            "right": "+"
+          }
+        },
+        {
+          "id": "b",
+          "row": 1,
+          "col": 1,
+          "value": 3
+        },
+        {
+          "id": "c",
+          "row": 1,
+          "col": 2,
+          "value": 2,
+          "edges": {
+            "left": "+"
+          }
+        }
+      ],
+      "walls": [
+        {
+          "row": 0,
+          "col": 1
+        }
+      ],
+      "floors": [],
+      "exits": [
+        {
+          "row": 2,
+          "col": 0,
+          "direction": "left",
+          "value": 12
+        }
+      ],
+      "tutorial": true,
+      "_report": {
+        "par": 5,
+        "walk_ratio": 0.4,
+        "density": 0.38,
+        "aha_forks": 9,
+        "states": 389
+      }
+    },
+    {
+      "levelId": "gen",
+      "title": "生成",
+      "hint": "",
+      "rows": 3,
+      "cols": 3,
+      "tiles": [
+        {
+          "id": "a",
+          "row": 0,
+          "col": 0,
+          "value": 15
+        },
+        {
+          "id": "b",
+          "row": 1,
+          "col": 0,
+          "value": 8,
+          "edges": {
+            "up": "+"
+          }
+        },
+        {
+          "id": "c",
+          "row": 2,
+          "col": 0,
+          "value": 8,
+          "edges": {
+            "up": "−"
+          }
+        }
+      ],
+      "walls": [
+        {
+          "row": 1,
+          "col": 1
+        }
+      ],
+      "floors": [],
+      "exits": [
+        {
+          "row": 2,
+          "col": 2,
+          "direction": "down",
+          "value": 15
+        }
+      ],
+      "tutorial": true,
+      "_report": {
+        "par": 5,
+        "walk_ratio": 0.4,
+        "density": 0.38,
+        "aha_forks": 3,
+        "states": 339
+      }
+    },
+    {
+      "levelId": "gen",
+      "title": "生成",
+      "hint": "",
+      "rows": 3,
+      "cols": 3,
+      "tiles": [
+        {
+          "id": "a",
+          "row": 0,
+          "col": 1,
+          "value": 24
+        },
+        {
+          "id": "b",
+          "row": 1,
+          "col": 0,
+          "value": 8
+        },
+        {
+          "id": "c",
+          "row": 1,
+          "col": 1,
+          "value": 4,
+          "edges": {
+            "up": "−",
+            "left": "+"
+          }
+        }
+      ],
+      "walls": [
+        {
+          "row": 2,
+          "col": 0
+        }
+      ],
+      "floors": [],
+      "exits": [
+        {
+          "row": 2,
+          "col": 2,
+          "direction": "down",
+          "value": 28
+        }
+      ],
+      "tutorial": true,
+      "_report": {
+        "par": 5,
+        "walk_ratio": 0.4,
+        "density": 0.38,
+        "aha_forks": 3,
+        "states": 704
+      }
+    },
+    {
+      "levelId": "gen",
+      "title": "生成",
+      "hint": "",
+      "rows": 3,
+      "cols": 3,
+      "tiles": [
+        {
+          "id": "a",
+          "row": 0,
+          "col": 1,
+          "value": 7,
+          "edges": {
+            "right": "+"
+          }
+        },
+        {
+          "id": "b",
+          "row": 0,
+          "col": 2,
+          "value": 13
+        },
+        {
+          "id": "c",
+          "row": 1,
+          "col": 0,
+          "value": 8,
+          "edges": {
+            "up": "−"
+          }
+        }
+      ],
+      "walls": [
+        {
+          "row": 1,
+          "col": 2
+        }
+      ],
+      "floors": [],
+      "exits": [
+        {
+          "row": 2,
+          "col": 0,
+          "direction": "left",
+          "value": 12
+        }
+      ],
+      "tutorial": true,
+      "_report": {
+        "par": 5,
+        "walk_ratio": 0.4,
+        "density": 0.38,
+        "aha_forks": 5,
+        "states": 552
+      }
+    },
+    {
+      "levelId": "gen",
+      "title": "生成",
+      "hint": "",
+      "rows": 3,
+      "cols": 3,
+      "tiles": [
+        {
+          "id": "a",
+          "row": 0,
+          "col": 2,
+          "value": 11
+        },
+        {
+          "id": "b",
+          "row": 1,
+          "col": 2,
+          "value": 9,
+          "edges": {
+            "down": "+",
+            "up": "−"
+          }
+        },
+        {
+          "id": "c",
+          "row": 2,
+          "col": 2,
+          "value": 4
+        }
+      ],
+      "walls": [
+        {
+          "row": 1,
+          "col": 1
+        }
+      ],
+      "floors": [],
+      "exits": [
+        {
+          "row": 2,
+          "col": 0,
+          "direction": "down",
+          "value": 6
+        }
+      ],
+      "tutorial": true,
+      "_report": {
+        "par": 5,
+        "walk_ratio": 0.4,
+        "density": 0.38,
+        "aha_forks": 3,
+        "states": 306
+      }
+    }
+  ]
+}

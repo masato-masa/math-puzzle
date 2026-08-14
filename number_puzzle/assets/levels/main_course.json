@@ -63,7 +63,13 @@
             }
           ],
           "par": 3,
-          "limit": 3
+          "limit": 3,
+          "hintMove": {
+            "type": "move",
+            "row": 1,
+            "col": 0,
+            "dir": "right"
+          }
         },
         {
           "levelId": "v3_002",
@@ -124,7 +130,13 @@
             }
           ],
           "par": 3,
-          "limit": 3
+          "limit": 3,
+          "hintMove": {
+            "type": "move",
+            "row": 2,
+            "col": 1,
+            "dir": "up"
+          }
         },
         {
           "levelId": "v3_003",
@@ -170,7 +182,13 @@
             }
           ],
           "par": 9,
-          "limit": 9
+          "limit": 9,
+          "hintMove": {
+            "type": "move",
+            "row": 4,
+            "col": 4,
+            "dir": "left"
+          }
         },
         {
           "levelId": "v3_004",
@@ -216,7 +234,13 @@
             }
           ],
           "par": 10,
-          "limit": 10
+          "limit": 10,
+          "hintMove": {
+            "type": "move",
+            "row": 0,
+            "col": 0,
+            "dir": "down"
+          }
         },
         {
           "levelId": "v3_005",
@@ -268,7 +292,13 @@
             }
           ],
           "par": 14,
-          "limit": 14
+          "limit": 14,
+          "hintMove": {
+            "type": "move",
+            "row": 4,
+            "col": 0,
+            "dir": "up"
+          }
         },
         {
           "levelId": "v3_006",
@@ -324,7 +354,13 @@
             }
           ],
           "par": 6,
-          "limit": 6
+          "limit": 6,
+          "hintMove": {
+            "type": "move",
+            "row": 3,
+            "col": 0,
+            "dir": "right"
+          }
         },
         {
           "levelId": "v3_007",
@@ -381,7 +417,13 @@
             }
           ],
           "par": 7,
-          "limit": 7
+          "limit": 7,
+          "hintMove": {
+            "type": "move",
+            "row": 2,
+            "col": 4,
+            "dir": "left"
+          }
         },
         {
           "levelId": "v3_008",
@@ -457,7 +499,13 @@
             }
           ],
           "par": 8,
-          "limit": 8
+          "limit": 8,
+          "hintMove": {
+            "type": "move",
+            "row": 0,
+            "col": 0,
+            "dir": "right"
+          }
         },
         {
           "levelId": "v3_009",
@@ -517,7 +565,13 @@
             }
           ],
           "par": 10,
-          "limit": 10
+          "limit": 10,
+          "hintMove": {
+            "type": "move",
+            "row": 0,
+            "col": 0,
+            "dir": "right"
+          }
         },
         {
           "levelId": "v3_010",
@@ -610,7 +664,13 @@
             }
           ],
           "par": 11,
-          "limit": 11
+          "limit": 11,
+          "hintMove": {
+            "type": "move",
+            "row": 0,
+            "col": 0,
+            "dir": "down"
+          }
         },
         {
           "levelId": "v3_011",
@@ -669,7 +729,13 @@
             }
           ],
           "par": 3,
-          "limit": 3
+          "limit": 3,
+          "hintMove": {
+            "type": "move",
+            "row": 1,
+            "col": 0,
+            "dir": "right"
+          }
         },
         {
           "levelId": "v3_012",
@@ -713,7 +779,13 @@
             }
           ],
           "par": 5,
-          "limit": 5
+          "limit": 5,
+          "hintMove": {
+            "type": "move",
+            "row": 0,
+            "col": 0,
+            "dir": "right"
+          }
         },
         {
           "levelId": "v3_013",
@@ -773,7 +845,13 @@
             }
           ],
           "par": 10,
-          "limit": 10
+          "limit": 10,
+          "hintMove": {
+            "type": "move",
+            "row": 3,
+            "col": 0,
+            "dir": "right"
+          }
         },
         {
           "levelId": "v3_014",
@@ -839,7 +917,13 @@
             }
           ],
           "par": 8,
-          "limit": 8
+          "limit": 8,
+          "hintMove": {
+            "type": "move",
+            "row": 4,
+            "col": 4,
+            "dir": "left"
+          }
         },
         {
           "levelId": "v3_015",
@@ -937,7 +1021,13 @@
             }
           ],
           "par": 10,
-          "limit": 10
+          "limit": 10,
+          "hintMove": {
+            "type": "move",
+            "row": 6,
+            "col": 5,
+            "dir": "left"
+          }
         },
         {
           "levelId": "v3_016",
@@ -996,7 +1086,13 @@
             }
           ],
           "par": 3,
-          "limit": 3
+          "limit": 3,
+          "hintMove": {
+            "type": "move",
+            "row": 1,
+            "col": 0,
+            "dir": "right"
+          }
         },
         {
           "levelId": "v3_017",
@@ -1040,7 +1136,13 @@
             }
           ],
           "par": 5,
-          "limit": 5
+          "limit": 5,
+          "hintMove": {
+            "type": "move",
+            "row": 0,
+            "col": 0,
+            "dir": "right"
+          }
         },
         {
           "levelId": "v3_018",
@@ -1100,7 +1202,13 @@
             }
           ],
           "par": 14,
-          "limit": 14
+          "limit": 14,
+          "hintMove": {
+            "type": "move",
+            "row": 0,
+            "col": 3,
+            "dir": "left"
+          }
         },
         {
           "levelId": "v3_019",
@@ -1152,7 +1260,13 @@
             }
           ],
           "par": 13,
-          "limit": 13
+          "limit": 13,
+          "hintMove": {
+            "type": "move",
+            "row": 0,
+            "col": 0,
+            "dir": "right"
+          }
         },
         {
           "levelId": "v3_020",
@@ -1211,7 +1325,13 @@
             }
           ],
           "par": 16,
-          "limit": 16
+          "limit": 16,
+          "hintMove": {
+            "type": "move",
+            "row": 0,
+            "col": 0,
+            "dir": "right"
+          }
         },
         {
           "levelId": "v3_021",
@@ -1255,7 +1375,13 @@
             }
           ],
           "par": 5,
-          "limit": 5
+          "limit": 5,
+          "hintMove": {
+            "type": "move",
+            "row": 0,
+            "col": 2,
+            "dir": "left"
+          }
         },
         {
           "levelId": "v3_022",
@@ -1299,7 +1425,13 @@
             }
           ],
           "par": 7,
-          "limit": 7
+          "limit": 7,
+          "hintMove": {
+            "type": "move",
+            "row": 0,
+            "col": 2,
+            "dir": "left"
+          }
         },
         {
           "levelId": "v3_023",
@@ -1356,7 +1488,13 @@
             }
           ],
           "par": 9,
-          "limit": 9
+          "limit": 9,
+          "hintMove": {
+            "type": "move",
+            "row": 0,
+            "col": 2,
+            "dir": "left"
+          }
         },
         {
           "levelId": "v3_024",
@@ -1414,7 +1552,13 @@
             }
           ],
           "par": 13,
-          "limit": 13
+          "limit": 13,
+          "hintMove": {
+            "type": "move",
+            "row": 0,
+            "col": 0,
+            "dir": "right"
+          }
         },
         {
           "levelId": "v3_025",
@@ -1476,7 +1620,13 @@
             }
           ],
           "par": 9,
-          "limit": 9
+          "limit": 9,
+          "hintMove": {
+            "type": "move",
+            "row": 5,
+            "col": 4,
+            "dir": "left"
+          }
         },
         {
           "levelId": "v3_026",
@@ -1520,7 +1670,13 @@
             }
           ],
           "par": 5,
-          "limit": 5
+          "limit": 5,
+          "hintMove": {
+            "type": "move",
+            "row": 0,
+            "col": 2,
+            "dir": "left"
+          }
         },
         {
           "levelId": "v3_027",
@@ -1564,7 +1720,13 @@
             }
           ],
           "par": 5,
-          "limit": 5
+          "limit": 5,
+          "hintMove": {
+            "type": "move",
+            "row": 0,
+            "col": 2,
+            "dir": "left"
+          }
         },
         {
           "levelId": "v3_028",
@@ -1635,7 +1797,13 @@
             }
           ],
           "par": 12,
-          "limit": 12
+          "limit": 12,
+          "hintMove": {
+            "type": "move",
+            "row": 3,
+            "col": 1,
+            "dir": "left"
+          }
         },
         {
           "levelId": "v3_029",
@@ -1699,7 +1867,13 @@
             }
           ],
           "par": 10,
-          "limit": 10
+          "limit": 10,
+          "hintMove": {
+            "type": "move",
+            "row": 2,
+            "col": 0,
+            "dir": "right"
+          }
         },
         {
           "levelId": "v3_030",
@@ -1774,7 +1948,13 @@
             }
           ],
           "par": 12,
-          "limit": 12
+          "limit": 12,
+          "hintMove": {
+            "type": "move",
+            "row": 0,
+            "col": 4,
+            "dir": "down"
+          }
         },
         {
           "levelId": "v3_031",
@@ -1819,7 +1999,13 @@
             }
           ],
           "par": 4,
-          "limit": 4
+          "limit": 4,
+          "hintMove": {
+            "type": "move",
+            "row": 0,
+            "col": 1,
+            "dir": "left"
+          }
         },
         {
           "levelId": "v3_032",
@@ -1882,7 +2068,13 @@
             }
           ],
           "par": 6,
-          "limit": 6
+          "limit": 6,
+          "hintMove": {
+            "type": "move",
+            "row": 0,
+            "col": 2,
+            "dir": "left"
+          }
         },
         {
           "levelId": "v3_033",
@@ -1956,7 +2148,13 @@
             }
           ],
           "par": 10,
-          "limit": 10
+          "limit": 10,
+          "hintMove": {
+            "type": "move",
+            "row": 3,
+            "col": 1,
+            "dir": "left"
+          }
         },
         {
           "levelId": "v3_034",
@@ -2019,7 +2217,13 @@
             }
           ],
           "par": 13,
-          "limit": 13
+          "limit": 13,
+          "hintMove": {
+            "type": "move",
+            "row": 3,
+            "col": 0,
+            "dir": "up"
+          }
         },
         {
           "levelId": "v3_035",
@@ -2102,7 +2306,13 @@
             }
           ],
           "par": 16,
-          "limit": 16
+          "limit": 16,
+          "hintMove": {
+            "type": "move",
+            "row": 4,
+            "col": 1,
+            "dir": "left"
+          }
         },
         {
           "levelId": "v3_036",
@@ -2131,7 +2341,13 @@
             }
           ],
           "par": 4,
-          "limit": 4
+          "limit": 4,
+          "hintMove": {
+            "type": "move",
+            "row": 0,
+            "col": 0,
+            "dir": "right"
+          }
         },
         {
           "levelId": "v3_037",
@@ -2169,7 +2385,13 @@
             }
           ],
           "par": 5,
-          "limit": 5
+          "limit": 5,
+          "hintMove": {
+            "type": "move",
+            "row": 0,
+            "col": 0,
+            "dir": "right"
+          }
         },
         {
           "levelId": "v3_038",
@@ -2222,7 +2444,13 @@
             }
           ],
           "par": 13,
-          "limit": 13
+          "limit": 13,
+          "hintMove": {
+            "type": "move",
+            "row": 0,
+            "col": 0,
+            "dir": "right"
+          }
         },
         {
           "levelId": "v3_039",
@@ -2274,7 +2502,13 @@
             }
           ],
           "par": 12,
-          "limit": 12
+          "limit": 12,
+          "hintMove": {
+            "type": "move",
+            "row": 0,
+            "col": 0,
+            "dir": "right"
+          }
         },
         {
           "levelId": "v3_040",
@@ -2348,7 +2582,13 @@
             }
           ],
           "par": 9,
-          "limit": 9
+          "limit": 9,
+          "hintMove": {
+            "type": "move",
+            "row": 3,
+            "col": 1,
+            "dir": "left"
+          }
         },
         {
           "levelId": "v3_041",
@@ -2410,7 +2650,13 @@
             }
           ],
           "par": 14,
-          "limit": 14
+          "limit": 14,
+          "hintMove": {
+            "type": "move",
+            "row": 4,
+            "col": 0,
+            "dir": "up"
+          }
         },
         {
           "levelId": "v3_042",
@@ -2468,7 +2714,13 @@
             }
           ],
           "par": 8,
-          "limit": 8
+          "limit": 8,
+          "hintMove": {
+            "type": "move",
+            "row": 4,
+            "col": 4,
+            "dir": "left"
+          }
         },
         {
           "levelId": "v3_043",
@@ -2525,7 +2777,13 @@
             }
           ],
           "par": 13,
-          "limit": 13
+          "limit": 13,
+          "hintMove": {
+            "type": "move",
+            "row": 0,
+            "col": 0,
+            "dir": "right"
+          }
         },
         {
           "levelId": "v3_044",
@@ -2580,7 +2838,13 @@
             }
           ],
           "par": 9,
-          "limit": 9
+          "limit": 9,
+          "hintMove": {
+            "type": "move",
+            "row": 3,
+            "col": 0,
+            "dir": "up"
+          }
         },
         {
           "levelId": "v3_045",
@@ -2634,7 +2898,13 @@
             }
           ],
           "par": 19,
-          "limit": 19
+          "limit": 19,
+          "hintMove": {
+            "type": "move",
+            "row": 0,
+            "col": 0,
+            "dir": "right"
+          }
         },
         {
           "levelId": "v3_046",
@@ -2693,7 +2963,13 @@
             }
           ],
           "par": 16,
-          "limit": 16
+          "limit": 16,
+          "hintMove": {
+            "type": "move",
+            "row": 0,
+            "col": 0,
+            "dir": "right"
+          }
         },
         {
           "levelId": "v3_047",
@@ -2777,7 +3053,13 @@
             }
           ],
           "par": 12,
-          "limit": 12
+          "limit": 12,
+          "hintMove": {
+            "type": "move",
+            "row": 0,
+            "col": 3,
+            "dir": "down"
+          }
         },
         {
           "levelId": "v3_048",
@@ -2845,7 +3127,13 @@
             }
           ],
           "par": 8,
-          "limit": 8
+          "limit": 8,
+          "hintMove": {
+            "type": "move",
+            "row": 5,
+            "col": 4,
+            "dir": "left"
+          }
         },
         {
           "levelId": "v3_049",
@@ -2909,7 +3197,13 @@
             }
           ],
           "par": 17,
-          "limit": 17
+          "limit": 17,
+          "hintMove": {
+            "type": "move",
+            "row": 0,
+            "col": 0,
+            "dir": "right"
+          }
         },
         {
           "levelId": "v3_050",
@@ -3011,7 +3305,13 @@
             }
           ],
           "par": 15,
-          "limit": 15
+          "limit": 15,
+          "hintMove": {
+            "type": "move",
+            "row": 4,
+            "col": 0,
+            "dir": "up"
+          }
         }
       ]
     }

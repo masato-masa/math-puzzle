@@ -1,6 +1,33 @@
+import 'direction.dart';
 import 'edges.dart';
 import 'floor.dart';
 import 'game_rules.dart' show kFireValue;
+
+/// レベルに埋め込まれた最初の一手のヒント。
+/// tools/build_course.py が最短手順の 1 手目から作る。
+class HintMove {
+  /// 動かすタイルの開始位置（move の場合のみ意味を持つ）。
+  final int? row;
+  final int? col;
+  final Direction? direction;
+
+  /// 出口から出す手がヒントになる場合の出口インデックス
+  /// （通常は起きない。起きたレベルには詰まりどころが無いということ）。
+  final int? exitIndex;
+
+  const HintMove({this.row, this.col, this.direction, this.exitIndex});
+
+  factory HintMove.fromJson(Map<String, dynamic> json) {
+    if (json['type'] == 'exit') {
+      return HintMove(exitIndex: json['index'] as int);
+    }
+    return HintMove(
+      row: json['row'] as int,
+      col: json['col'] as int,
+      direction: DirectionX.fromName(json['dir'] as String),
+    );
+  }
+}
 
 /// レベルに定義された初期タイル（不変・レベルデータそのもの）。
 class TileSpec {
@@ -107,6 +134,12 @@ class Level {
   final int par;
   final int limit;
 
+  /// 最短手順の最初の一手だけを埋め込んだヒント。手順全体は埋め込まない
+  /// （攻略の丸見えを避けるため、最初の詰まりどころだけ救済する）。
+  /// null なら手詰まりを避けられないタイプの手（出口など）が最初になる
+  /// レベルで、その場合ヒントは出さない。
+  final HintMove? hintMove;
+
   const Level({
     required this.levelId,
     required this.title,
@@ -120,6 +153,7 @@ class Level {
     required this.exits,
     required this.par,
     required this.limit,
+    this.hintMove,
   });
 
   factory Level.fromJson(Map<String, dynamic> json) {
@@ -145,6 +179,9 @@ class Level {
           .toList(),
       par: json['par'] as int,
       limit: json['limit'] as int? ?? json['par'] as int,
+      hintMove: json['hintMove'] == null
+          ? null
+          : HintMove.fromJson(json['hintMove'] as Map<String, dynamic>),
     );
   }
 

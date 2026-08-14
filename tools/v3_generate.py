@@ -39,13 +39,22 @@ OUT = os.path.join(HERE, "generated_v3.json")
 OPS = ["+", "−", "×", "÷"]
 # 盤に置く数字。大きすぎると掛け算で爆発して詰みだらけになるので抑える。
 VALUES = [1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 8, 8, 9, 9, 10, 12, 12, 15, 16, 18, 20, 24]
+# 出口に出す値の種。約数が多い数を混ぜておくと、逆再生で
+# 掛け算・割り算に割りやすく、筋の種類が増える。
+EXIT_SEED_VALUES = [4, 5, 6, 6, 8, 8, 9, 10, 12, 12, 15, 16, 18, 20, 24]
 
 
 class Spec:
-    """どんな盤を作りたいかの指定。"""
+    """どんな盤を作りたいかの指定。
+
+    「中身のある手」は概ね (タイル枚数 + 床が効いた回数) になる。
+    非チュートリアルの下限が 5 回なので、床の無いブロックでは
+    タイルを 5 枚以上置かないと通らない。
+    """
 
     def __init__(self, name, rows, cols, tiles, floors=(), walls=0,
-                 exits=2, tutorial=False, par=(8, 20), min_aha=3):
+                 exits=2, tutorial=False, par=(6, 22), min_aha=3,
+                 fire=0, fixed=0, all_ice=False):
         self.name = name
         self.rows, self.cols = rows, cols
         self.tiles = tiles
@@ -55,6 +64,9 @@ class Spec:
         self.tutorial = tutorial
         self.par = par
         self.min_aha = min_aha
+        self.fire = fire                # 炎タイルの枚数
+        self.fixed = fixed              # 動かせないタイルの枚数
+        self.all_ice = all_ice          # 盤全体を氷にする
 
 
 def _free_cells(rows, cols, taken):
@@ -88,6 +100,14 @@ def build_candidate(rng, spec):
         walls.append({"row": cell[0], "col": cell[1]})
 
     floors = []
+    if spec.all_ice:
+        # 全面氷。どこにも止まれないので、止めたい場所に何を置くかが
+        # そのまま問題になる。壁とタイルだけが「止まる理由」になる。
+        wallset = {(w["row"], w["col"]) for w in walls}
+        for r in range(rows):
+            for c in range(cols):
+                if (r, c) not in wallset:
+                    floors.append({"row": r, "col": c, "type": "ice"})
     for kind in spec.floors:
         free = _free_cells(rows, cols, taken)
         if not free:
@@ -100,14 +120,29 @@ def build_candidate(rng, spec):
         floors.append(f)
 
     tiles = []
-    for i in range(spec.tiles):
+    n_total = spec.tiles + spec.fire
+    fire_slots = set(rng.sample(range(n_total), spec.fire)) if spec.fire else set()
+    fixed_slots = set()
+    if spec.fixed:
+        movable = [i for i in range(n_total) if i not in fire_slots]
+        fixed_slots = set(rng.sample(movable, min(spec.fixed, len(movable))))
+    for i in range(n_total):
         free = _free_cells(rows, cols, taken)
         if not free:
             return None
         cell = rng.choice(free)
         taken.add(cell)
-        t = {"id": chr(ord("a") + i), "row": cell[0], "col": cell[1],
-             "value": rng.choice(VALUES)}
+        t = {"id": chr(ord("a") + i), "row": cell[0], "col": cell[1]}
+        if i in fire_slots:
+            t["fire"] = True
+            t["value"] = 0            # 炎は値を使わないが、形をそろえるため置く
+            tiles.append(t)
+            continue
+        t["value"] = rng.choice(VALUES)
+        if i in fixed_slots:
+            # 動かせないタイル。「これを動かせれば簡単なのに」という
+            # 詰まり方を作るための駒。
+            t["fixed"] = True
         # 辺の演算子。1 枚あたり 0〜2 個。全部に付けると当てられる面が
         # 無くなって詰みやすいので、付けない枚も混ぜる。
         n_edges = rng.choices([0, 1, 2], weights=[25, 55, 20])[0]
@@ -124,9 +159,180 @@ def build_candidate(rng, spec):
     chosen = rng.sample(spots, spec.exits)
     exits = [{"row": r, "col": c, "direction": d} for (r, c, d) in chosen]
 
-    return {"levelId": "gen", "title": "生成", "hint": "",
-            "rows": rows, "cols": cols,
-            "tiles": tiles, "walls": walls, "floors": floors, "exits": exits}
+    out = {"levelId": "gen", "title": "生成", "hint": "",
+           "rows": rows, "cols": cols,
+           "tiles": tiles, "walls": walls, "floors": floors, "exits": exits}
+    if spec.tutorial:
+        out["tutorial"] = True
+    return out
+
+
+def build_by_rewind(rng, spec, walls, floors):
+    """クリアした状態から巻き戻して盤を組み立てる。
+
+    前向きにランダムに置くと、全タイルを合体させて出口へ運べる盤には
+    まずならない（試したところ 200 回中 191 回がクリア不能だった）。
+    そこで「空になった盤」から逆にたどる:
+
+      出口の巻き戻し … 出口のマスにタイルを 1 枚戻す
+      合体の巻き戻し … タイル 1 枚を、計算前の 2 枚に割る
+      移動の巻き戻し … タイルを、そこへ来る前のマスへ戻す
+
+    こうして作った盤は、逆にたどれば必ずクリアできる。
+    氷の滑りはここでは考えていない（1 マスずつ動く前提で組む）ので、
+    出来上がりは最後に本物の判定へ通して確かめる。
+    """
+    rows, cols = spec.rows, spec.cols
+    wallset = {(w["row"], w["col"]) for w in walls}
+
+    # 出口の位置だけ先に決める（値はあとで焼き付ける）
+    spots = [b for b in _border_cells(rows, cols) if (b[0], b[1]) not in wallset]
+    if len(spots) < spec.exits:
+        return None
+    exits = [{"row": r, "col": c, "direction": d}
+             for (r, c, d) in rng.sample(spots, spec.exits)]
+
+    # 盤の上のタイル: cell -> [value, edges(dict), fixed, fire]
+    board = {}
+
+    def empty(cell):
+        return (cell not in board and cell not in wallset
+                and 0 <= cell[0] < rows and 0 <= cell[1] < cols)
+
+    # 1) まず各出口から 1 枚ずつ戻す（＝最後にそこから出ていったタイル）
+    for ex in exits:
+        cell = (ex["row"], ex["col"])
+        if not empty(cell):
+            continue
+        # 出口に出す値。ここを起点に逆再生で割っていくので、
+        # 割りしろのある手ごろな数から始める。
+        board[cell] = [rng.choice(EXIT_SEED_VALUES), {}, False, False]
+    if not board:
+        return None
+
+    target_tiles = spec.tiles + spec.fire
+    guard = 0
+    while len(board) < target_tiles and guard < 400:
+        guard += 1
+        cell = rng.choice(list(board))
+        value, edges, _fixed, fire = board[cell]
+        if fire:
+            continue
+
+        if rng.random() < 0.65:
+            # --- 合体の巻き戻し: value を作れる 2 数に割る ---
+            split = _split_value(rng, value)
+            if split is None:
+                continue
+            op, a, b = split                      # a op b == value
+            # ぶつけた側(a)が来られる隣のマスを選ぶ
+            dirs = list(DIRS)
+            rng.shuffle(dirs)
+            placed = False
+            for d in dirs:
+                dr, dc = {"up": (1, 0), "right": (0, -1),
+                          "down": (-1, 0), "left": (0, 1)}[d]
+                src = (cell[0] + dr, cell[1] + dc)
+                if not empty(src):
+                    continue
+                # 演算子は「ぶつけられた側の、接触面」に置く形にする
+                # （こうすると合体後に mover 側の辺が消える規則と噛み合う）
+                new_edges = dict(edges)
+                new_edges[OPPOSITE_NAME[d]] = op
+                board[cell] = [b, new_edges, False, False]
+                board[src] = [a, {}, False, False]
+                placed = True
+                break
+            if not placed:
+                continue
+        else:
+            # --- 移動の巻き戻し: 1 マス手前へ戻す ---
+            dirs = list(DIRS)
+            rng.shuffle(dirs)
+            for d in dirs:
+                dr, dc = {"up": (1, 0), "right": (0, -1),
+                          "down": (-1, 0), "left": (0, 1)}[d]
+                src = (cell[0] + dr, cell[1] + dc)
+                if empty(src):
+                    board[src] = board.pop(cell)
+                    break
+
+    if len(board) < 2:
+        return None
+
+    # 炎タイルを混ぜる（数字を 1 枚、炎に置き換える）
+    cells = list(board)
+    rng.shuffle(cells)
+    for i in range(min(spec.fire, max(0, len(cells) - 2))):
+        board[cells[i]] = [0, {}, False, True]
+    # 動かせないタイル
+    for i in range(spec.fire, min(spec.fire + spec.fixed, len(cells))):
+        if not board[cells[i]][3]:
+            board[cells[i]][2] = True
+
+    tiles = []
+    for i, (cell, (value, edges, fixed, fire)) in enumerate(sorted(board.items())):
+        t = {"id": chr(ord("a") + i), "row": cell[0], "col": cell[1]}
+        if fire:
+            t["fire"] = True
+            t["value"] = 0
+        else:
+            t["value"] = value
+            if edges:
+                t["edges"] = edges
+            if fixed:
+                t["fixed"] = True
+        tiles.append(t)
+
+    out = {"levelId": "gen", "title": "生成", "hint": "",
+           "rows": rows, "cols": cols,
+           "tiles": tiles, "walls": walls, "floors": floors, "exits": exits}
+    if spec.tutorial:
+        out["tutorial"] = True
+    return out
+
+
+# 巻き戻すときは「進んだ向きの逆」に置くので、名前の対応表を持っておく
+OPPOSITE_NAME = {"up": "down", "down": "up", "left": "right", "right": "left"}
+
+
+# 盤に出したい数の上限。大きい数や半端な数が並ぶと、
+# 暗算しづらいだけで難しさは増えないので抑える。
+MAX_TILE_VALUE = 24
+
+
+def _split_value(rng, value):
+    """value になる (演算子, a, b) を 1 つ選ぶ。a op b == value。
+
+    出てくる数が小さく収まるように候補を絞る。逆再生を繰り返すと
+    数はどんどん大きくなりがちで、放っておくと 32 と 29 を引き算する
+    ような、計算が面倒なだけの盤になる。
+    """
+    if value < 0 or value > MAX_TILE_VALUE:
+        return None
+    cands = []
+    # 足し算: 1+1 のような極端な偏りは避け、両方 1 以上
+    for a in range(1, value):
+        b = value - a
+        if 1 <= b <= MAX_TILE_VALUE:
+            cands.append(("+", a, b))
+    # 引き算: 引かれる数が大きくなりすぎないように
+    for b in range(1, 13):
+        a = value + b
+        if a <= MAX_TILE_VALUE:
+            cands.append(("−", a, b))
+    # 掛け算: 九九の範囲に収める
+    for b in range(2, 10):
+        if value % b == 0 and 1 <= value // b <= 12:
+            cands.append(("×", value // b, b))
+    # 割り算: 割られる数が大きくなりすぎないように
+    for b in range(2, 10):
+        a = value * b
+        if a <= MAX_TILE_VALUE:
+            cands.append(("÷", a, b))
+    if not cands:
+        return None
+    return rng.choice(cands)
 
 
 def solve_open_exits(level):
@@ -216,23 +422,64 @@ def acceptable(rep, spec):
     return None
 
 
+def exits_are_tight(level, max_span=4):
+    """範囲で受ける出口が緩すぎないか。
+
+    (3, 18) のように広い範囲だと何を作っても通ってしまい、
+    「ちょうどに収める」という問いが消える。
+    """
+    for e in level["exits"]:
+        lo, hi = e.get("minValue"), e.get("maxValue")
+        if lo is not None and hi is not None and hi - lo > max_span:
+            return False
+    return True
+
+
 SPECS = {
-    # 土台（床なし）。小さく詰めた盤で、当てる順と向きだけで悩ませる。
-    "base": Spec("base", 4, 4, tiles=4, walls=1, exits=2, par=(8, 16)),
-    "base_small": Spec("base_small", 3, 4, tiles=4, walls=0, exits=2, par=(8, 14)),
-    # 各ギミック。チュートリアルは短くてよいが、床は必ず要るようにする。
+    # --- ブロック1: 土台（床なし）。当てる順と向きだけで悩ませる。
+    # 床が無いぶん「中身のある手」はタイル枚数で稼ぐ必要がある。
+    "b1_tutorial": Spec("b1_tutorial", 3, 3, tiles=3, walls=1, exits=1,
+                        tutorial=True, par=(3, 8)),
+    "b1": Spec("b1", 4, 4, tiles=5, walls=2, exits=2, par=(8, 16)),
+    # ボスは枚数を増やすが、4x4 に 6 枚 + 壁 3 だと動く余地が無くなって
+    # ほとんどクリア不能になる（900 回試して 0 件だった）。
+    # 密度は保ったまま、少しだけ盤を広げる。
+    "b1_boss": Spec("b1_boss", 4, 5, tiles=6, walls=2, exits=2,
+                    par=(9, 20), min_aha=5),
+
+    # --- 迷路。壁を多めにして、動かす順と経路を考えないと詰むようにする。
+    "maze": Spec("maze", 4, 4, tiles=5, walls=4, exits=2, par=(8, 18), min_aha=4),
+    "maze_big": Spec("maze_big", 5, 4, tiles=6, walls=6, exits=2,
+                     par=(10, 20), min_aha=4),
+
+    # --- 全面氷。どこにも止まれないので、止める理由を自分で作る。
+    "all_ice": Spec("all_ice", 4, 4, tiles=5, walls=2, exits=2,
+                    all_ice=True, par=(6, 18), min_aha=3),
+    "all_ice_tutorial": Spec("all_ice_tutorial", 3, 3, tiles=3, walls=1, exits=1,
+                             all_ice=True, tutorial=True, par=(3, 10)),
+
+    # --- 炎。どれを諦めるかを選ばせる。
+    "fire_tutorial": Spec("fire_tutorial", 3, 3, tiles=2, fire=1, walls=1,
+                          exits=1, tutorial=True, par=(3, 10)),
+    "fire": Spec("fire", 4, 4, tiles=4, fire=1, walls=2, exits=2, par=(7, 18)),
+
+    # --- 動かせないタイル。「動かせれば簡単なのに」を作る。
+    "fixed": Spec("fixed", 4, 4, tiles=5, fixed=1, walls=2, exits=2, par=(8, 18)),
+
+    # --- 各ギミック。
     "ice": Spec("ice", 4, 4, tiles=4, floors=["ice", "ice"], walls=1, exits=2),
     "sqrt": Spec("sqrt", 4, 4, tiles=4, floors=["sqrt"], walls=1, exits=2),
     "fact": Spec("fact", 4, 4, tiles=4, floors=["fact"], walls=1, exits=2),
     "swap": Spec("swap", 4, 4, tiles=4, floors=["swap"], walls=1, exits=2),
     "rotate": Spec("rotate", 4, 4, tiles=4, floors=["rotate"], walls=1, exits=2),
-    # 総仕上げ。床を複数種、タイルも出口も多め。
+
+    # --- 総仕上げ。床を複数種、タイルも出口も多め。
     "mix2": Spec("mix2", 4, 5, tiles=5, floors=["ice", "sqrt"], walls=2, exits=3,
                  par=(10, 22), min_aha=5),
     "mix3": Spec("mix3", 5, 5, tiles=5, floors=["ice", "swap", "rotate"],
                  walls=2, exits=3, par=(12, 24), min_aha=5),
-    "mix_fact": Spec("mix_fact", 4, 5, tiles=5, floors=["fact", "swap"],
-                     walls=2, exits=3, par=(10, 22), min_aha=5),
+    "mix_fire": Spec("mix_fire", 4, 5, tiles=5, fire=1, floors=["ice", "swap"],
+                     walls=3, exits=3, par=(10, 22), min_aha=5),
 }
 
 
@@ -256,9 +503,14 @@ def main():
 
     for i in range(args.tries):
         tried += 1
-        cand = build_candidate(rng, spec)
-        if cand is None:
+        # 壁と床だけ先に置き、タイルは「クリア状態からの巻き戻し」で並べる
+        scaffold = build_candidate(rng, spec)
+        if scaffold is None:
             drop("盤が作れない")
+            continue
+        cand = build_by_rewind(rng, spec, scaffold["walls"], scaffold["floors"])
+        if cand is None:
+            drop("巻き戻しで組めない")
             continue
         # 壁で分かれた盤は、この時点で捨てる（解く前に分かる）
         lv = json.loads(json.dumps(cand))
@@ -274,6 +526,9 @@ def main():
         final = finalize(cand, exit_values)
         if final is None:
             drop("出口が使われない")
+            continue
+        if not exits_are_tight(final):
+            drop("出口の範囲が広すぎる")
             continue
 
         try:
