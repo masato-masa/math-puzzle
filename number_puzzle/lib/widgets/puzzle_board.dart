@@ -45,6 +45,18 @@ class _GhostSpec {
   });
 }
 
+/// 氷スライドの通過マスに一瞬だけ出す軌跡の粒 1 個ぶん。
+///
+/// 氷は「当たるまで止まらない」ので 1 手で何マスも進むが、タイル本体は
+/// AnimatedPositioned で始点から終点へ直接すべるだけなので、途中の
+/// マスを本当に通ったのかが伝わりにくい（特に距離が長いとき）。
+/// 通過マスに軌跡を灯すことで、物理的に滑った感触を補う。
+class _TrailDotSpec {
+  final int row, col;
+  final int index; // 出現を少しずつ遅らせるための順番
+  _TrailDotSpec({required this.row, required this.col, required this.index});
+}
+
 /// 盤面の描画とタップ操作。ゲームルールの判定は一切持たず、
 /// GameController を呼ぶだけ（このクラスの責務は「見た目とジェスチャー」）。
 class PuzzleBoard extends StatefulWidget {
@@ -58,6 +70,7 @@ class PuzzleBoard extends StatefulWidget {
 
 class _PuzzleBoardState extends State<PuzzleBoard> {
   final List<_GhostSpec> _ghosts = [];
+  final List<_TrailDotSpec> _trail = [];
 
   // スワイプ操作の途中経過（なぞり始めた位置・マスと、最後の指の位置）
   Offset? _panStart;
@@ -162,7 +175,31 @@ class _PuzzleBoardState extends State<PuzzleBoard> {
         toCol: event.toCol,
         value: origValue,
       );
+    } else if (event.kind == MoveEventKind.moved) {
+      // 素の移動で 2 マス以上動くのは氷スライドしかありえない
+      // （氷が無ければ 1 手は必ず 1 マスで止まる）。
+      final dr = event.toRow - event.fromRow;
+      final dc = event.toCol - event.fromCol;
+      final dist = dr.abs() + dc.abs();
+      if (dist > 1) {
+        _spawnTrail(event.fromRow, event.fromCol, event.toRow, event.toCol);
+      }
     }
+  }
+
+  void _spawnTrail(int fromRow, int fromCol, int toRow, int toCol) {
+    final dr = (toRow - fromRow).sign;
+    final dc = (toCol - fromCol).sign;
+    final dist = (toRow - fromRow).abs() + (toCol - fromCol).abs();
+    final dots = <_TrailDotSpec>[
+      for (var i = 1; i < dist; i++)
+        _TrailDotSpec(row: fromRow + dr * i, col: fromCol + dc * i, index: i),
+    ];
+    setState(() => _trail.addAll(dots));
+    Future.delayed(const Duration(milliseconds: 380), () {
+      if (!mounted) return;
+      setState(() => _trail.removeWhere(dots.contains));
+    });
   }
 
   void _spawnGhost({
@@ -318,6 +355,14 @@ class _PuzzleBoardState extends State<PuzzleBoard> {
                                   ),
                                 ),
                               ),
+                          for (final dot in _trail)
+                            _SlideTrailDot(
+                              key: ValueKey('trail_${dot.row}_${dot.col}_${dot.index}'),
+                              row: dot.row,
+                              col: dot.col,
+                              delay: Duration(milliseconds: dot.index * 22),
+                              cellSize: cellSize,
+                            ),
                           for (final t in widget.controller.tiles)
                             AnimatedPositioned(
                               key: ValueKey(t.id),
@@ -399,6 +444,69 @@ class _PuzzleBoardState extends State<PuzzleBoard> {
 /// 合体アニメーション用のゴースト。mover が消えた瞬間から短時間だけ、
 /// target の位置へ滑り込むように見せる（実データは既に更新済みで、
 /// これは視覚効果のみ）。
+/// 氷スライドの通過マスに一瞬灯る光の粒。[delay] だけ遅れて現れ、
+/// 手前のマスから奥のマスへ順に灯っていくことで「通り過ぎた」向きが
+/// 伝わるようにしてある。
+class _SlideTrailDot extends StatefulWidget {
+  const _SlideTrailDot({
+    super.key,
+    required this.row,
+    required this.col,
+    required this.delay,
+    required this.cellSize,
+  });
+
+  final int row, col;
+  final Duration delay;
+  final double cellSize;
+
+  @override
+  State<_SlideTrailDot> createState() => _SlideTrailDotState();
+}
+
+class _SlideTrailDotState extends State<_SlideTrailDot> {
+  bool _visible = false;
+
+  @override
+  void initState() {
+    super.initState();
+    Future.delayed(widget.delay, () {
+      if (mounted) setState(() => _visible = true);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final size = widget.cellSize;
+    return Positioned(
+      left: widget.col * size,
+      top: widget.row * size,
+      width: size,
+      height: size,
+      child: IgnorePointer(
+        child: AnimatedOpacity(
+          opacity: _visible ? 1.0 : 0.0,
+          duration: const Duration(milliseconds: 90),
+          curve: Curves.easeOut,
+          child: Center(
+            child: Container(
+              width: size * 0.22,
+              height: size * 0.22,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: AppColors.cyan.withValues(alpha: 0.75),
+                boxShadow: [
+                  BoxShadow(color: AppColors.cyan.withValues(alpha: 0.6), blurRadius: 6),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _FlyingGhost extends StatefulWidget {
   const _FlyingGhost({required this.ghost, required this.cellSize});
   final _GhostSpec ghost;

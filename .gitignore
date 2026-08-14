@@ -16,6 +16,9 @@ __pycache__/
 
 # 検証スクリプトの一時出力（_ 始まりは使い捨て）
 tools/_*.txt
+tools/_*.json
+# v3_generate.py が吐く候補プール（大量・使い捨て。採用分は v3_levels.py に転記する）
+tools/generated_*.json
 
 # バージョンスナップショット（履歴は git 側で持つ）
 bk/

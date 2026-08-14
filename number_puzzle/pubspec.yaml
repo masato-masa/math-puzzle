@@ -67,6 +67,11 @@ flutter:
     - assets/audio/sfx_move.wav
     - assets/audio/sfx_slide.wav
     - assets/audio/sfx_merge.wav
+    - assets/audio/sfx_merge_plus.wav
+    - assets/audio/sfx_merge_minus.wav
+    - assets/audio/sfx_merge_times.wav
+    - assets/audio/sfx_merge_div.wav
+    - assets/audio/sfx_burn.wav
     - assets/audio/sfx_exit.wav
     - assets/audio/sfx_blocked.wav
     - assets/audio/sfx_undo.wav

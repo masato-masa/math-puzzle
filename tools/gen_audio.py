@@ -122,9 +122,32 @@ def gen_sfx():
     write_wav(os.path.join(OUT, "sfx_slide.wav"),
               render_sweep(520, 880, 0.18, gain=0.35))
 
-    # 結合（計算成立）: 明るい2音のチャイム
+    # 結合（計算成立）: 明るい2音のチャイム（演算子が分からない場面の既定音）
     write_wav(os.path.join(OUT, "sfx_merge.wav"),
               render_chime([NOTE["E5"], NOTE["G5"]], 0.32, gains=[0.6, 0.5], decay=0.22))
+
+    # 結合を演算子ごとに変える。2048 のように「合体そのものの手応え」を
+    # 均一にせず、何をして合体したかが音だけでも伝わるようにする。
+    #   + … 素直に足し合わさる、まとまりのある単音寄りの響き
+    #   − … 一段落ちる（ピッチが下がる2音）、削られる感じ
+    #   × … 音を重ねて分厚くする、いちばん派手
+    #   ÷ … 短く区切られた2音（スタッカート）、割れる・分かれる感じ
+    write_wav(os.path.join(OUT, "sfx_merge_plus.wav"),
+              render_chime([NOTE["C5"], NOTE["E5"]], 0.3, gains=[0.55, 0.55], decay=0.22))
+    write_wav(os.path.join(OUT, "sfx_merge_minus.wav"),
+              render_chime([NOTE["G4"], NOTE["D4"]], 0.28, gains=[0.55, 0.45], decay=0.2))
+    write_wav(os.path.join(OUT, "sfx_merge_times.wav"),
+              render_chime([NOTE["C5"], NOTE["E5"], NOTE["G5"], NOTE["C5"] * 2], 0.38,
+                           gains=[0.5, 0.5, 0.5, 0.35], decay=0.28))
+    write_wav(os.path.join(OUT, "sfx_merge_div.wav"),
+              concat_with_gap(0.02,
+                              render_chime([NOTE["E5"]], 0.1, gains=[0.55], decay=0.08),
+                              render_chime([NOTE["C5"]], 0.16, gains=[0.5], decay=0.12)))
+
+    # 炎が燃やす: パチッという短いノイズ + くすぶるスイープ
+    write_wav(os.path.join(OUT, "sfx_burn.wav"),
+              mix(render_noise_tick(0.09, gain=0.3, seed=777),
+                  render_sweep(900, 260, 0.22, gain=0.28)))
 
     # 出口: 上品に抜けるような単音
     write_wav(os.path.join(OUT, "sfx_exit.wav"),

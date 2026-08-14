@@ -349,7 +349,7 @@ def solve_open_exits(level):
         if is_goal(s):
             goal = s
             break
-        if len(parent) > 60000:      # 大きすぎる盤は捨てる
+        if len(parent) > 120000:      # 大きすぎる盤は捨てる
             return None
         for ns, action in successors_with_actions(s, lv):
             if ns not in parent:
@@ -441,11 +441,12 @@ SPECS = {
     "b1_tutorial": Spec("b1_tutorial", 3, 3, tiles=3, walls=1, exits=1,
                         tutorial=True, par=(3, 8)),
     "b1": Spec("b1", 4, 4, tiles=5, walls=2, exits=2, par=(8, 16)),
-    # ボスは枚数を増やすが、4x4 に 6 枚 + 壁 3 だと動く余地が無くなって
-    # ほとんどクリア不能になる（900 回試して 0 件だった）。
-    # 密度は保ったまま、少しだけ盤を広げる。
-    "b1_boss": Spec("b1_boss", 4, 5, tiles=6, walls=2, exits=2,
-                    par=(9, 20), min_aha=5),
+    # タイル6枚は状態空間が急に膨らみ検証(BFS)が追いつかず、
+    # 出口3つは「使われない行・列」に引っかかりやすく、
+    # どちらも実質 0 件だった。b1 と同じ枚数・出口数のまま
+    # 壁だけ増やしてボスらしさを出す。
+    "b1_boss": Spec("b1_boss", 4, 5, tiles=5, walls=3, exits=2,
+                    par=(9, 22), min_aha=6),
 
     # --- 迷路。壁を多めにして、動かす順と経路を考えないと詰むようにする。
     "maze": Spec("maze", 4, 4, tiles=5, walls=4, exits=2, par=(8, 18), min_aha=4),

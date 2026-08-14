@@ -9,7 +9,34 @@ import 'tile_state.dart';
 
 /// 効果音トリガー用のイベント種別（GameController は音を鳴らさない。
 /// SoundService がこれを購読して実際の再生を行う）。
-enum GameSoundEvent { move, slide, merge, exit, blocked, win, fail, undo }
+///
+/// 合体音は演算子ごとに鳴らし分ける（2048 のように「合体そのもの」を
+/// 均一な手応えにせず、何をして合体したかが音だけでも伝わるように）。
+/// mergePlus/Minus/Times/Div のどれにも当てはまらない場合の保険として
+/// merge を残してある（本来は起こらない想定）。
+enum GameSoundEvent {
+  move,
+  slide,
+  merge,
+  mergePlus,
+  mergeMinus,
+  mergeTimes,
+  mergeDiv,
+  burn,
+  exit,
+  blocked,
+  win,
+  fail,
+  undo,
+}
+
+GameSoundEvent soundForOp(String? op) => switch (op) {
+      '+' => GameSoundEvent.mergePlus,
+      '−' => GameSoundEvent.mergeMinus,
+      '×' => GameSoundEvent.mergeTimes,
+      '÷' => GameSoundEvent.mergeDiv,
+      _ => GameSoundEvent.merge,
+    };
 
 /// 1 手を解決した結果。まだ盤面には反映していない。
 ///
@@ -40,6 +67,10 @@ class MoveResolution {
   /// 動かせないときの理由（それ以外では null）。
   final String? reason;
 
+  /// 合体に使われた演算子（+/−/×/÷）。合体・炎による焼却以外では null。
+  /// 演算子ごとに効果音を鳴らし分けるのに使う。
+  final String? op;
+
   const MoveResolution({
     required this.kind,
     required this.toRow,
@@ -50,6 +81,7 @@ class MoveResolution {
     this.target,
     this.spendFloor = false,
     this.reason,
+    this.op,
   });
 
   bool get isBlocked => kind == MoveEventKind.blocked;
@@ -307,6 +339,7 @@ class GameController {
           edges: result.edges,
           slid: slid,
           target: hit,
+          op: result.op,
         );
       }
       if (cr == tile.row && cc == tile.col) {
@@ -368,7 +401,7 @@ class GameController {
       moveCount++;
       message = null;
       _checkEnd();
-      onSound?.call(GameSoundEvent.merge);
+      onSound?.call(GameSoundEvent.burn);
       notifyListeners();
       return MoveEvent(
         kind: MoveEventKind.burned,
@@ -396,7 +429,7 @@ class GameController {
         selectedTileId = targetId;
       }
       _checkEnd();
-      onSound?.call(GameSoundEvent.merge);
+      onSound?.call(soundForOp(res.op));
       notifyListeners();
       return MoveEvent(
         kind: MoveEventKind.merged,

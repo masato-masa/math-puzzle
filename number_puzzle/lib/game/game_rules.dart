@@ -61,7 +61,11 @@ int? _isqrtExact(int n) {
 class CollideResult {
   final int value;
   final Edges edges;
-  const CollideResult(this.value, this.edges);
+
+  /// 実際に使われた演算子（+/−/×/÷）。演算子ごとに違う効果音を
+  /// 鳴らし分けるのに使う（判定そのものには影響しない）。
+  final String op;
+  const CollideResult(this.value, this.edges, this.op);
 }
 
 CollideResult? collide({
@@ -85,7 +89,7 @@ CollideResult? collide({
   if (value == null) return null;
 
   final edges = targetEdges.withCleared(direction.opposite);
-  return CollideResult(value, edges);
+  return CollideResult(value, edges, op);
 }
 
 /// 床に止まったときの効果。

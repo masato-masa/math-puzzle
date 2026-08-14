@@ -168,7 +168,7 @@ class _LevelPathNode extends StatelessWidget {
             ),
             child: Row(
               children: [
-                _Badge(index: index, cleared: cleared),
+                _Badge(index: index, cleared: cleared, isBoss: index % 5 == 0),
                 const SizedBox(width: 14),
                 Expanded(
                   child: Column(
@@ -227,14 +227,18 @@ class _LevelPathNode extends StatelessWidget {
 }
 
 class _Badge extends StatelessWidget {
-  const _Badge({required this.index, required this.cleared});
+  const _Badge({required this.index, required this.cleared, this.isBoss = false});
 
   final int index;
   final bool cleared;
 
+  /// 5ステージ1ブロックの最後（ボス面）かどうか。Angry Birds 等の
+  /// レベルマップで節目の面が一目で分かるのを参考に、王冠を添える。
+  final bool isBoss;
+
   @override
   Widget build(BuildContext context) {
-    return Container(
+    final badge = Container(
       width: _LevelPathNode._badgeSize,
       height: _LevelPathNode._badgeSize,
       alignment: Alignment.center,
@@ -244,7 +248,12 @@ class _Badge extends StatelessWidget {
             ? const LinearGradient(colors: [Color(0xFFFFE29A), AppColors.gold])
             : null,
         color: cleared ? null : AppColors.tileFixed,
-        border: Border.all(color: cleared ? AppColors.goldDeep : AppColors.rule, width: 1.2),
+        border: Border.all(
+          color: isBoss
+              ? AppColors.warn
+              : (cleared ? AppColors.goldDeep : AppColors.rule),
+          width: isBoss ? 1.8 : 1.2,
+        ),
       ),
       child: Text(
         '$index',
@@ -254,6 +263,19 @@ class _Badge extends StatelessWidget {
           color: cleared ? AppColors.goldDeep : AppColors.textPrimary,
         ),
       ),
+    );
+    if (!isBoss) return badge;
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        badge,
+        const Positioned(
+          top: -12,
+          left: 0,
+          right: 0,
+          child: Center(child: Text('👑', style: TextStyle(fontSize: 16))),
+        ),
+      ],
     );
   }
 }
