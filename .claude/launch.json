@@ -10,8 +10,8 @@
     {
       "name": "flutter_web",
       "runtimeExecutable": "python",
-      "runtimeArgs": ["-m", "http.server", "8888", "--directory", "C:\\dev\\number_puzzle\\build\\web"],
-      "port": 8888
+      "runtimeArgs": ["-m", "http.server", "8940", "--directory", "C:\\claude\\math-puzzle\\number_puzzle\\build\\web"],
+      "port": 8940
     }
   ]
 }
