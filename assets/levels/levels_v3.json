@@ -380,6 +380,142 @@
       "limit": 7
     },
     {
+      "levelId": "v3_008",
+      "title": "氷で一気に",
+      "hint": "氷は当たるまで止まらない",
+      "rows": 6,
+      "cols": 5,
+      "tiles": [
+        {
+          "id": "a",
+          "row": 5,
+          "col": 0,
+          "value": 4
+        },
+        {
+          "id": "b",
+          "row": 5,
+          "col": 4,
+          "value": 5,
+          "edges": {
+            "left": "+"
+          }
+        },
+        {
+          "id": "c",
+          "row": 0,
+          "col": 0,
+          "value": 3,
+          "edges": {
+            "down": "×"
+          }
+        }
+      ],
+      "walls": [],
+      "floors": [
+        {
+          "row": 5,
+          "col": 1,
+          "type": "ice"
+        },
+        {
+          "row": 5,
+          "col": 2,
+          "type": "ice"
+        },
+        {
+          "row": 5,
+          "col": 3,
+          "type": "ice"
+        },
+        {
+          "row": 0,
+          "col": 1,
+          "type": "ice"
+        },
+        {
+          "row": 0,
+          "col": 2,
+          "type": "ice"
+        },
+        {
+          "row": 0,
+          "col": 3,
+          "type": "ice"
+        }
+      ],
+      "exits": [
+        {
+          "row": 0,
+          "col": 4,
+          "direction": "right",
+          "value": 27
+        }
+      ],
+      "par": 8,
+      "limit": 8
+    },
+    {
+      "levelId": "v3_009",
+      "title": "氷で二段仕込み",
+      "hint": "氷が無い側は歩いて運ぶ",
+      "size": 5,
+      "tiles": [
+        {
+          "id": "a",
+          "row": 4,
+          "col": 0,
+          "value": 2
+        },
+        {
+          "id": "b",
+          "row": 4,
+          "col": 4,
+          "value": 6,
+          "edges": {
+            "left": "+"
+          }
+        },
+        {
+          "id": "c",
+          "row": 0,
+          "col": 0,
+          "value": 3,
+          "edges": {
+            "down": "×"
+          }
+        }
+      ],
+      "walls": [],
+      "floors": [
+        {
+          "row": 4,
+          "col": 1,
+          "type": "ice"
+        },
+        {
+          "row": 4,
+          "col": 2,
+          "type": "ice"
+        },
+        {
+          "row": 4,
+          "col": 3,
+          "type": "ice"
+        }
+      ],
+      "exits": [
+        {
+          "row": 0,
+          "col": 4,
+          "direction": "right",
+          "value": 24
+        }
+      ],
+      "par": 10,
+      "limit": 10
+    },
+    {
       "levelId": "v3_010",
       "title": "二本の氷レーン",
       "hint": "両端から仕込んで中央でぶつける",
@@ -620,6 +756,170 @@
         {
           "row": 3,
           "col": 3,
+          "type": "sqrt",
+          "uses": 1
+        }
+      ],
+      "exits": [
+        {
+          "row": 0,
+          "col": 0,
+          "direction": "up",
+          "value": 8
+        }
+      ],
+      "par": 10,
+      "limit": 10
+    },
+    {
+      "levelId": "v3_014",
+      "title": "根を経由する遠回り",
+      "hint": "大きく作ってから根で小さくする",
+      "size": 5,
+      "tiles": [
+        {
+          "id": "a",
+          "row": 4,
+          "col": 0,
+          "value": 4
+        },
+        {
+          "id": "b",
+          "row": 4,
+          "col": 4,
+          "value": 9,
+          "edges": {
+            "left": "×"
+          }
+        },
+        {
+          "id": "c",
+          "row": 0,
+          "col": 0,
+          "value": 7,
+          "edges": {
+            "down": "+"
+          }
+        }
+      ],
+      "walls": [],
+      "floors": [
+        {
+          "row": 4,
+          "col": 1,
+          "type": "ice"
+        },
+        {
+          "row": 4,
+          "col": 2,
+          "type": "ice"
+        },
+        {
+          "row": 4,
+          "col": 3,
+          "type": "ice"
+        },
+        {
+          "row": 4,
+          "col": 4,
+          "type": "sqrt",
+          "uses": 1
+        }
+      ],
+      "exits": [
+        {
+          "row": 0,
+          "col": 0,
+          "direction": "up",
+          "value": 13
+        }
+      ],
+      "par": 8,
+      "limit": 8
+    },
+    {
+      "levelId": "v3_015",
+      "title": "根を二回",
+      "hint": "81 を 3 まで落とす",
+      "rows": 7,
+      "cols": 6,
+      "tiles": [
+        {
+          "id": "a",
+          "row": 6,
+          "col": 0,
+          "value": 9
+        },
+        {
+          "id": "b",
+          "row": 6,
+          "col": 5,
+          "value": 9,
+          "edges": {
+            "left": "×"
+          }
+        },
+        {
+          "id": "c",
+          "row": 0,
+          "col": 0,
+          "value": 5,
+          "edges": {
+            "right": "+"
+          }
+        }
+      ],
+      "walls": [],
+      "floors": [
+        {
+          "row": 6,
+          "col": 1,
+          "type": "ice"
+        },
+        {
+          "row": 6,
+          "col": 2,
+          "type": "ice"
+        },
+        {
+          "row": 6,
+          "col": 3,
+          "type": "ice"
+        },
+        {
+          "row": 6,
+          "col": 4,
+          "type": "ice"
+        },
+        {
+          "row": 6,
+          "col": 5,
+          "type": "sqrt",
+          "uses": 1
+        },
+        {
+          "row": 0,
+          "col": 1,
+          "type": "ice"
+        },
+        {
+          "row": 0,
+          "col": 2,
+          "type": "ice"
+        },
+        {
+          "row": 0,
+          "col": 3,
+          "type": "ice"
+        },
+        {
+          "row": 0,
+          "col": 4,
+          "type": "ice"
+        },
+        {
+          "row": 0,
+          "col": 5,
           "type": "sqrt",
           "uses": 1
         }
@@ -910,6 +1210,50 @@
       "limit": 16
     },
     {
+      "levelId": "v3_021",
+      "title": "演算子を入れ替える",
+      "hint": "×を÷に変えられる",
+      "tutorial": true,
+      "rows": 1,
+      "cols": 4,
+      "tiles": [
+        {
+          "id": "a",
+          "row": 0,
+          "col": 0,
+          "value": 12
+        },
+        {
+          "id": "b",
+          "row": 0,
+          "col": 2,
+          "value": 3,
+          "edges": {
+            "left": "×"
+          }
+        }
+      ],
+      "walls": [],
+      "floors": [
+        {
+          "row": 0,
+          "col": 1,
+          "type": "swap",
+          "uses": 1
+        }
+      ],
+      "exits": [
+        {
+          "row": 0,
+          "col": 3,
+          "direction": "right",
+          "value": 4
+        }
+      ],
+      "par": 5,
+      "limit": 5
+    },
+    {
       "levelId": "v3_022",
       "title": "入れ替えてから当てる",
       "hint": "＋のままでは出せない",
@@ -1067,6 +1411,156 @@
       ],
       "par": 13,
       "limit": 13
+    },
+    {
+      "levelId": "v3_025",
+      "title": "入替とスライドのボス",
+      "hint": "滑る前に演算子を整える",
+      "rows": 6,
+      "cols": 5,
+      "tiles": [
+        {
+          "id": "a",
+          "row": 5,
+          "col": 0,
+          "value": 24
+        },
+        {
+          "id": "b",
+          "row": 5,
+          "col": 4,
+          "value": 6,
+          "edges": {
+            "left": "×"
+          }
+        },
+        {
+          "id": "c",
+          "row": 0,
+          "col": 0,
+          "value": 5,
+          "edges": {
+            "down": "+"
+          }
+        }
+      ],
+      "walls": [],
+      "floors": [
+        {
+          "row": 5,
+          "col": 1,
+          "type": "ice"
+        },
+        {
+          "row": 5,
+          "col": 2,
+          "type": "swap",
+          "uses": 1
+        },
+        {
+          "row": 5,
+          "col": 3,
+          "type": "ice"
+        }
+      ],
+      "exits": [
+        {
+          "row": 0,
+          "col": 0,
+          "direction": "up",
+          "value": 9
+        }
+      ],
+      "par": 9,
+      "limit": 9
+    },
+    {
+      "levelId": "v3_026",
+      "title": "演算子を回す",
+      "hint": "辺は時計回りに移る",
+      "tutorial": true,
+      "rows": 1,
+      "cols": 4,
+      "tiles": [
+        {
+          "id": "a",
+          "row": 0,
+          "col": 0,
+          "value": 3
+        },
+        {
+          "id": "b",
+          "row": 0,
+          "col": 2,
+          "value": 5,
+          "edges": {
+            "down": "+"
+          }
+        }
+      ],
+      "walls": [],
+      "floors": [
+        {
+          "row": 0,
+          "col": 1,
+          "type": "rotate",
+          "uses": 1
+        }
+      ],
+      "exits": [
+        {
+          "row": 0,
+          "col": 3,
+          "direction": "right",
+          "value": 8
+        }
+      ],
+      "par": 5,
+      "limit": 5
+    },
+    {
+      "levelId": "v3_027",
+      "title": "回してから当てる",
+      "hint": "当てられる向きを作る",
+      "tutorial": true,
+      "rows": 1,
+      "cols": 4,
+      "tiles": [
+        {
+          "id": "a",
+          "row": 0,
+          "col": 3,
+          "value": 3
+        },
+        {
+          "id": "b",
+          "row": 0,
+          "col": 2,
+          "value": 5,
+          "edges": {
+            "up": "+"
+          }
+        }
+      ],
+      "walls": [],
+      "floors": [
+        {
+          "row": 0,
+          "col": 1,
+          "type": "rotate",
+          "uses": 1
+        }
+      ],
+      "exits": [
+        {
+          "row": 0,
+          "col": 0,
+          "direction": "left",
+          "value": 8
+        }
+      ],
+      "par": 5,
+      "limit": 5
     },
     {
       "levelId": "v3_028",
@@ -1387,6 +1881,226 @@
       "limit": 6
     },
     {
+      "levelId": "v3_033",
+      "title": "二本立てで組み立てる",
+      "hint": "左右で別々の式を作る",
+      "rows": 4,
+      "cols": 5,
+      "tiles": [
+        {
+          "id": "a",
+          "row": 3,
+          "col": 1,
+          "value": 5
+        },
+        {
+          "id": "b",
+          "row": 3,
+          "col": 0,
+          "value": 4,
+          "edges": {
+            "right": "+"
+          }
+        },
+        {
+          "id": "c",
+          "row": 3,
+          "col": 3,
+          "value": 2
+        },
+        {
+          "id": "d",
+          "row": 3,
+          "col": 4,
+          "value": 3,
+          "edges": {
+            "left": "×"
+          }
+        }
+      ],
+      "walls": [
+        {
+          "row": 0,
+          "col": 2
+        },
+        {
+          "row": 1,
+          "col": 2
+        },
+        {
+          "row": 2,
+          "col": 2
+        },
+        {
+          "row": 3,
+          "col": 2
+        }
+      ],
+      "floors": [],
+      "exits": [
+        {
+          "row": 0,
+          "col": 0,
+          "direction": "up",
+          "value": 9
+        },
+        {
+          "row": 0,
+          "col": 4,
+          "direction": "up",
+          "value": 6
+        }
+      ],
+      "par": 10,
+      "limit": 10
+    },
+    {
+      "levelId": "v3_034",
+      "title": "三つの行き先",
+      "hint": "似た値ほど出口を間違えやすい",
+      "rows": 4,
+      "cols": 4,
+      "tiles": [
+        {
+          "id": "a",
+          "row": 3,
+          "col": 0,
+          "value": 6
+        },
+        {
+          "id": "b",
+          "row": 3,
+          "col": 1,
+          "value": 4,
+          "edges": {
+            "left": "+"
+          }
+        },
+        {
+          "id": "c",
+          "row": 3,
+          "col": 2,
+          "value": 3,
+          "edges": {
+            "left": "×"
+          }
+        },
+        {
+          "id": "d",
+          "row": 3,
+          "col": 3,
+          "value": 3
+        }
+      ],
+      "walls": [],
+      "floors": [],
+      "exits": [
+        {
+          "row": 0,
+          "col": 0,
+          "direction": "up",
+          "value": 6
+        },
+        {
+          "row": 0,
+          "col": 2,
+          "direction": "up",
+          "value": 12
+        },
+        {
+          "row": 0,
+          "col": 3,
+          "direction": "up",
+          "value": 3
+        }
+      ],
+      "par": 13,
+      "limit": 13
+    },
+    {
+      "levelId": "v3_035",
+      "title": "出口の総仕上げ",
+      "hint": "組み立てる物とそのまま出す物を見分ける",
+      "size": 5,
+      "tiles": [
+        {
+          "id": "a",
+          "row": 4,
+          "col": 1,
+          "value": 5
+        },
+        {
+          "id": "b",
+          "row": 4,
+          "col": 0,
+          "value": 4,
+          "edges": {
+            "right": "+"
+          }
+        },
+        {
+          "id": "c",
+          "row": 4,
+          "col": 3,
+          "value": 7,
+          "edges": {
+            "right": "×"
+          }
+        },
+        {
+          "id": "d",
+          "row": 4,
+          "col": 4,
+          "value": 2
+        }
+      ],
+      "walls": [
+        {
+          "row": 0,
+          "col": 2
+        },
+        {
+          "row": 1,
+          "col": 2
+        },
+        {
+          "row": 2,
+          "col": 2
+        },
+        {
+          "row": 3,
+          "col": 2
+        },
+        {
+          "row": 4,
+          "col": 2
+        }
+      ],
+      "floors": [],
+      "exits": [
+        {
+          "row": 0,
+          "col": 0,
+          "direction": "up",
+          "value": 9
+        },
+        {
+          "row": 0,
+          "col": 3,
+          "direction": "up",
+          "value": 7
+        },
+        {
+          "row": 0,
+          "col": 4,
+          "direction": "up",
+          "value": 2
+        }
+      ],
+      "par": 16,
+      "limit": 16
+    },
+    {
       "levelId": "v3_036",
       "title": "範囲で受け付ける出口",
       "hint": "ぴったりでなくても出せる",
@@ -1559,6 +2273,80 @@
       "limit": 12
     },
     {
+      "levelId": "v3_040",
+      "title": "範囲の振り分け",
+      "hint": "どちらの範囲に収まるか見極める",
+      "rows": 4,
+      "cols": 4,
+      "tiles": [
+        {
+          "id": "a",
+          "row": 3,
+          "col": 1,
+          "value": 2
+        },
+        {
+          "id": "b",
+          "row": 3,
+          "col": 0,
+          "value": 6,
+          "edges": {
+            "right": "×"
+          }
+        },
+        {
+          "id": "c",
+          "row": 3,
+          "col": 3,
+          "value": 4
+        }
+      ],
+      "walls": [
+        {
+          "row": 0,
+          "col": 2
+        },
+        {
+          "row": 1,
+          "col": 2
+        },
+        {
+          "row": 2,
+          "col": 2
+        },
+        {
+          "row": 3,
+          "col": 2
+        }
+      ],
+      "floors": [
+        {
+          "row": 2,
+          "col": 3,
+          "type": "fact",
+          "uses": 1
+        }
+      ],
+      "exits": [
+        {
+          "row": 0,
+          "col": 0,
+          "direction": "up",
+          "minValue": 10,
+          "maxValue": 14
+        },
+        {
+          "row": 0,
+          "col": 3,
+          "direction": "up",
+          "minValue": 20,
+          "maxValue": 25
+        }
+      ],
+      "par": 9,
+      "limit": 9
+    },
+    {
       "levelId": "v3_041",
       "title": "総仕上げ1：氷と根",
       "hint": "滑らせてから根で整える",
@@ -1621,6 +2409,64 @@
       "limit": 14
     },
     {
+      "levelId": "v3_042",
+      "title": "総仕上げ2：階乗と入替",
+      "hint": "＋のままでは! に入れられない",
+      "size": 5,
+      "tiles": [
+        {
+          "id": "a",
+          "row": 4,
+          "col": 0,
+          "value": 10
+        },
+        {
+          "id": "b",
+          "row": 4,
+          "col": 4,
+          "value": 4,
+          "edges": {
+            "left": "+"
+          }
+        }
+      ],
+      "walls": [],
+      "floors": [
+        {
+          "row": 4,
+          "col": 1,
+          "type": "ice"
+        },
+        {
+          "row": 4,
+          "col": 2,
+          "type": "swap",
+          "uses": 1
+        },
+        {
+          "row": 4,
+          "col": 3,
+          "type": "ice"
+        },
+        {
+          "row": 0,
+          "col": 0,
+          "type": "fact",
+          "uses": 1
+        }
+      ],
+      "exits": [
+        {
+          "row": 0,
+          "col": 0,
+          "direction": "up",
+          "value": 720
+        }
+      ],
+      "par": 8,
+      "limit": 8
+    },
+    {
       "levelId": "v3_043",
       "title": "総仕上げ3：回転と氷",
       "hint": "回してから滑らせる",
@@ -1676,6 +2522,61 @@
       ],
       "par": 13,
       "limit": 13
+    },
+    {
+      "levelId": "v3_044",
+      "title": "総仕上げ4：複数出口と根",
+      "hint": "根を通した方だけがその出口に合う",
+      "rows": 4,
+      "cols": 3,
+      "tiles": [
+        {
+          "id": "a",
+          "row": 3,
+          "col": 0,
+          "value": 9
+        },
+        {
+          "id": "b",
+          "row": 3,
+          "col": 1,
+          "value": 4
+        },
+        {
+          "id": "c",
+          "row": 3,
+          "col": 2,
+          "value": 6,
+          "edges": {
+            "left": "+"
+          }
+        }
+      ],
+      "walls": [],
+      "floors": [
+        {
+          "row": 1,
+          "col": 0,
+          "type": "sqrt",
+          "uses": 1
+        }
+      ],
+      "exits": [
+        {
+          "row": 0,
+          "col": 0,
+          "direction": "up",
+          "value": 3
+        },
+        {
+          "row": 0,
+          "col": 2,
+          "direction": "up",
+          "value": 10
+        }
+      ],
+      "par": 9,
+      "limit": 9
     },
     {
       "levelId": "v3_045",
@@ -1791,6 +2692,158 @@
       "limit": 16
     },
     {
+      "levelId": "v3_047",
+      "title": "総仕上げ7：回転と複数出口",
+      "hint": "当てられる面をどう作るか",
+      "rows": 4,
+      "cols": 4,
+      "tiles": [
+        {
+          "id": "a",
+          "row": 3,
+          "col": 0,
+          "value": 3,
+          "edges": {
+            "right": "+"
+          }
+        },
+        {
+          "id": "b",
+          "row": 3,
+          "col": 1,
+          "value": 5,
+          "edges": {
+            "left": "×"
+          }
+        },
+        {
+          "id": "c",
+          "row": 0,
+          "col": 3,
+          "value": 4
+        },
+        {
+          "id": "d",
+          "row": 3,
+          "col": 3,
+          "value": 6,
+          "edges": {
+            "up": "×"
+          }
+        }
+      ],
+      "walls": [
+        {
+          "row": 0,
+          "col": 2
+        },
+        {
+          "row": 1,
+          "col": 2
+        },
+        {
+          "row": 2,
+          "col": 2
+        },
+        {
+          "row": 3,
+          "col": 2
+        }
+      ],
+      "floors": [
+        {
+          "row": 0,
+          "col": 0,
+          "type": "rotate",
+          "uses": 1
+        }
+      ],
+      "exits": [
+        {
+          "row": 0,
+          "col": 0,
+          "direction": "up",
+          "value": 8
+        },
+        {
+          "row": 3,
+          "col": 3,
+          "direction": "down",
+          "value": 24
+        }
+      ],
+      "par": 12,
+      "limit": 12
+    },
+    {
+      "levelId": "v3_048",
+      "title": "総仕上げ8：範囲・根・氷",
+      "hint": "滑って作った値を根で範囲に収める",
+      "rows": 6,
+      "cols": 5,
+      "tiles": [
+        {
+          "id": "a",
+          "row": 5,
+          "col": 0,
+          "value": 8
+        },
+        {
+          "id": "b",
+          "row": 5,
+          "col": 4,
+          "value": 8,
+          "edges": {
+            "left": "×"
+          }
+        },
+        {
+          "id": "c",
+          "row": 0,
+          "col": 4,
+          "value": 3,
+          "edges": {
+            "down": "+"
+          }
+        }
+      ],
+      "walls": [],
+      "floors": [
+        {
+          "row": 5,
+          "col": 1,
+          "type": "ice"
+        },
+        {
+          "row": 5,
+          "col": 2,
+          "type": "ice"
+        },
+        {
+          "row": 5,
+          "col": 3,
+          "type": "ice"
+        },
+        {
+          "row": 5,
+          "col": 4,
+          "type": "sqrt",
+          "uses": 1
+        }
+      ],
+      "exits": [
+        {
+          "row": 0,
+          "col": 4,
+          "direction": "up",
+          "minValue": 10,
+          "maxValue": 12
+        }
+      ],
+      "par": 8,
+      "limit": 8
+    },
+    {
       "levelId": "v3_049",
       "title": "総仕上げ9：全ギミック前半",
       "hint": "回転・入替・氷を順に使う",
@@ -1853,6 +2906,108 @@
       ],
       "par": 17,
       "limit": 17
+    },
+    {
+      "levelId": "v3_050",
+      "title": "最終ボス",
+      "hint": "これまでの床を全部使うつもりで",
+      "size": 5,
+      "tiles": [
+        {
+          "id": "a",
+          "row": 4,
+          "col": 0,
+          "value": 10
+        },
+        {
+          "id": "b",
+          "row": 4,
+          "col": 1,
+          "value": 4,
+          "edges": {
+            "left": "+"
+          }
+        },
+        {
+          "id": "c",
+          "row": 4,
+          "col": 4,
+          "value": 9
+        },
+        {
+          "id": "d",
+          "row": 4,
+          "col": 3,
+          "value": 9,
+          "edges": {
+            "up": "×"
+          }
+        }
+      ],
+      "walls": [
+        {
+          "row": 0,
+          "col": 2
+        },
+        {
+          "row": 1,
+          "col": 2
+        },
+        {
+          "row": 2,
+          "col": 2
+        },
+        {
+          "row": 3,
+          "col": 2
+        },
+        {
+          "row": 4,
+          "col": 2
+        }
+      ],
+      "floors": [
+        {
+          "row": 3,
+          "col": 1,
+          "type": "swap",
+          "uses": 1
+        },
+        {
+          "row": 0,
+          "col": 0,
+          "type": "fact",
+          "uses": 1
+        },
+        {
+          "row": 3,
+          "col": 3,
+          "type": "rotate",
+          "uses": 1
+        },
+        {
+          "row": 1,
+          "col": 3,
+          "type": "sqrt",
+          "uses": 1
+        }
+      ],
+      "exits": [
+        {
+          "row": 0,
+          "col": 0,
+          "direction": "up",
+          "value": 720
+        },
+        {
+          "row": 0,
+          "col": 3,
+          "direction": "up",
+          "value": 9
+        }
+      ],
+      "par": 15,
+      "limit": 15
     }
   ]
 }
