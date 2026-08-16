@@ -54,7 +54,7 @@ class Spec:
 
     def __init__(self, name, rows, cols, tiles, floors=(), walls=0,
                  exits=2, tutorial=False, par=(6, 22), min_aha=3,
-                 fire=0, fixed=0, all_ice=False):
+                 fire=0, fixed=0, all_ice=False, widen_exits=0):
         self.name = name
         self.rows, self.cols = rows, cols
         self.tiles = tiles
@@ -67,6 +67,12 @@ class Spec:
         self.fire = fire                # 炎タイルの枚数
         self.fixed = fixed              # 動かせないタイルの枚数
         self.all_ice = all_ice          # 盤全体を氷にする
+        # 出口の受け付け値を、ぴったりの値から前後に広げる幅。
+        # 逆再生では 1 つの出口に 1 枚しか種を置かないので、
+        # 放っておくと出口は必ず単一値になり「範囲出口」の面が作れない。
+        # 広げた結果ほかの値でも通れてしまうなら、別解が増えて
+        # analyze 側の「解法が複数ある」で落ちるので、安全に試せる。
+        self.widen_exits = widen_exits
 
 
 def _free_cells(rows, cols, taken):
@@ -379,6 +385,22 @@ def solve_open_exits(level):
     return out
 
 
+def widen(level, span):
+    """出口の受け付け値を前後 span だけ広げて範囲にする。
+
+    「ちょうどの値」ではなく「この範囲に収まればよい」という問いに変える。
+    広げすぎると何でも通ってしまうので、呼び出し側で検証に通すこと。
+    """
+    lv = json.loads(json.dumps(level))
+    for ex in lv["exits"]:
+        if ex.get("value") is None:
+            continue
+        v = ex.pop("value")
+        ex["minValue"] = max(0, v - span)
+        ex["maxValue"] = v + span
+    return lv
+
+
 def finalize(level, exit_values):
     """出口に、実際に出ていった値を焼き付ける。
 
@@ -493,8 +515,14 @@ SPECS = {
 
     # --- 範囲を受け付ける出口。出口を1つに絞ると、生き残った全タイルが
     # 必ずそこを通るので、異なる値が同じ出口から出て自然に範囲になる。
-    "range_app": Spec("range_app", 4, 4, tiles=5, walls=2, exits=1),
-    "range_boss": Spec("range_boss", 4, 4, tiles=5, walls=3, exits=1, min_aha=6),
+    #
+    # 壁2枚（range_app）だと 400 回試して 0 件だった。タイルが自由に
+    # 動ける分だけ出ていく値が散らばり、「出口の範囲が広すぎる」で
+    # ほとんど落ちる。壁を増やして動きを縛った range_boss は通ったので、
+    # 応用側も壁 3 枚にそろえる（難度差はアハ下限で付ける）。
+    "range_app": Spec("range_app", 4, 4, tiles=5, walls=3, exits=2, widen_exits=1),
+    "range_boss": Spec("range_boss", 4, 4, tiles=5, walls=3, exits=2,
+                       widen_exits=1, min_aha=6),
 
     # --- 総仕上げ（41-50）。床を複数種、正方形〜わずかに縦長。
     "finale_ice_sqrt": Spec("finale_ice_sqrt", 4, 4, tiles=5,
@@ -507,9 +535,14 @@ SPECS = {
                               floors=["ice"], walls=2, exits=3, min_aha=5),
     "finale_range_rotate": Spec("finale_range_rotate", 4, 4, tiles=5,
                                 floors=["rotate", "sqrt"], walls=2, exits=1, min_aha=5),
-    "finale_boss": Spec("finale_boss", 5, 4, tiles=6, fire=1,
+    # 最終ボス。tiles と fire は合算して盤に置かれるので、当初の
+    # tiles=6 + fire=1 は実質 7 枚だった。6 枚ですら状態空間が破綻して
+    # 生成できないことがブロック1で分かっていたのに超過させてしまい、
+    # 4 時間以上かかっても 1 件も出なかった。実績のある 5 枚（うち 1 枚を
+    # 炎に）に抑え、難度は床の種類・壁・アハ下限で付ける。
+    "finale_boss": Spec("finale_boss", 4, 4, tiles=4, fire=1,
                         floors=["ice", "swap", "sqrt"], walls=3, exits=2,
-                        par=(12, 26), min_aha=8),
+                        par=(10, 24), min_aha=7),
 }
 
 
@@ -557,6 +590,8 @@ def main():
         if final is None:
             drop("出口が使われない")
             continue
+        if spec.widen_exits:
+            final = widen(final, spec.widen_exits)
         if not exits_are_tight(final):
             drop("出口の範囲が広すぎる")
             continue
