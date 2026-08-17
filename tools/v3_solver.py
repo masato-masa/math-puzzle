@@ -299,17 +299,33 @@ def solvable_within(level, limit):
 
 
 def floor_necessity(level, limit):
-    """床を 1 枚ずつ取り除いても解けてしまわないかを調べる。
+    """床を取り除いても解けてしまわないかを調べる。
 
     取り除いても limit 手以内に解けるなら、その床は飾りでしかない。
+
+    ただし氷はまとめて 1 つとして扱う。氷は「装置」ではなく「地形」で、
+    1 枚だけ抜いてもそこで止まるようになるだけで解けてしまうことが多く、
+    1 枚ずつ調べると全面氷の盤で全マスが不要と判定されてしまうため
+    （実際それで全面氷の盤が 1 つも作れなかった）。
+    まとめて抜いて解けなくなるなら、その氷は働いていると見なす。
     """
     result = []
     floors = level.get("floors", [])
-    for i, f in enumerate(floors):
+    ice = [f for f in floors if f["type"] == "ice"]
+    others = [f for f in floors if f["type"] != "ice"]
+
+    for f in others:
         trimmed = {k: v for k, v in level.items() if not k.startswith("_")}
-        trimmed["floors"] = [g for j, g in enumerate(floors) if j != i]
+        trimmed["floors"] = [g for g in floors if g is not f]
+        result.append({"floor": f, "needed": not solvable_within(trimmed, limit)})
+
+    if ice:
+        trimmed = {k: v for k, v in level.items() if not k.startswith("_")}
+        trimmed["floors"] = others
         needed = not solvable_within(trimmed, limit)
-        result.append({"floor": f, "needed": needed})
+        # 表示は代表 1 枚にまとめる（全マス列挙すると読みにくいので）
+        result.append({"floor": {**ice[0], "type": f"ice x{len(ice)}"},
+                       "needed": needed})
     return result
 
 
@@ -570,13 +586,18 @@ def analyze(level):
     useless = [n["floor"] for n in necessity if not n["needed"]]
     if useless:
         names = ", ".join(f"{f['type']}({f['row']},{f['col']})" for f in useless)
-        if level.get("tutorial"):
-            # チュートリアルは「その仕掛けを教える」場なので、飾りの床があると
-            # 何を学ばせたいのかがぼやける。応用編では逆に、使わない床を
-            # 置いておくのはひっかけとして有効なので警告にとどめる。
-            report["errors"].append(f"チュートリアルなのに使わない床がある: {names}")
+        # 抜いても解ける床は、そのステージの「お題」が機能していないという
+        # ことなので、原則エラーにする。以前は非チュートリアルを警告どまりに
+        # していたため、√ブロックなのに√を使わず解ける面が 39 か所も
+        # 素通りしていた（それが「ランダム生成感」の主因だった）。
+        #
+        # ひっかけとして使わない床を置きたい場合だけ、レベル側で
+        # "decoy_floors": True を明示する。明示を必須にすることで、
+        # 意図した飾りと、単なる置き忘れを区別する。
+        if level.get("decoy_floors"):
+            report["warnings"].append(f"ひっかけの床（意図的）: {names}")
         else:
-            report["warnings"].append(f"無くても解ける床: {names}")
+            report["errors"].append(f"無くても解ける床がある: {names}")
 
     start, dist, adj, truncated = explore(level, max_depth=par + 3)
     dgoal = goal_distance(dist, adj)

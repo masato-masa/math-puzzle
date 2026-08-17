@@ -3,24 +3,40 @@
 // 氷は「当たるまで止まらない」ので 1 手で何マスも進むが、タイル本体は
 // 始点から終点へすべるだけなので、途中を本当に通ったのか伝わりにくい。
 // 通過マスに軌跡の粒を灯すことで補っている。
-import 'dart:convert';
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:number_puzzle/game/course.dart';
 import 'package:number_puzzle/game/edges.dart';
+import 'package:number_puzzle/game/floor.dart';
 import 'package:number_puzzle/game/game_controller.dart';
 import 'package:number_puzzle/game/models.dart';
 import 'package:number_puzzle/widgets/puzzle_board.dart';
 
-Level _level(String id) {
-  final json = jsonDecode(
-    File('assets/levels/main_course.json').readAsStringSync(),
-  ) as Map<String, dynamic>;
-  final course = Course.fromJson((json['courses'] as List).first as Map<String, dynamic>);
-  return course.levels.firstWhere((l) => l.levelId == id);
-}
+/// 氷を2マス挟んで 9 と 4 が向かい合う 4x4 盤。
+/// (3,0)の9 が (3,1)(3,2) を滑って (3,3)の4 に当たり 9−4=5 になる。
+///
+/// 実レベルは作り直すたびに内容が変わるので、ここは固定の盤で確かめる
+/// （本番レベルを名指ししていたため、コースを差し替えた際に壊れた）。
+Level _iceFixture() => Level(
+      levelId: 'fixture_ice',
+      title: 'fixture',
+      hint: '',
+      tutorial: true,
+      rows: 4,
+      cols: 4,
+      tiles: [
+        TileSpec(id: 'a', row: 3, col: 0, value: 9, edges: Edges.fromMap(null)),
+        TileSpec(id: 'b', row: 3, col: 3, value: 4, edges: Edges.fromMap({'left': '−'})),
+        TileSpec(id: 'c', row: 0, col: 0, value: 6, edges: Edges.fromMap({'down': '+'})),
+      ],
+      walls: const [],
+      floors: const [
+        FloorTile(row: 3, col: 1, kind: FloorKind.ice),
+        FloorTile(row: 3, col: 2, kind: FloorKind.ice),
+      ],
+      exits: const [ExitSpec(row: 0, col: 0, direction: ExitDirection.up, value: 11)],
+      par: 6,
+      limit: 6,
+    );
 
 /// 実レベルは生成のたびに内容が変わるので、通常移動（氷なし）の例は
 /// 固定フィクスチャで検証する（board_gesture_test.dart と同じ理由）。
@@ -80,7 +96,7 @@ void main() {
     // v3_006: (3,0)の9 が (3,1)(3,2) の氷を滑って (3,3) の4 に当たる。
     // タップ2回（選ぶ→行き先）で動かす。ドラッグのしきい値判定に
     // 左右されない、確実な経路で _performMove を通す。
-    final c = await _pumpBoard(tester, _level('v3_006'));
+    final c = await _pumpBoard(tester, _iceFixture());
 
     await tester.tapAt(_cellCenter(tester, 3, 0));
     await tester.pump();

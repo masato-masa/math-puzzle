@@ -27,12 +27,18 @@ class FloorCellWidget extends StatelessWidget {
     this.isWall = false,
     this.floor,
     this.usesLeft,
+    this.suppressIce = false,
   });
 
   final double cellSize;
   final bool isWall;
   final FloorKind? floor;
   final int? usesLeft;
+
+  /// 盤全体が氷のとき true。マスごとに氷の印を出すと画面が記号で
+  /// 埋まってしまうので、その場合は印を描かず、盤そのものを氷の色で
+  /// 見せる（「ここは全部氷」という一目の理解に任せる）。
+  final bool suppressIce;
 
   @override
   Widget build(BuildContext context) {
@@ -58,6 +64,7 @@ class FloorCellWidget extends StatelessWidget {
       );
     }
     if (floor == null) return const SizedBox.shrink();
+    if (floor == FloorKind.ice && suppressIce) return const SizedBox.shrink();
 
     final spent = usesLeft != null && usesLeft! <= 0;
     final color = floorColor(floor!);

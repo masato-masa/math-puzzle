@@ -16,9 +16,10 @@ import '../theme/app_theme.dart';
 /// 計算自体は暗算できる範囲、あるいは実際に動かして確かめられる範囲に
 /// とどめてあるので、先出しの数字が無くても支障は無い。
 ///
-/// 表示は 2 種類:
-///  - 移動先マス … 角の枠と向きの矢印。
-///  - 合体先タイル … 相手タイルの上に「ここで合体する」印を出す。
+/// 出すのは移動先マスの枠と向きの矢印だけ。合体できる相手には何も
+/// 重ねない（相手のマスにはタイルが載っているので、枠を重ねると
+/// 数字が隠れるうえ、印の形によっては「そこへは行けない」という
+/// 逆の意味に見えてしまう）。
 class MoveDestinationMarker extends StatelessWidget {
   const MoveDestinationMarker({
     super.key,
@@ -124,43 +125,3 @@ class _HintGlowState extends State<HintGlow> with SingleTickerProviderStateMixin
   }
 }
 
-/// 合体できる相手タイルの上に出す「ここで合体する」印。
-/// 計算結果の数字は出さない（クラスの doc コメント参照）。
-class MergeResultBadge extends StatelessWidget {
-  const MergeResultBadge({super.key, required this.cellSize});
-
-  final double cellSize;
-
-  @override
-  Widget build(BuildContext context) {
-    return IgnorePointer(
-      child: Center(
-        child: Container(
-          width: cellSize * 0.34,
-          height: cellSize * 0.34,
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [Color(0xFFFFE29A), AppColors.gold],
-            ),
-            shape: BoxShape.circle,
-            border: Border.all(color: AppColors.ground, width: 1.2),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.gold.withValues(alpha: 0.7),
-                blurRadius: 10,
-                spreadRadius: 1,
-              ),
-            ],
-          ),
-          child: Icon(
-            Icons.close,
-            size: cellSize * 0.2,
-            color: AppColors.goldDeep,
-          ),
-        ),
-      ),
-    );
-  }
-}

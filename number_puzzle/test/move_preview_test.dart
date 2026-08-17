@@ -173,7 +173,12 @@ void main() {
           expect(event.toCol, preview.toCol,
               reason: '${level.levelId} の ${startTile.id} を $d: 行き先(列)が食い違う');
 
-          if (!preview.isBlocked) {
+          if (preview.kind == MoveEventKind.burned) {
+            // 炎は相手を燃やして自分も消えるので、その位置には何も残らない。
+            expect(c.tileAt(preview.toRow, preview.toCol), isNull,
+                reason: '${level.levelId} の ${startTile.id} を $d: '
+                    '燃やした跡にタイルが残っている');
+          } else if (!preview.isBlocked) {
             // 成立したなら、その位置のタイルはプレビューが予告した値になっている。
             final landed = c.tileAt(preview.toRow, preview.toCol);
             expect(landed?.value, preview.value,

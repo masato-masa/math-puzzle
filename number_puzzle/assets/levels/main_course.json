@@ -1,272 +1,148 @@
 {
   "courses": [
     {
-      "courseId": "main",
-      "title": "基本コース",
+      "courseId": "trial",
+      "title": "お試し（型で作成）",
       "levels": [
         {
-          "levelId": "v3_001",
-          "title": "ぶつけて計算",
-          "hint": "演算子のある辺に当てる",
-          "tutorial": true,
-          "size": 3,
+          "levelId": "trial_001",
+          "title": "全面氷",
+          "hint": "止まりたい場所に止まれない",
+          "rows": 4,
+          "cols": 4,
           "tiles": [
             {
               "id": "a",
               "row": 0,
               "col": 0,
-              "value": 7,
+              "value": 12,
               "edges": {
-                "right": "+"
-              }
-            },
-            {
-              "id": "b",
-              "row": 1,
-              "col": 1,
-              "value": 3
-            },
-            {
-              "id": "c",
-              "row": 1,
-              "col": 2,
-              "value": 2,
-              "edges": {
-                "left": "+"
-              }
-            }
-          ],
-          "walls": [
-            {
-              "row": 0,
-              "col": 1
-            }
-          ],
-          "floors": [],
-          "exits": [
-            {
-              "row": 2,
-              "col": 0,
-              "direction": "left",
-              "value": 12
-            }
-          ],
-          "par": 5,
-          "limit": 5,
-          "hintMove": {
-            "type": "move",
-            "row": 0,
-            "col": 0,
-            "dir": "down"
-          }
-        },
-        {
-          "levelId": "v3_002",
-          "title": "当てる向き",
-          "hint": "演算子の無い辺には入れない",
-          "tutorial": true,
-          "size": 3,
-          "tiles": [
-            {
-              "id": "a",
-              "row": 0,
-              "col": 1,
-              "value": 7,
-              "edges": {
-                "right": "+"
-              }
-            },
-            {
-              "id": "b",
-              "row": 0,
-              "col": 2,
-              "value": 13
-            },
-            {
-              "id": "c",
-              "row": 1,
-              "col": 0,
-              "value": 8,
-              "edges": {
-                "up": "−"
-              }
-            }
-          ],
-          "walls": [
-            {
-              "row": 1,
-              "col": 2
-            }
-          ],
-          "floors": [],
-          "exits": [
-            {
-              "row": 2,
-              "col": 0,
-              "direction": "left",
-              "value": 12
-            }
-          ],
-          "par": 5,
-          "limit": 5,
-          "hintMove": {
-            "type": "move",
-            "row": 0,
-            "col": 2,
-            "dir": "left"
-          }
-        },
-        {
-          "levelId": "v3_003",
-          "title": "どれとどれを",
-          "hint": "似た数ほど組み合わせを間違えやすい",
-          "size": 4,
-          "tiles": [
-            {
-              "id": "a",
-              "row": 0,
-              "col": 2,
-              "value": 9
-            },
-            {
-              "id": "b",
-              "row": 0,
-              "col": 3,
-              "value": 1,
-              "edges": {
-                "left": "−"
-              }
-            },
-            {
-              "id": "c",
-              "row": 1,
-              "col": 0,
-              "value": 2
-            },
-            {
-              "id": "d",
-              "row": 3,
-              "col": 1,
-              "value": 5,
-              "edges": {
-                "up": "+",
                 "right": "−"
               }
             },
             {
-              "id": "e",
-              "row": 3,
-              "col": 2,
-              "value": 7
-            }
-          ],
-          "walls": [
-            {
-              "row": 2,
-              "col": 1
-            },
-            {
-              "row": 2,
-              "col": 2
-            }
-          ],
-          "floors": [],
-          "exits": [
-            {
-              "row": 3,
-              "col": 0,
-              "direction": "down",
-              "value": 4
-            },
-            {
-              "row": 1,
-              "col": 3,
-              "direction": "right",
-              "value": 8
-            }
-          ],
-          "par": 8,
-          "limit": 8,
-          "hintMove": {
-            "type": "move",
-            "row": 0,
-            "col": 2,
-            "dir": "right"
-          }
-        },
-        {
-          "levelId": "v3_004",
-          "title": "順番を選ぶ",
-          "hint": "動かす順番で結果が変わる",
-          "size": 4,
-          "tiles": [
-            {
-              "id": "a",
+              "id": "b",
               "row": 0,
               "col": 1,
-              "value": 1,
+              "value": 16
+            },
+            {
+              "id": "c",
+              "row": 0,
+              "col": 2,
+              "value": 3,
+              "edges": {
+                "left": "+",
+                "right": "÷"
+              }
+            },
+            {
+              "id": "d",
+              "row": 0,
+              "col": 3,
+              "value": 4,
               "edges": {
                 "down": "+"
               }
             },
             {
-              "id": "b",
-              "row": 2,
-              "col": 0,
-              "value": 7
-            },
-            {
-              "id": "c",
-              "row": 3,
-              "col": 1,
-              "value": 5,
-              "edges": {
-                "right": "−"
-              }
-            },
-            {
-              "id": "d",
-              "row": 3,
-              "col": 2,
-              "value": 6,
-              "edges": {
-                "right": "−"
-              }
-            },
-            {
               "id": "e",
-              "row": 3,
+              "row": 1,
               "col": 3,
-              "value": 15
+              "value": 14
             }
           ],
           "walls": [
             {
-              "row": 2,
+              "row": 1,
               "col": 1
             },
             {
               "row": 2,
               "col": 2
+            },
+            {
+              "row": 2,
+              "col": 3
             }
           ],
-          "floors": [],
-          "exits": [
+          "floors": [
             {
               "row": 0,
               "col": 0,
-              "direction": "up",
-              "value": 8
+              "type": "ice"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "type": "ice"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "type": "ice"
+            },
+            {
+              "row": 0,
+              "col": 3,
+              "type": "ice"
+            },
+            {
+              "row": 1,
+              "col": 0,
+              "type": "ice"
+            },
+            {
+              "row": 1,
+              "col": 2,
+              "type": "ice"
+            },
+            {
+              "row": 1,
+              "col": 3,
+              "type": "ice"
+            },
+            {
+              "row": 2,
+              "col": 0,
+              "type": "ice"
+            },
+            {
+              "row": 2,
+              "col": 1,
+              "type": "ice"
             },
             {
               "row": 3,
               "col": 0,
-              "direction": "down",
-              "value": 4
+              "type": "ice"
+            },
+            {
+              "row": 3,
+              "col": 1,
+              "type": "ice"
+            },
+            {
+              "row": 3,
+              "col": 2,
+              "type": "ice"
+            },
+            {
+              "row": 3,
+              "col": 3,
+              "type": "ice"
             }
           ],
-          "par": 8,
-          "limit": 8,
+          "exits": [
+            {
+              "row": 0,
+              "col": 2,
+              "direction": "up",
+              "value": 10
+            }
+          ],
+          "par": 5,
+          "limit": 5,
           "hintMove": {
             "type": "move",
             "row": 0,
@@ -275,130 +151,132 @@
           }
         },
         {
-          "levelId": "v3_005",
-          "title": "五枚のボス",
-          "hint": "範囲に収まる出口もある",
-          "size": 4,
+          "levelId": "trial_002",
+          "title": "大きくしてから縮める",
+          "hint": "√に入れるには平方数が要る",
+          "rows": 4,
+          "cols": 4,
           "tiles": [
             {
               "id": "a",
               "row": 0,
-              "col": 2,
-              "value": 3,
-              "edges": {
-                "down": "×"
-              }
+              "col": 3,
+              "value": 12
             },
             {
               "id": "b",
-              "row": 0,
-              "col": 3,
-              "value": 8,
+              "row": 1,
+              "col": 2,
+              "value": 10,
               "edges": {
-                "left": "−"
+                "right": "−"
               }
             },
             {
               "id": "c",
               "row": 1,
-              "col": 2,
-              "value": 1
+              "col": 3,
+              "value": 1,
+              "edges": {
+                "down": "−",
+                "up": "−"
+              }
             },
             {
               "id": "d",
               "row": 2,
               "col": 2,
-              "value": 15
+              "value": 8,
+              "edges": {
+                "up": "+"
+              }
             },
             {
               "id": "e",
-              "row": 3,
-              "col": 0,
-              "value": 16
+              "row": 2,
+              "col": 3,
+              "value": 22
             }
           ],
-          "walls": [
-            {
-              "row": 1,
-              "col": 1
-            },
-            {
-              "row": 1,
-              "col": 3
-            },
+          "walls": [],
+          "floors": [
             {
               "row": 2,
-              "col": 3
+              "col": 1,
+              "type": "sqrt",
+              "uses": 1
             }
           ],
-          "floors": [],
           "exits": [
             {
               "row": 3,
-              "col": 2,
+              "col": 0,
               "direction": "down",
-              "minValue": 15,
-              "maxValue": 16
-            },
-            {
-              "row": 0,
-              "col": 3,
-              "direction": "up",
-              "value": 5
+              "value": 3
             }
           ],
-          "par": 9,
-          "limit": 9,
+          "par": 8,
+          "limit": 8,
           "hintMove": {
             "type": "move",
             "row": 0,
             "col": 3,
-            "dir": "left"
+            "dir": "down"
           }
         },
         {
-          "levelId": "v3_006",
-          "title": "氷の床",
-          "hint": "氷の上では止まらない",
-          "tutorial": true,
-          "size": 4,
+          "levelId": "trial_003",
+          "title": "小さくしてから増やす",
+          "hint": "! は 0〜8 しか受け付けない",
+          "rows": 4,
+          "cols": 4,
           "tiles": [
             {
               "id": "a",
-              "row": 3,
-              "col": 0,
-              "value": 9
+              "row": 1,
+              "col": 2,
+              "value": 17
             },
             {
               "id": "b",
-              "row": 3,
-              "col": 3,
+              "row": 2,
+              "col": 1,
               "value": 4,
               "edges": {
-                "left": "−"
+                "right": "−"
               }
             },
             {
               "id": "c",
-              "row": 0,
-              "col": 0,
-              "value": 6,
+              "row": 2,
+              "col": 2,
+              "value": 5,
               "edges": {
-                "down": "+"
+                "up": "−",
+                "right": "÷",
+                "down": "−"
               }
+            },
+            {
+              "id": "d",
+              "row": 2,
+              "col": 3,
+              "value": 16
+            },
+            {
+              "id": "e",
+              "row": 3,
+              "col": 2,
+              "value": 7
             }
           ],
           "walls": [],
           "floors": [
             {
-              "row": 3,
-              "col": 1,
-              "type": "ice"
-            },
-            {
-              "row": 3,
-              "col": 2,
-              "type": "ice"
+              "row": 2,
+              "col": 0,
+              "type": "fact",
+              "uses": 1
             }
           ],
           "exits": [
@@ -406,500 +284,16 @@
               "row": 0,
               "col": 0,
               "direction": "up",
-              "value": 11
+              "value": 120
             }
           ],
-          "par": 6,
-          "limit": 6,
+          "par": 8,
+          "limit": 8,
           "hintMove": {
             "type": "move",
             "row": 3,
-            "col": 0,
-            "dir": "right"
-          }
-        },
-        {
-          "levelId": "v3_011",
-          "title": "平方根の床",
-          "hint": "平方数でないと入れない",
-          "tutorial": true,
-          "size": 3,
-          "tiles": [
-            {
-              "id": "a",
-              "row": 1,
-              "col": 0,
-              "value": 16
-            }
-          ],
-          "walls": [
-            {
-              "row": 0,
-              "col": 0
-            },
-            {
-              "row": 0,
-              "col": 1
-            },
-            {
-              "row": 0,
-              "col": 2
-            },
-            {
-              "row": 2,
-              "col": 0
-            },
-            {
-              "row": 2,
-              "col": 1
-            },
-            {
-              "row": 2,
-              "col": 2
-            }
-          ],
-          "floors": [
-            {
-              "row": 1,
-              "col": 1,
-              "type": "sqrt",
-              "uses": 1
-            }
-          ],
-          "exits": [
-            {
-              "row": 1,
-              "col": 2,
-              "direction": "right",
-              "value": 4
-            }
-          ],
-          "par": 3,
-          "limit": 3,
-          "hintMove": {
-            "type": "move",
-            "row": 1,
-            "col": 0,
-            "dir": "right"
-          }
-        },
-        {
-          "levelId": "v3_012",
-          "title": "合わせてから根を取る",
-          "hint": "9 になれば通れる",
-          "tutorial": true,
-          "rows": 1,
-          "cols": 5,
-          "tiles": [
-            {
-              "id": "a",
-              "row": 0,
-              "col": 0,
-              "value": 5
-            },
-            {
-              "id": "b",
-              "row": 0,
-              "col": 1,
-              "value": 4,
-              "edges": {
-                "left": "+"
-              }
-            }
-          ],
-          "walls": [],
-          "floors": [
-            {
-              "row": 0,
-              "col": 2,
-              "type": "sqrt",
-              "uses": 1
-            }
-          ],
-          "exits": [
-            {
-              "row": 0,
-              "col": 4,
-              "direction": "right",
-              "value": 3
-            }
-          ],
-          "par": 5,
-          "limit": 5,
-          "hintMove": {
-            "type": "move",
-            "row": 0,
-            "col": 0,
-            "dir": "right"
-          }
-        },
-        {
-          "levelId": "v3_015",
-          "title": "根を二回",
-          "hint": "81 を 3 まで落とす",
-          "rows": 7,
-          "cols": 6,
-          "tiles": [
-            {
-              "id": "a",
-              "row": 6,
-              "col": 0,
-              "value": 9
-            },
-            {
-              "id": "b",
-              "row": 6,
-              "col": 5,
-              "value": 9,
-              "edges": {
-                "left": "×"
-              }
-            },
-            {
-              "id": "c",
-              "row": 0,
-              "col": 0,
-              "value": 5,
-              "edges": {
-                "right": "+"
-              }
-            }
-          ],
-          "walls": [],
-          "floors": [
-            {
-              "row": 6,
-              "col": 1,
-              "type": "ice"
-            },
-            {
-              "row": 6,
-              "col": 2,
-              "type": "ice"
-            },
-            {
-              "row": 6,
-              "col": 3,
-              "type": "ice"
-            },
-            {
-              "row": 6,
-              "col": 4,
-              "type": "ice"
-            },
-            {
-              "row": 6,
-              "col": 5,
-              "type": "sqrt",
-              "uses": 1
-            },
-            {
-              "row": 0,
-              "col": 1,
-              "type": "ice"
-            },
-            {
-              "row": 0,
-              "col": 2,
-              "type": "ice"
-            },
-            {
-              "row": 0,
-              "col": 3,
-              "type": "ice"
-            },
-            {
-              "row": 0,
-              "col": 4,
-              "type": "ice"
-            },
-            {
-              "row": 0,
-              "col": 5,
-              "type": "sqrt",
-              "uses": 1
-            }
-          ],
-          "exits": [
-            {
-              "row": 0,
-              "col": 0,
-              "direction": "up",
-              "value": 8
-            }
-          ],
-          "par": 10,
-          "limit": 10,
-          "hintMove": {
-            "type": "move",
-            "row": 6,
-            "col": 5,
-            "dir": "left"
-          }
-        },
-        {
-          "levelId": "v3_016",
-          "title": "階乗の床",
-          "hint": "0〜8 でないと入れない",
-          "tutorial": true,
-          "size": 3,
-          "tiles": [
-            {
-              "id": "a",
-              "row": 1,
-              "col": 0,
-              "value": 4
-            }
-          ],
-          "walls": [
-            {
-              "row": 0,
-              "col": 0
-            },
-            {
-              "row": 0,
-              "col": 1
-            },
-            {
-              "row": 0,
-              "col": 2
-            },
-            {
-              "row": 2,
-              "col": 0
-            },
-            {
-              "row": 2,
-              "col": 1
-            },
-            {
-              "row": 2,
-              "col": 2
-            }
-          ],
-          "floors": [
-            {
-              "row": 1,
-              "col": 1,
-              "type": "fact",
-              "uses": 1
-            }
-          ],
-          "exits": [
-            {
-              "row": 1,
-              "col": 2,
-              "direction": "right",
-              "value": 24
-            }
-          ],
-          "par": 3,
-          "limit": 3,
-          "hintMove": {
-            "type": "move",
-            "row": 1,
-            "col": 0,
-            "dir": "right"
-          }
-        },
-        {
-          "levelId": "v3_017",
-          "title": "合わせてから階乗",
-          "hint": "! は数字の直後に効く",
-          "tutorial": true,
-          "rows": 1,
-          "cols": 5,
-          "tiles": [
-            {
-              "id": "a",
-              "row": 0,
-              "col": 0,
-              "value": 2
-            },
-            {
-              "id": "b",
-              "row": 0,
-              "col": 1,
-              "value": 1,
-              "edges": {
-                "left": "+"
-              }
-            }
-          ],
-          "walls": [],
-          "floors": [
-            {
-              "row": 0,
-              "col": 2,
-              "type": "fact",
-              "uses": 1
-            }
-          ],
-          "exits": [
-            {
-              "row": 0,
-              "col": 4,
-              "direction": "right",
-              "value": 6
-            }
-          ],
-          "par": 5,
-          "limit": 5,
-          "hintMove": {
-            "type": "move",
-            "row": 0,
-            "col": 0,
-            "dir": "right"
-          }
-        },
-        {
-          "levelId": "v3_021",
-          "title": "演算子を入れ替える",
-          "hint": "×を÷に変えられる",
-          "tutorial": true,
-          "rows": 1,
-          "cols": 4,
-          "tiles": [
-            {
-              "id": "a",
-              "row": 0,
-              "col": 0,
-              "value": 12
-            },
-            {
-              "id": "b",
-              "row": 0,
-              "col": 2,
-              "value": 3,
-              "edges": {
-                "left": "×"
-              }
-            }
-          ],
-          "walls": [],
-          "floors": [
-            {
-              "row": 0,
-              "col": 1,
-              "type": "swap",
-              "uses": 1
-            }
-          ],
-          "exits": [
-            {
-              "row": 0,
-              "col": 3,
-              "direction": "right",
-              "value": 4
-            }
-          ],
-          "par": 5,
-          "limit": 5,
-          "hintMove": {
-            "type": "move",
-            "row": 0,
             "col": 2,
-            "dir": "left"
-          }
-        },
-        {
-          "levelId": "v3_026",
-          "title": "演算子を回す",
-          "hint": "辺は時計回りに移る",
-          "tutorial": true,
-          "rows": 1,
-          "cols": 4,
-          "tiles": [
-            {
-              "id": "a",
-              "row": 0,
-              "col": 0,
-              "value": 3
-            },
-            {
-              "id": "b",
-              "row": 0,
-              "col": 2,
-              "value": 5,
-              "edges": {
-                "down": "+"
-              }
-            }
-          ],
-          "walls": [],
-          "floors": [
-            {
-              "row": 0,
-              "col": 1,
-              "type": "rotate",
-              "uses": 1
-            }
-          ],
-          "exits": [
-            {
-              "row": 0,
-              "col": 3,
-              "direction": "right",
-              "value": 8
-            }
-          ],
-          "par": 5,
-          "limit": 5,
-          "hintMove": {
-            "type": "move",
-            "row": 0,
-            "col": 2,
-            "dir": "left"
-          }
-        },
-        {
-          "levelId": "v3_027",
-          "title": "回してから当てる",
-          "hint": "当てられる向きを作る",
-          "tutorial": true,
-          "rows": 1,
-          "cols": 4,
-          "tiles": [
-            {
-              "id": "a",
-              "row": 0,
-              "col": 3,
-              "value": 3
-            },
-            {
-              "id": "b",
-              "row": 0,
-              "col": 2,
-              "value": 5,
-              "edges": {
-                "up": "+"
-              }
-            }
-          ],
-          "walls": [],
-          "floors": [
-            {
-              "row": 0,
-              "col": 1,
-              "type": "rotate",
-              "uses": 1
-            }
-          ],
-          "exits": [
-            {
-              "row": 0,
-              "col": 0,
-              "direction": "left",
-              "value": 8
-            }
-          ],
-          "par": 5,
-          "limit": 5,
-          "hintMove": {
-            "type": "move",
-            "row": 0,
-            "col": 2,
-            "dir": "left"
+            "dir": "up"
           }
         }
       ]

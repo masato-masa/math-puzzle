@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../game/direction.dart';
 import '../game/edges.dart';
+import '../game/floor.dart';
 import '../game/game_controller.dart';
 import '../game/models.dart';
 import '../game/move_event.dart';
@@ -251,8 +252,13 @@ class _PuzzleBoardState extends State<PuzzleBoard> {
   }
 
   Widget _positionedPreview(_Preview p, double cellSize) {
+    // 合体できる相手には何も重ねない。
+    // 以前は印を出していたが、✕ は「そこへは行けない」という意味に
+    // 見えてしまい、合体できる合図としては逆の印象を与えていた。
+    // 相手のマスにはタイルが載っているので、枠を重ねると数字も隠れる。
+    // ヒントで示された向きのときだけ、光の輪（枠なし）を出す。
     final marker = p.isMerge
-        ? MergeResultBadge(cellSize: cellSize)
+        ? const SizedBox.shrink()
         : MoveDestinationMarker(cellSize: cellSize, direction: p.direction);
     return Positioned(
       left: p.col * cellSize,
@@ -263,9 +269,27 @@ class _PuzzleBoardState extends State<PuzzleBoard> {
     );
   }
 
+  /// 通れるマスがすべて氷か。氷は「装置」ではなく「地形」なので、
+  /// 盤一面が氷のときにマスごとの印を出すと画面が記号で埋まってしまう。
+  /// その場合は印をやめ、盤そのものを氷の色にして「ここは全部氷」と
+  /// 一目で分かる見せ方に切り替える。
+  bool get _isIceField {
+    final level = widget.controller.level;
+    var open = 0;
+    for (var r = 0; r < level.rows; r++) {
+      for (var c = 0; c < level.cols; c++) {
+        if (level.isWall(r, c)) continue;
+        open++;
+        if (level.floorAt(r, c)?.kind != FloorKind.ice) return false;
+      }
+    }
+    return open > 0;
+  }
+
   @override
   Widget build(BuildContext context) {
     final level = widget.controller.level;
+    final iceField = _isIceField;
 
     return ControllerListener(
       controller: widget.controller,
@@ -294,13 +318,26 @@ class _PuzzleBoardState extends State<PuzzleBoard> {
                     height: boardH,
                     child: Container(
                       decoration: BoxDecoration(
-                        gradient: const LinearGradient(
+                        // 全面氷の盤は、マスごとの印ではなく盤の色で示す。
+                        gradient: LinearGradient(
                           begin: Alignment.topCenter,
                           end: Alignment.bottomCenter,
-                          colors: [AppColors.groundTop, AppColors.ground],
-                          stops: [0.0, 0.55],
+                          colors: iceField
+                              ? [
+                                  Color.lerp(AppColors.groundTop,
+                                      AppColors.cyan, 0.22)!,
+                                  Color.lerp(AppColors.ground,
+                                      AppColors.cyan, 0.14)!,
+                                ]
+                              : const [AppColors.groundTop, AppColors.ground],
+                          stops: const [0.0, 0.55],
                         ),
-                        border: Border.all(color: AppColors.rule, width: 2),
+                        border: Border.all(
+                          color: iceField
+                              ? AppColors.cyan.withValues(alpha: 0.55)
+                              : AppColors.rule,
+                          width: 2,
+                        ),
                         boxShadow: [
                           BoxShadow(
                             color: Colors.black.withValues(alpha: 0.55),
@@ -343,6 +380,7 @@ class _PuzzleBoardState extends State<PuzzleBoard> {
                                       usesLeft: level.floorAt(r, c) == null
                                           ? null
                                           : widget.controller.floorUsesLeft(r, c),
+                                      suppressIce: iceField,
                                     ),
                                   ),
                                 ),
