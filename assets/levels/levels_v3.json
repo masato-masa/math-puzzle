@@ -2532,6 +2532,242 @@
       "limit": 3
     },
     {
+      "levelId": "v3_038",
+      "title": "範囲に合わせる",
+      "hint": "",
+      "size": 4,
+      "tiles": [
+        {
+          "id": "a",
+          "row": 0,
+          "col": 0,
+          "value": 12,
+          "edges": {
+            "right": "−"
+          }
+        },
+        {
+          "id": "b",
+          "row": 0,
+          "col": 1,
+          "value": 15
+        },
+        {
+          "id": "c",
+          "row": 1,
+          "col": 0,
+          "value": 2,
+          "edges": {
+            "up": "×"
+          }
+        },
+        {
+          "id": "d",
+          "row": 1,
+          "col": 2,
+          "value": 1,
+          "edges": {
+            "down": "−"
+          }
+        },
+        {
+          "id": "e",
+          "row": 2,
+          "col": 2,
+          "value": 9
+        }
+      ],
+      "walls": [
+        {
+          "row": 2,
+          "col": 1
+        },
+        {
+          "row": 0,
+          "col": 2
+        },
+        {
+          "row": 3,
+          "col": 3
+        }
+      ],
+      "floors": [],
+      "exits": [
+        {
+          "row": 3,
+          "col": 0,
+          "direction": "left",
+          "minValue": 5,
+          "maxValue": 7
+        },
+        {
+          "row": 2,
+          "col": 3,
+          "direction": "right",
+          "minValue": 7,
+          "maxValue": 9
+        }
+      ],
+      "par": 9,
+      "limit": 9
+    },
+    {
+      "levelId": "v3_039",
+      "title": "範囲を外さない",
+      "hint": "",
+      "size": 4,
+      "tiles": [
+        {
+          "id": "a",
+          "row": 1,
+          "col": 0,
+          "value": 8,
+          "edges": {
+            "right": "−"
+          }
+        },
+        {
+          "id": "b",
+          "row": 2,
+          "col": 1,
+          "value": 20
+        },
+        {
+          "id": "c",
+          "row": 2,
+          "col": 2,
+          "value": 4,
+          "edges": {
+            "down": "+",
+            "right": "×"
+          }
+        },
+        {
+          "id": "d",
+          "row": 2,
+          "col": 3,
+          "value": 1
+        },
+        {
+          "id": "e",
+          "row": 3,
+          "col": 2,
+          "value": 1
+        }
+      ],
+      "walls": [
+        {
+          "row": 0,
+          "col": 2
+        },
+        {
+          "row": 2,
+          "col": 0
+        },
+        {
+          "row": 0,
+          "col": 0
+        }
+      ],
+      "floors": [],
+      "exits": [
+        {
+          "row": 1,
+          "col": 0,
+          "direction": "left",
+          "minValue": 11,
+          "maxValue": 13
+        },
+        {
+          "row": 0,
+          "col": 3,
+          "direction": "right",
+          "minValue": 4,
+          "maxValue": 6
+        }
+      ],
+      "par": 8,
+      "limit": 8
+    },
+    {
+      "levelId": "v3_040",
+      "title": "範囲のボス",
+      "hint": "",
+      "size": 4,
+      "tiles": [
+        {
+          "id": "a",
+          "row": 0,
+          "col": 1,
+          "value": 3
+        },
+        {
+          "id": "b",
+          "row": 0,
+          "col": 2,
+          "value": 1,
+          "edges": {
+            "down": "−",
+            "left": "+"
+          }
+        },
+        {
+          "id": "c",
+          "row": 1,
+          "col": 1,
+          "value": 6,
+          "edges": {
+            "right": "+"
+          }
+        },
+        {
+          "id": "d",
+          "row": 1,
+          "col": 3,
+          "value": 8
+        },
+        {
+          "id": "e",
+          "row": 2,
+          "col": 0,
+          "value": 8
+        }
+      ],
+      "walls": [
+        {
+          "row": 0,
+          "col": 3
+        },
+        {
+          "row": 2,
+          "col": 2
+        },
+        {
+          "row": 3,
+          "col": 3
+        }
+      ],
+      "floors": [],
+      "exits": [
+        {
+          "row": 3,
+          "col": 0,
+          "direction": "left",
+          "minValue": 7,
+          "maxValue": 9
+        },
+        {
+          "row": 0,
+          "col": 1,
+          "direction": "up",
+          "minValue": 15,
+          "maxValue": 17
+        }
+      ],
+      "par": 7,
+      "limit": 7
+    },
+    {
       "levelId": "v3_041",
       "title": "氷と根",
       "hint": "",

@@ -268,6 +268,55 @@ def extra_merges(rng, board, n):
         un_merge(rng, board, rng.choice(cands))
 
 
+def fill_spare_walls(rng, board, keep_free=1):
+    """使っていない空きマスを壁で埋めて、盤を締める。
+
+    タイルが自由に動ける空きマスが多いほど探索する状態が増え、
+    検証に何十秒もかかるようになる（タイル5枚・4x4 で 40 万状態、
+    十数秒かかっていた）。遊ぶ側にとっても、意味の無い空きマスは
+    「歩くだけの手」を増やすだけなので、埋めた方が締まる。
+
+    keep_free だけは残す（完全に埋めると動かす余地が無くなるため）。
+    """
+    spare = [(r, c) for r in range(board.rows) for c in range(board.cols)
+             if board.free((r, c)) and (r, c) not in board.floors]
+    rng.shuffle(spare)
+    for cell in spare[keep_free:]:
+        board.walls.add(cell)
+
+
+def crop_board(board):
+    """中身のある範囲まで盤を切り詰める。
+
+    型は 4x4 などの決め打ちで組み立てるが、解が盤の一部しか使わない
+    ことがある。使われない行や列が残ると「盤が広いだけ」になり、
+    歩くだけの手も増える。空きを壁で埋めるより、盤そのものを
+    小さくする方が素直（探索する状態も減って検証が速くなる）。
+
+    出口は縁に置いてあり、切り詰める範囲は中身をすべて含むので、
+    切り詰めた後も出口は縁に残る。
+    """
+    cells = list(board.tiles) + list(board.floors)
+    cells += [(e["row"], e["col"]) for e in board.exits]
+    if not cells:
+        return board
+    r0 = min(r for r, _ in cells)
+    r1 = max(r for r, _ in cells)
+    c0 = min(c for _, c in cells)
+    c1 = max(c for _, c in cells)
+    if (r0, c0) == (0, 0) and (r1, c1) == (board.rows - 1, board.cols - 1):
+        return board
+
+    out = Board(r1 - r0 + 1, c1 - c0 + 1)
+    out.tiles = {(r - r0, c - c0): v for (r, c), v in board.tiles.items()}
+    out.floors = {(r - r0, c - c0): v for (r, c), v in board.floors.items()}
+    out.walls = {(r - r0, c - c0) for (r, c) in board.walls
+                 if r0 <= r <= r1 and c0 <= c <= c1}
+    out.exits = [{**e, "row": e["row"] - r0, "col": e["col"] - c0}
+                 for e in board.exits]
+    return out
+
+
 # ----------------------------------------------------------------------
 # 手筋の型
 # ----------------------------------------------------------------------
@@ -295,6 +344,8 @@ def t_sqrt_grow_shrink(rng, rows, cols):
     if cell is None:
         return None
     extra_merges(rng, b, rng.choice([2, 3]))
+    b = crop_board(b)
+    fill_spare_walls(rng, b, keep_free=rng.choice([1, 2]))
     return b
 
 
@@ -318,6 +369,8 @@ def t_fact_small_to_big(rng, rows, cols):
     if cell is None:
         return None
     extra_merges(rng, b, rng.choice([2, 3]))
+    b = crop_board(b)
+    fill_spare_walls(rng, b, keep_free=rng.choice([1, 2]))
     return b
 
 
@@ -326,21 +379,25 @@ def t_swap_wrong_op(rng, rows, cols):
 
     盤にある演算子で素直に計算すると出口の値にならず、
     ⇄ を通して演算子を変えて初めて届く。
+
+    床に乗せるのは「ぶつけられる側」。演算子を持っているのはそちらなので、
+    ぶつける側を床に乗せても辺が無く、何も変わらない（最初その誤りで
+    1 件も作れなかった）。
     """
     b = Board(rows, cols)
     goal = rng.choice([2, 3, 4, 5, 6, 8])
     cell = un_exit(rng, b, goal)
     if cell is None:
         return None
-    cell = un_merge(rng, b, cell)                  # 合体して goal を作る形にする
-    if cell is None:
+    # 出口の値を作る合体。演算子は cell 側（ぶつけられる側）に付く
+    if un_merge(rng, b, cell) is None:
         return None
-    # ぶつける側のタイルを ⇄ の床経由にする（辺は入れ替わった姿で置かれる）
-    cell = un_move(rng, b, cell, steps=1)
-    cell = un_floor(rng, b, cell, "swap")
-    if cell is None:
+    # その演算子を持つタイルが ⇄ の床に乗ってきた、という形にする
+    if un_floor(rng, b, cell, "swap") is None:
         return None
     extra_merges(rng, b, rng.choice([2, 3]))
+    b = crop_board(b)
+    fill_spare_walls(rng, b, keep_free=rng.choice([1, 2]))
     return b
 
 
@@ -349,20 +406,21 @@ def t_rotate_make_face(rng, rows, cols):
 
     演算子が付いている辺の向きが噛み合わず、そのままでは当たれない。
     ↻ を通して面の向きを変えることで初めて当てられるようになる。
+
+    swap と同じく、床に乗せるのは演算子を持っている側。
     """
     b = Board(rows, cols)
     goal = rng.choice([4, 6, 8, 9, 12])
     cell = un_exit(rng, b, goal)
     if cell is None:
         return None
-    cell = un_merge(rng, b, cell)
-    if cell is None:
+    if un_merge(rng, b, cell) is None:
         return None
-    cell = un_move(rng, b, cell, steps=1)
-    cell = un_floor(rng, b, cell, "rotate")
-    if cell is None:
+    if un_floor(rng, b, cell, "rotate") is None:
         return None
     extra_merges(rng, b, rng.choice([2, 3]))
+    b = crop_board(b)
+    fill_spare_walls(rng, b, keep_free=rng.choice([1, 2]))
     return b
 
 
@@ -390,9 +448,11 @@ def t_ice_full_board(rng, rows, cols):
                  if b.free((r, c))]
         if spots:
             b.walls.add(rng.choice(spots))
-    # 残った通れるマスを全部氷にする
-    for r in range(rows):
-        for c in range(cols):
+    # 使う範囲まで切り詰めてから、残った通れるマスを全部氷にする
+    # （先に氷を敷くと全マスが「中身あり」になって切り詰められない）
+    b = crop_board(b)
+    for r in range(b.rows):
+        for c in range(b.cols):
             if (r, c) not in b.walls:
                 b.floors[(r, c)] = {"type": "ice", "uses": None}
     return b
@@ -419,6 +479,8 @@ def t_edge_inheritance(rng, rows, cols):
     if cell is None:
         return None
     extra_merges(rng, b, rng.choice([2, 3]))
+    b = crop_board(b)
+    fill_spare_walls(rng, b, keep_free=rng.choice([1, 2]))
     return b
 
 
@@ -534,9 +596,11 @@ def t_ice_field(rng, rows, cols):
         nxt = un_merge_ice(rng, b, rng.choice(cands))
         if nxt is None:
             return None
-    # 残った通れるマスを全部氷にする
-    for r in range(rows):
-        for c in range(cols):
+    # 使う範囲まで切り詰めてから、残った通れるマスを全部氷にする
+    # （先に氷を敷くと全マスが「中身あり」になって切り詰められない）
+    b = crop_board(b)
+    for r in range(b.rows):
+        for c in range(b.cols):
             if (r, c) not in b.walls:
                 b.floors[(r, c)] = {"type": "ice", "uses": None}
     return b

@@ -1837,5 +1837,152 @@
         "index": 0
       }
     ]
+  },
+  "v3_038": {
+    "par": 9,
+    "actions": [
+      {
+        "type": "move",
+        "row": 0,
+        "col": 1,
+        "dir": "left"
+      },
+      {
+        "type": "move",
+        "row": 0,
+        "col": 0,
+        "dir": "down"
+      },
+      {
+        "type": "move",
+        "row": 1,
+        "col": 0,
+        "dir": "down"
+      },
+      {
+        "type": "move",
+        "row": 2,
+        "col": 0,
+        "dir": "down"
+      },
+      {
+        "type": "move",
+        "row": 2,
+        "col": 2,
+        "dir": "up"
+      },
+      {
+        "type": "move",
+        "row": 1,
+        "col": 2,
+        "dir": "right"
+      },
+      {
+        "type": "move",
+        "row": 1,
+        "col": 3,
+        "dir": "down"
+      },
+      {
+        "type": "exit",
+        "index": 0
+      },
+      {
+        "type": "exit",
+        "index": 1
+      }
+    ]
+  },
+  "v3_039": {
+    "par": 8,
+    "actions": [
+      {
+        "type": "move",
+        "row": 2,
+        "col": 1,
+        "dir": "up"
+      },
+      {
+        "type": "move",
+        "row": 1,
+        "col": 1,
+        "dir": "left"
+      },
+      {
+        "type": "move",
+        "row": 3,
+        "col": 2,
+        "dir": "up"
+      },
+      {
+        "type": "move",
+        "row": 2,
+        "col": 2,
+        "dir": "right"
+      },
+      {
+        "type": "move",
+        "row": 2,
+        "col": 3,
+        "dir": "up"
+      },
+      {
+        "type": "move",
+        "row": 1,
+        "col": 3,
+        "dir": "up"
+      },
+      {
+        "type": "exit",
+        "index": 0
+      },
+      {
+        "type": "exit",
+        "index": 1
+      }
+    ]
+  },
+  "v3_040": {
+    "par": 7,
+    "actions": [
+      {
+        "type": "move",
+        "row": 1,
+        "col": 1,
+        "dir": "right"
+      },
+      {
+        "type": "move",
+        "row": 1,
+        "col": 3,
+        "dir": "left"
+      },
+      {
+        "type": "move",
+        "row": 1,
+        "col": 2,
+        "dir": "up"
+      },
+      {
+        "type": "move",
+        "row": 0,
+        "col": 2,
+        "dir": "left"
+      },
+      {
+        "type": "move",
+        "row": 2,
+        "col": 0,
+        "dir": "down"
+      },
+      {
+        "type": "exit",
+        "index": 0
+      },
+      {
+        "type": "exit",
+        "index": 1
+      }
+    ]
   }
 }
