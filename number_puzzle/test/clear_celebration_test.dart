@@ -13,6 +13,7 @@ import 'package:number_puzzle/game/direction.dart';
 import 'package:number_puzzle/game/models.dart';
 import 'package:number_puzzle/screens/puzzle_screen.dart';
 import 'package:number_puzzle/services/progress_service.dart';
+import 'package:number_puzzle/services/settings_service.dart';
 import 'package:number_puzzle/services/sound_service.dart';
 import 'package:number_puzzle/widgets/clear_celebration.dart';
 import 'package:number_puzzle/widgets/puzzle_board.dart';
@@ -55,6 +56,7 @@ void main() {
           level: level,
           soundService: SoundService()..sfxEnabled = false,
           progressService: ProgressService(),
+          settingsService: SettingsService(),
         ),
       ),
     );

@@ -3,8 +3,11 @@ import 'package:flutter/material.dart';
 import '../game/game_controller.dart';
 import '../game/models.dart';
 import '../services/progress_service.dart';
+import '../services/settings_service.dart';
 import '../services/sound_service.dart';
 import '../theme/app_theme.dart';
+import '../widgets/app_header.dart';
+import '../widgets/app_sheets.dart';
 import '../widgets/clear_celebration.dart';
 import '../widgets/controller_listener.dart';
 import '../widgets/puzzle_board.dart';
@@ -15,12 +18,14 @@ class PuzzleScreen extends StatefulWidget {
     required this.level,
     required this.soundService,
     required this.progressService,
+    required this.settingsService,
     this.onNextLevel,
   });
 
   final Level level;
   final SoundService soundService;
   final ProgressService progressService;
+  final SettingsService settingsService;
   final VoidCallback? onNextLevel;
 
   @override
@@ -92,7 +97,6 @@ class _PuzzleScreenState extends State<PuzzleScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(widget.level.title)),
       body: SafeArea(
         child: Stack(
           children: [
@@ -100,19 +104,41 @@ class _PuzzleScreenState extends State<PuzzleScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: Column(
                 children: [
-                  _Hud(
+                  // 行 1 はナビゲーションだけ。残り手数は行 2（ステータスバー）へ。
+                  ControllerListener(
                     controller: _controller,
-                    onUndo: () {
-                      setState(() => _dialogShown = false);
-                      _controller.undo();
+                    builder: (context) {
+                      final left = _controller.movesLeft;
+                      return AppHeader(
+                        title: widget.level.title,
+                        onBack: () => Navigator.of(context).pop(),
+                        onSettings: () => showSettingsSheet(
+                          context,
+                          settings: widget.settingsService,
+                          onSfxChanged: (v) {
+                            widget.settingsService.setSfxEnabled(v);
+                            widget.soundService.sfxEnabled = v;
+                            setState(() {});
+                          },
+                        ),
+                        onHelp: () => showHelpSheet(context),
+                        status: [
+                          StatPill(
+                            label: 'のこり',
+                            value: '$left',
+                            valueColor: left <= 2 ? AppColors.warn : null,
+                            trailing: '/ ${widget.level.limit}手',
+                          ),
+                        ],
+                      );
                     },
-                    onReset: _restart,
-                    onHint: () => setState(() => _controller.peekHint()),
                   ),
-                  const SizedBox(height: 4),
                   if (widget.level.hint.isNotEmpty)
-                    Text(widget.level.hint,
-                        style: AppTextStyles.caption, textAlign: TextAlign.center),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 4),
+                      child: Text(widget.level.hint,
+                          style: AppTextStyles.caption, textAlign: TextAlign.center),
+                    ),
                   Expanded(
                     child: Center(
                       child: Padding(
@@ -130,6 +156,20 @@ class _PuzzleScreenState extends State<PuzzleScreen> {
                         style: const TextStyle(color: AppColors.warn, fontSize: 13),
                         textAlign: TextAlign.center,
                       ),
+                    ),
+                  ),
+                  // 操作のボタンは盤面の下。上＝ナビゲーション、下＝操作で
+                  // どのゲームも同じ形にしてある。
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8, bottom: 4),
+                    child: _ToolRowForGame(
+                      controller: _controller,
+                      onUndo: () {
+                        setState(() => _dialogShown = false);
+                        _controller.undo();
+                      },
+                      onReset: _restart,
+                      onHint: () => setState(() => _controller.peekHint()),
                     ),
                   ),
                 ],
@@ -225,13 +265,16 @@ class _PuzzleScreenState extends State<PuzzleScreen> {
   }
 }
 
-class _Hud extends StatelessWidget {
-  const _Hud({
+/// 盤面の下のツール行。ヒントは 1 手目にしか出せないので、
+/// 出せないときは押せない見た目にする（隠すと位置が動いてしまう）。
+class _ToolRowForGame extends StatelessWidget {
+  const _ToolRowForGame({
     required this.controller,
     required this.onUndo,
     required this.onReset,
     required this.onHint,
   });
+
   final GameController controller;
   final VoidCallback onUndo;
   final VoidCallback onReset;
@@ -242,48 +285,29 @@ class _Hud extends StatelessWidget {
     return ControllerListener(
       controller: controller,
       builder: (context) {
-        final left = controller.movesLeft;
-        final warn = left <= 2;
         // ヒントは最初の一手にしか対応していないので、1手目でしか出せない。
-        // 埋め込みが無いレベル（起きない想定だが保険）ではボタン自体を隠す。
         final hintAvailable = controller.level.hintMove != null &&
             controller.moveCount == 0 &&
             !controller.isCleared &&
             !controller.isFailed;
-        return Row(
+        return ToolRow(
           children: [
-            Text.rich(
-              TextSpan(
-                style: AppTextStyles.body,
-                children: [
-                  const TextSpan(text: '残り手数 '),
-                  TextSpan(
-                    text: '$left',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w800,
-                      color: warn ? AppColors.warn : AppColors.textPrimary,
-                    ),
-                  ),
-                  TextSpan(text: ' / ${controller.level.limit}手以内', style: AppTextStyles.caption),
-                ],
-              ),
-            ),
-            const Spacer(),
-            if (controller.level.hintMove != null)
-              Padding(
-                padding: const EdgeInsets.only(right: 8),
-                child: OutlinedButton.icon(
-                  onPressed: hintAvailable ? onHint : null,
-                  icon: const Icon(Icons.lightbulb_outline, size: 18),
-                  label: const Text('ヒント'),
-                ),
-              ),
-            OutlinedButton(
+            ToolButton(
+              icon: Icons.undo,
+              tooltip: 'もどす',
               onPressed: controller.canUndo ? onUndo : null,
-              child: const Text('戻す'),
             ),
-            const SizedBox(width: 8),
-            OutlinedButton(onPressed: onReset, child: const Text('リセット')),
+            ToolButton(
+              icon: Icons.refresh,
+              tooltip: 'やり直す',
+              onPressed: onReset,
+            ),
+            if (controller.level.hintMove != null)
+              ToolButton(
+                icon: Icons.lightbulb_outline,
+                tooltip: 'ヒント',
+                onPressed: hintAvailable ? onHint : null,
+              ),
           ],
         );
       },

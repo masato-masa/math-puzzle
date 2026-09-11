@@ -4,8 +4,10 @@ import '../game/course.dart';
 import '../game/level_repository.dart';
 import '../game/models.dart';
 import '../services/progress_service.dart';
+import '../services/settings_service.dart';
 import '../services/sound_service.dart';
 import '../theme/app_theme.dart';
+import '../widgets/app_header.dart';
 import '../widgets/gimmick_chips.dart';
 import 'puzzle_screen.dart';
 
@@ -15,11 +17,13 @@ class LevelSelectScreen extends StatefulWidget {
     required this.levelRepository,
     required this.progressService,
     required this.soundService,
+    required this.settingsService,
   });
 
   final LevelRepository levelRepository;
   final ProgressService progressService;
   final SoundService soundService;
+  final SettingsService settingsService;
 
   @override
   State<LevelSelectScreen> createState() => _LevelSelectScreenState();
@@ -60,6 +64,7 @@ class _LevelSelectScreenState extends State<LevelSelectScreen> {
           level: level,
           soundService: widget.soundService,
           progressService: widget.progressService,
+          settingsService: widget.settingsService,
           onNextLevel: index + 1 < course.levels.length
               ? () => _openLevel(course, index + 1)
               : null,
@@ -72,13 +77,30 @@ class _LevelSelectScreenState extends State<LevelSelectScreen> {
   @override
   Widget build(BuildContext context) {
     final courses = _courses;
+    final levels = [for (final c in courses ?? const <Course>[]) ...c.levels];
+    final cleared = levels.where((l) => _progress[l.levelId]?.cleared ?? false).length;
+
     return Scaffold(
-      appBar: AppBar(title: const Text('数式パズル')),
       body: courses == null
           ? const Center(child: CircularProgressIndicator())
           : SafeArea(
               child: Column(
                 children: [
+                  // 行 1 はナビゲーションだけ。クリア数は行 2 に置く。
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: AppHeader(
+                      title: 'ステージ',
+                      onBack: () => Navigator.of(context).pop(),
+                      status: [
+                        StatPill(
+                          label: 'クリア',
+                          value: '$cleared',
+                          trailing: '/ ${levels.length}',
+                        ),
+                      ],
+                    ),
+                  ),
                   for (final course in courses) ...[
                     Padding(
                       padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),

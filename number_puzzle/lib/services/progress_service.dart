@@ -50,6 +50,37 @@ class ProgressService {
     }
   }
 
+  /// 記録を全部消す。動作確認用で、開発者メニューからだけ呼ぶ。
+  Future<void> clearAll() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove(_key);
+    } catch (_) {
+      // 消せなくても画面上は空として扱う
+    }
+  }
+
+  /// 渡したレベルを一括でクリア済みにする。動作確認用。
+  /// ノーヒント・ノーアンドゥの実績は付けない（実際に達成していないため）。
+  Future<void> unlockAllForTesting(Map<String, int> levelIdToMoves) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final all = await loadAll();
+      levelIdToMoves.forEach((levelId, moves) {
+        final prev = all[levelId];
+        all[levelId] = LevelProgress(
+          cleared: true,
+          bestMoves: prev == null ? moves : (moves < prev.bestMoves ? moves : prev.bestMoves),
+          everPerfect: prev?.everPerfect ?? false,
+        );
+      });
+      final json = all.map((k, v) => MapEntry(k, v.toJson()));
+      await prefs.setString(_key, jsonEncode(json));
+    } catch (_) {
+      // 保存に失敗しても進行は継続する
+    }
+  }
+
   Future<void> recordClear(String levelId, int moves, {bool perfect = false}) async {
     try {
       final prefs = await SharedPreferences.getInstance();
