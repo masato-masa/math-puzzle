@@ -2,13 +2,14 @@ import 'package:flutter/material.dart';
 
 import '../theme/app_sizes.dart';
 import '../theme/app_theme.dart';
+import 'tool_icons.dart';
 
 /// 全ゲーム共通のヘッダー。
 ///
-///     行1  [戻る]        タイトル        [設定] [?]
+///     行1  [戻る]        タイトル        [?] [設定]
 ///     行2  ステータスバー（手数・クリア数など）
 ///
-/// **行 1 に置いてよいのは、戻る・タイトル・設定・? の 4 つだけ。**
+/// **行 1 に置いてよいのは、戻る・タイトル・?・設定 の 4 つだけ。**
 /// 手数もクリア数もすべて行 2（[status]）へ置く。行 2 は中身が空でも
 /// [AppSizes.statusBar] の高さを取るので、盤面の縦位置が画面ごとにずれない。
 class AppHeader extends StatelessWidget {
@@ -66,21 +67,22 @@ class AppHeader extends StatelessWidget {
               ),
               SizedBox(
                 width: sideWidth,
+                // 並びは ? が左、設定が右。4 つのゲームで同じにしてある。
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    if (onSettings != null)
-                      RoundIconButton(
-                        icon: Icons.settings,
-                        tooltip: '設定',
-                        onPressed: onSettings,
-                      ),
-                    if (onHelp != null) ...[
-                      const SizedBox(width: 6),
+                    if (onHelp != null)
                       RoundIconButton(
                         icon: Icons.help_outline,
                         tooltip: '遊びかた',
                         onPressed: onHelp,
+                      ),
+                    if (onSettings != null) ...[
+                      if (onHelp != null) const SizedBox(width: 6),
+                      RoundIconButton(
+                        icon: Icons.settings,
+                        tooltip: '設定',
+                        onPressed: onSettings,
                       ),
                     ],
                   ],
@@ -197,12 +199,12 @@ class StatPill extends StatelessWidget {
 class ToolButton extends StatelessWidget {
   const ToolButton({
     super.key,
-    required this.icon,
+    required this.kind,
     required this.tooltip,
     required this.onPressed,
   });
 
-  final IconData icon;
+  final ToolIconKind kind;
   final String tooltip;
   final VoidCallback? onPressed;
 
@@ -213,7 +215,7 @@ class ToolButton extends StatelessWidget {
       opacity: enabled ? 1 : 0.35,
       child: Material(
         color: AppColors.surface,
-        shape: CircleBorder(side: BorderSide(color: AppColors.rule, width: 1.2)),
+        shape: const CircleBorder(side: BorderSide(color: AppColors.rule, width: 1.2)),
         clipBehavior: Clip.antiAlias,
         child: InkWell(
           onTap: onPressed,
@@ -222,7 +224,11 @@ class ToolButton extends StatelessWidget {
             height: AppSizes.toolButton,
             child: Tooltip(
               message: tooltip,
-              child: Icon(icon, size: 28, color: AppColors.gold),
+              // 絵は 4 つのゲームで共通（lib/widgets/tool_icons.dart は生成物）。
+              // 色だけこのゲームの金色にしている。
+              child: Center(
+                child: ToolIcon(kind: kind, color: AppColors.gold, size: 32),
+              ),
             ),
           ),
         ),

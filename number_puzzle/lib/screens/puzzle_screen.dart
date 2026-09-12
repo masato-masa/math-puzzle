@@ -8,6 +8,7 @@ import '../services/sound_service.dart';
 import '../theme/app_theme.dart';
 import '../widgets/app_header.dart';
 import '../widgets/app_sheets.dart';
+import '../widgets/tool_icons.dart';
 import '../widgets/clear_celebration.dart';
 import '../widgets/controller_listener.dart';
 import '../widgets/puzzle_board.dart';
@@ -293,18 +294,18 @@ class _ToolRowForGame extends StatelessWidget {
         return ToolRow(
           children: [
             ToolButton(
-              icon: Icons.undo,
+              kind: ToolIconKind.undo,
               tooltip: 'もどす',
               onPressed: controller.canUndo ? onUndo : null,
             ),
             ToolButton(
-              icon: Icons.refresh,
+              kind: ToolIconKind.reset,
               tooltip: 'やり直す',
               onPressed: onReset,
             ),
             if (controller.level.hintMove != null)
               ToolButton(
-                icon: Icons.lightbulb_outline,
+                kind: ToolIconKind.hint,
                 tooltip: 'ヒント',
                 onPressed: hintAvailable ? onHint : null,
               ),
