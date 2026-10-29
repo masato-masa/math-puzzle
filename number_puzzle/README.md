@@ -1,6 +1,6 @@
 # 数式パズル（Flutter 本番実装）
 
-`docs/final-spec.html` の仕様に基づく本番実装。ルールエンジンは
+`Obsidian:Projects/math-puzzle/final-spec.html` の仕様に基づく本番実装。ルールエンジンは
 `tools/v3_solver.py`（Python）で検証したものと 1:1 対応させてあり、
 `tool/replay_solutions.dart` で全レベルの最短手順を実際にこの Dart 実装で
 再生し、Python 側の par/limit と完全に一致することを確認済み。
