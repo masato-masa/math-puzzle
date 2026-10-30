@@ -1,11 +1,11 @@
 {
-    "name": "number_puzzle",
-    "short_name": "number_puzzle",
+    "name": "数式パズル",
+    "short_name": "数式パズル",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#16161c",
+    "theme_color": "#16161c",
+    "description": "数式パズル",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
