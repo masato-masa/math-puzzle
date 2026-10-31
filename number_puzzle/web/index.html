@@ -17,12 +17,14 @@
   <base href="$FLUTTER_BASE_HREF">
 
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#0b0a0d">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
   <meta name="description" content="数式パズル">
 
   <!-- iOS meta tags & icons -->
   <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="数式パズル">
   <link rel="apple-touch-icon" href="icons/Icon-192.png">
 
@@ -31,8 +33,31 @@
 
   <title>数式パズル</title>
   <link rel="manifest" href="manifest.json">
+  <!--
+    ホーム画面に追加したアプリでは、画面が時計の帯やノッチの下まで広がる
+    （viewport-fit=cover と black-translucent）。帯の部分はアプリの地の色で塗り、
+    Flutter はセーフエリアの内側の #app にだけ描かせる（flutter_bootstrap.js）。
+    こうしないと、帯が白く欠けるか、ボタンが時計に重なる。
+  -->
+  <style>
+    html, body {
+      margin: 0;
+      height: 100%;
+      overflow: hidden;
+      overscroll-behavior: none;
+      background: #0b0a0d; /* AppColors.ground */
+    }
+    #app {
+      position: fixed;
+      top: env(safe-area-inset-top);
+      right: env(safe-area-inset-right);
+      bottom: env(safe-area-inset-bottom);
+      left: env(safe-area-inset-left);
+    }
+  </style>
 </head>
 <body>
+  <div id="app"></div>
   <!--
     You can customize the "flutter_bootstrap.js" script.
     This is useful to provide a custom configuration to the Flutter loader
