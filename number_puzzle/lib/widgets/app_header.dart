@@ -34,7 +34,8 @@ class AppHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     // 左右の列を同じ幅にして、タイトルが本当に中央に来るようにする。
     // 右のボタンが 1 個か 2 個かでタイトルの中心がずれないようにするため。
-    const sideWidth = AppSizes.hit * 2;
+    // 幅は ? と設定の 2 個ぶん＋あいだの隙間。隙間を足さないと 6px はみ出す。
+    const sideWidth = AppSizes.hit * 2 + AppSizes.iconGap;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -78,7 +79,7 @@ class AppHeader extends StatelessWidget {
                         onPressed: onHelp,
                       ),
                     if (onSettings != null) ...[
-                      if (onHelp != null) const SizedBox(width: 6),
+                      if (onHelp != null) const SizedBox(width: AppSizes.iconGap),
                       RoundIconButton(
                         icon: Icons.settings,
                         tooltip: '設定',

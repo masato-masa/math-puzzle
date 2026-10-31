@@ -13,6 +13,9 @@ class AppSizes {
   /// 丸アイコンボタンの見た目の大きさ。当たり判定は [hit] まで広げる。
   static const iconButton = 36.0;
 
+  /// ヘッダー右上の ? と設定のあいだ。
+  static const iconGap = 6.0;
+
   /// フッターのツール行の丸ボタン。
   static const toolButton = 60.0;
 
