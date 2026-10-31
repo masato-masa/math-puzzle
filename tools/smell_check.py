@@ -10,6 +10,11 @@
   余り物     … 抜いても解ける（＝置いてあるだけ）のタイル
   飾りの床   … 抜いても同じ手数で解ける床
   値の重複   … 同じ数字が複数あり、どれを使っても同じになりやすい
+
+飾りの床（抜いても同じ手数で解ける床）は、さらに 3 つに分ける（2026-11-01 MP-5）:
+  罠       … par 以内に乗れるが、乗ると必ず par で解けなくなる（「使わない判断」をさせる床。役割がある）
+  寄り道   … 乗っても乗らなくても par で解ける（役割が無い）
+  届かない … par 以内のどの手でも乗れない（役割が無い）
 """
 
 import json
@@ -18,7 +23,7 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from v3_solver import analyze, optimal_state_path, prepare  # noqa: E402
+from v3_solver import analyze, explore, goal_distance, optimal_state_path, prepare  # noqa: E402
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
@@ -73,6 +78,30 @@ def useless_tiles(level, par):
     return out
 
 
+def floor_roles(level, par, floors):
+    """飾りの床を 罠 / 寄り道 / 届かない に分ける。乗る＝その手のあとで、床のマスにタイルが来る。"""
+    lv = json.loads(json.dumps(level))
+    start, dist, adj, _ = explore(lv, max_depth=par)
+    dgoal = goal_distance(dist, adj)
+    roles = {}
+    for f in floors:
+        cell = (f["row"], f["col"])
+        uses = fatal = 0
+        for s, edges in adj.items():
+            if dist[s] >= par:
+                continue
+            before = {(t[0], t[1]) for t in s[0]}
+            for (ns, _k, _key) in edges:
+                after = {(t[0], t[1]) for t in ns[0]}
+                if cell in after and cell not in before:
+                    uses += 1
+                    d = dgoal.get(ns)
+                    if d is None or dist[s] + 1 + d > par:
+                        fatal += 1
+        roles[cell] = "届かない" if uses == 0 else "罠" if fatal == uses else "寄り道"
+    return roles
+
+
 def main():
     with open(os.path.join(ROOT, "assets", "levels", "levels_v3.json"),
               encoding="utf-8") as f:
@@ -100,9 +129,15 @@ def main():
 
         decor = [n["floor"] for n in rep.get("floors", []) if not n["needed"]]
         if decor:
-            notes.append("飾りの床: " + ", ".join(
-                f"{f['type']}({f['row']},{f['col']})" for f in decor))
+            # 氷はまとめて 1 つ（ice xN）なので、役割の判定は氷以外だけ
+            roles = floor_roles(lv, rep["par"], [f for f in decor if not f["type"].startswith("ice")])
+            def label(f):
+                role = roles.get((f["row"], f["col"]))
+                return f"{f['type']}({f['row']},{f['col']})" + (f"={role}" if role else "")
+            notes.append("飾りの床: " + ", ".join(label(f) for f in decor))
             totals["decor"] += len(decor)
+            for r in roles.values():
+                totals[r] = totals.get(r, 0) + 1
 
         vals = [t.get("value") for t in lv["tiles"] if not t.get("fire")]
         dups = {v for v in vals if vals.count(v) > 1}
