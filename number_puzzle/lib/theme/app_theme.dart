@@ -40,6 +40,14 @@ class AppColors {
   static const warn = Color(0xFFFF5C5C); // 警告・手数オーバー
 }
 
+class AppFonts {
+  AppFonts._();
+
+  /// 同梱の日本語フォント（pubspec.yaml の fonts）。英数字は持たないので、
+  /// どのフォールバック列でも最後に置き、英数字は今までどおりのフォントで描く。
+  static const japanese = 'NotoSansJP';
+}
+
 class AppTextStyles {
   AppTextStyles._();
 
@@ -51,6 +59,7 @@ class AppTextStyles {
       'Consolas',
       'Courier New',
       'monospace',
+      AppFonts.japanese,
     ],
     fontWeight: FontWeight.w700,
     color: AppColors.textPrimary,
@@ -63,6 +72,7 @@ class AppTextStyles {
       'Hiragino Mincho ProN',
       'Times New Roman',
       'serif',
+      AppFonts.japanese,
     ],
     fontWeight: FontWeight.w700,
     color: AppColors.textPrimary,
@@ -85,6 +95,7 @@ ThemeData buildAppTheme() {
     ),
     scaffoldBackgroundColor: AppColors.ground,
     fontFamily: 'Georgia',
+    fontFamilyFallback: const [AppFonts.japanese],
   );
 
   return base.copyWith(
@@ -99,7 +110,7 @@ ThemeData buildAppTheme() {
       centerTitle: true,
       titleTextStyle: TextStyle(
         fontFamily: 'Georgia',
-        fontFamilyFallback: ['Hiragino Mincho ProN', 'serif'],
+        fontFamilyFallback: ['Hiragino Mincho ProN', 'serif', AppFonts.japanese],
         fontSize: 20,
         fontWeight: FontWeight.w700,
         letterSpacing: 0.6,
