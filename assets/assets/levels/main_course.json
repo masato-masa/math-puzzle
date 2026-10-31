@@ -3912,12 +3912,6 @@
           ],
           "floors": [
             {
-              "row": 3,
-              "col": 1,
-              "type": "rotate",
-              "uses": 1
-            },
-            {
               "row": 0,
               "col": 3,
               "type": "sqrt",
