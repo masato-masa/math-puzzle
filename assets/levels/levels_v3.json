@@ -3630,6 +3630,832 @@
       ],
       "par": 7,
       "limit": 7
+    },
+    {
+      "levelId": "v3_051",
+      "title": "出口のおかわり 1",
+      "hint": "",
+      "size": 4,
+      "tiles": [
+        {
+          "id": "a",
+          "row": 0,
+          "col": 1,
+          "value": 12,
+          "edges": {
+            "right": "+"
+          }
+        },
+        {
+          "id": "b",
+          "row": 0,
+          "col": 2,
+          "value": 12
+        },
+        {
+          "id": "c",
+          "row": 1,
+          "col": 0,
+          "value": 5
+        },
+        {
+          "id": "d",
+          "row": 2,
+          "col": 3,
+          "value": 11
+        },
+        {
+          "id": "e",
+          "row": 3,
+          "col": 3,
+          "value": 3,
+          "edges": {
+            "up": "−"
+          }
+        }
+      ],
+      "walls": [
+        {
+          "row": 3,
+          "col": 2
+        },
+        {
+          "row": 1,
+          "col": 1
+        },
+        {
+          "row": 1,
+          "col": 2
+        }
+      ],
+      "floors": [],
+      "exits": [
+        {
+          "row": 1,
+          "col": 0,
+          "direction": "left",
+          "value": 5
+        },
+        {
+          "row": 0,
+          "col": 0,
+          "direction": "up",
+          "value": 24
+        },
+        {
+          "row": 3,
+          "col": 3,
+          "direction": "down",
+          "value": 8
+        }
+      ],
+      "par": 6,
+      "limit": 6
+    },
+    {
+      "levelId": "v3_052",
+      "title": "出口のおかわり 2",
+      "hint": "",
+      "size": 4,
+      "tiles": [
+        {
+          "id": "a",
+          "row": 1,
+          "col": 1,
+          "value": 18
+        },
+        {
+          "id": "b",
+          "row": 2,
+          "col": 0,
+          "value": 24
+        },
+        {
+          "id": "c",
+          "row": 3,
+          "col": 0,
+          "value": 6,
+          "edges": {
+            "up": "−"
+          }
+        },
+        {
+          "id": "d",
+          "row": 3,
+          "col": 2,
+          "value": 12
+        },
+        {
+          "id": "e",
+          "row": 3,
+          "col": 3,
+          "value": 2,
+          "edges": {
+            "left": "−"
+          }
+        }
+      ],
+      "walls": [
+        {
+          "row": 2,
+          "col": 1
+        },
+        {
+          "row": 2,
+          "col": 3
+        },
+        {
+          "row": 0,
+          "col": 2
+        }
+      ],
+      "floors": [],
+      "exits": [
+        {
+          "row": 0,
+          "col": 1,
+          "direction": "up",
+          "value": 18
+        },
+        {
+          "row": 3,
+          "col": 3,
+          "direction": "right",
+          "value": 10
+        },
+        {
+          "row": 3,
+          "col": 0,
+          "direction": "down",
+          "value": 18
+        }
+      ],
+      "par": 6,
+      "limit": 6
+    },
+    {
+      "levelId": "v3_053",
+      "title": "階乗のおかわり 1",
+      "hint": "",
+      "size": 4,
+      "tiles": [
+        {
+          "id": "a",
+          "row": 0,
+          "col": 2,
+          "value": 3
+        },
+        {
+          "id": "b",
+          "row": 1,
+          "col": 3,
+          "value": 5,
+          "edges": {
+            "left": "+"
+          }
+        },
+        {
+          "id": "c",
+          "row": 2,
+          "col": 0,
+          "value": 12
+        },
+        {
+          "id": "d",
+          "row": 3,
+          "col": 0,
+          "value": 10,
+          "edges": {
+            "right": "+",
+            "up": "−"
+          }
+        },
+        {
+          "id": "e",
+          "row": 3,
+          "col": 1,
+          "value": 18
+        }
+      ],
+      "walls": [
+        {
+          "row": 2,
+          "col": 1
+        },
+        {
+          "row": 0,
+          "col": 1
+        },
+        {
+          "row": 2,
+          "col": 2
+        }
+      ],
+      "floors": [
+        {
+          "row": 0,
+          "col": 3,
+          "type": "fact",
+          "uses": 1
+        }
+      ],
+      "exits": [
+        {
+          "row": 3,
+          "col": 0,
+          "direction": "left",
+          "value": 20
+        },
+        {
+          "row": 0,
+          "col": 3,
+          "direction": "right",
+          "value": 123
+        }
+      ],
+      "par": 6,
+      "limit": 6
+    },
+    {
+      "levelId": "v3_054",
+      "title": "入替のおかわり 1",
+      "hint": "",
+      "size": 4,
+      "tiles": [
+        {
+          "id": "a",
+          "row": 0,
+          "col": 3,
+          "value": 20
+        },
+        {
+          "id": "b",
+          "row": 1,
+          "col": 2,
+          "value": 18
+        },
+        {
+          "id": "c",
+          "row": 2,
+          "col": 0,
+          "value": 6,
+          "edges": {
+            "right": "×"
+          }
+        },
+        {
+          "id": "d",
+          "row": 2,
+          "col": 2,
+          "value": 9,
+          "edges": {
+            "down": "÷",
+            "up": "÷"
+          }
+        },
+        {
+          "id": "e",
+          "row": 3,
+          "col": 1,
+          "value": 2
+        }
+      ],
+      "walls": [
+        {
+          "row": 1,
+          "col": 3
+        },
+        {
+          "row": 1,
+          "col": 1
+        }
+      ],
+      "floors": [
+        {
+          "row": 2,
+          "col": 1,
+          "type": "swap",
+          "uses": 1
+        }
+      ],
+      "exits": [
+        {
+          "row": 0,
+          "col": 3,
+          "direction": "right",
+          "value": 20
+        },
+        {
+          "row": 2,
+          "col": 0,
+          "direction": "left",
+          "value": 24
+        }
+      ],
+      "par": 6,
+      "limit": 6
+    },
+    {
+      "levelId": "v3_055",
+      "title": "入替のおかわり 2",
+      "hint": "",
+      "size": 4,
+      "tiles": [
+        {
+          "id": "a",
+          "row": 0,
+          "col": 3,
+          "value": 4,
+          "edges": {
+            "down": "÷"
+          }
+        },
+        {
+          "id": "b",
+          "row": 1,
+          "col": 2,
+          "value": 20
+        },
+        {
+          "id": "c",
+          "row": 2,
+          "col": 1,
+          "value": 12,
+          "edges": {
+            "left": "−"
+          }
+        },
+        {
+          "id": "d",
+          "row": 3,
+          "col": 0,
+          "value": 12,
+          "edges": {
+            "right": "+"
+          }
+        },
+        {
+          "id": "e",
+          "row": 3,
+          "col": 1,
+          "value": 8
+        }
+      ],
+      "walls": [
+        {
+          "row": 3,
+          "col": 2
+        },
+        {
+          "row": 0,
+          "col": 0
+        },
+        {
+          "row": 0,
+          "col": 2
+        }
+      ],
+      "floors": [
+        {
+          "row": 3,
+          "col": 1,
+          "type": "swap",
+          "uses": 1
+        }
+      ],
+      "exits": [
+        {
+          "row": 3,
+          "col": 0,
+          "direction": "down",
+          "value": 32
+        },
+        {
+          "row": 0,
+          "col": 3,
+          "direction": "up",
+          "value": 5
+        }
+      ],
+      "par": 7,
+      "limit": 7
+    },
+    {
+      "levelId": "v3_056",
+      "title": "入替のおかわり 3",
+      "hint": "",
+      "size": 4,
+      "tiles": [
+        {
+          "id": "a",
+          "row": 0,
+          "col": 2,
+          "value": 15,
+          "edges": {
+            "right": "+"
+          }
+        },
+        {
+          "id": "b",
+          "row": 0,
+          "col": 3,
+          "value": 8
+        },
+        {
+          "id": "c",
+          "row": 1,
+          "col": 3,
+          "value": 5,
+          "edges": {
+            "left": "−"
+          }
+        },
+        {
+          "id": "d",
+          "row": 2,
+          "col": 0,
+          "value": 14
+        },
+        {
+          "id": "e",
+          "row": 3,
+          "col": 0,
+          "value": 8,
+          "edges": {
+            "up": "−"
+          }
+        }
+      ],
+      "walls": [
+        {
+          "row": 0,
+          "col": 0
+        },
+        {
+          "row": 0,
+          "col": 1
+        }
+      ],
+      "floors": [
+        {
+          "row": 0,
+          "col": 3,
+          "type": "swap",
+          "uses": 1
+        }
+      ],
+      "exits": [
+        {
+          "row": 0,
+          "col": 2,
+          "direction": "up",
+          "value": 28
+        },
+        {
+          "row": 3,
+          "col": 1,
+          "direction": "down",
+          "value": 6
+        }
+      ],
+      "par": 7,
+      "limit": 7
+    },
+    {
+      "levelId": "v3_057",
+      "title": "階乗のおかわり 2",
+      "hint": "",
+      "size": 4,
+      "tiles": [
+        {
+          "id": "a",
+          "row": 0,
+          "col": 2,
+          "value": 5,
+          "edges": {
+            "down": "+"
+          }
+        },
+        {
+          "id": "b",
+          "row": 1,
+          "col": 2,
+          "value": 6,
+          "edges": {
+            "down": "−"
+          }
+        },
+        {
+          "id": "c",
+          "row": 2,
+          "col": 1,
+          "value": 2
+        },
+        {
+          "id": "d",
+          "row": 2,
+          "col": 2,
+          "value": 9
+        },
+        {
+          "id": "e",
+          "row": 3,
+          "col": 0,
+          "value": 8,
+          "edges": {
+            "up": "×"
+          }
+        }
+      ],
+      "walls": [
+        {
+          "row": 3,
+          "col": 1
+        },
+        {
+          "row": 0,
+          "col": 0
+        },
+        {
+          "row": 1,
+          "col": 0
+        }
+      ],
+      "floors": [
+        {
+          "row": 0,
+          "col": 3,
+          "type": "fact",
+          "uses": 1
+        }
+      ],
+      "exits": [
+        {
+          "row": 2,
+          "col": 0,
+          "direction": "left",
+          "value": 16
+        },
+        {
+          "row": 0,
+          "col": 3,
+          "direction": "right",
+          "value": 40320
+        }
+      ],
+      "par": 7,
+      "limit": 7
+    },
+    {
+      "levelId": "v3_058",
+      "title": "根のおかわり 1",
+      "hint": "",
+      "size": 4,
+      "tiles": [
+        {
+          "id": "a",
+          "row": 0,
+          "col": 1,
+          "value": 3
+        },
+        {
+          "id": "b",
+          "row": 0,
+          "col": 2,
+          "value": 4,
+          "edges": {
+            "left": "×",
+            "down": "−"
+          }
+        },
+        {
+          "id": "c",
+          "row": 0,
+          "col": 3,
+          "value": 2,
+          "edges": {
+            "left": "÷"
+          }
+        },
+        {
+          "id": "d",
+          "row": 1,
+          "col": 2,
+          "value": 8
+        },
+        {
+          "id": "e",
+          "row": 3,
+          "col": 2,
+          "value": 4
+        }
+      ],
+      "walls": [
+        {
+          "row": 0,
+          "col": 0
+        },
+        {
+          "row": 1,
+          "col": 1
+        },
+        {
+          "row": 1,
+          "col": 3
+        }
+      ],
+      "floors": [
+        {
+          "row": 2,
+          "col": 0,
+          "type": "sqrt",
+          "uses": 1
+        }
+      ],
+      "exits": [
+        {
+          "row": 2,
+          "col": 0,
+          "direction": "left",
+          "value": 2
+        },
+        {
+          "row": 0,
+          "col": 3,
+          "direction": "right",
+          "value": 6
+        }
+      ],
+      "par": 8,
+      "limit": 8
+    },
+    {
+      "levelId": "v3_059",
+      "title": "回転のおかわり",
+      "hint": "",
+      "size": 4,
+      "tiles": [
+        {
+          "id": "a",
+          "row": 0,
+          "col": 0,
+          "value": 8
+        },
+        {
+          "id": "b",
+          "row": 0,
+          "col": 3,
+          "value": 17,
+          "edges": {
+            "down": "+"
+          }
+        },
+        {
+          "id": "c",
+          "row": 2,
+          "col": 1,
+          "value": 13
+        },
+        {
+          "id": "d",
+          "row": 2,
+          "col": 3,
+          "value": 9,
+          "edges": {
+            "up": "−",
+            "down": "−"
+          }
+        },
+        {
+          "id": "e",
+          "row": 3,
+          "col": 3,
+          "value": 19
+        }
+      ],
+      "walls": [
+        {
+          "row": 3,
+          "col": 2
+        },
+        {
+          "row": 1,
+          "col": 0
+        },
+        {
+          "row": 0,
+          "col": 1
+        }
+      ],
+      "floors": [
+        {
+          "row": 2,
+          "col": 2,
+          "type": "rotate",
+          "uses": 1
+        }
+      ],
+      "exits": [
+        {
+          "row": 0,
+          "col": 0,
+          "direction": "up",
+          "value": 8
+        },
+        {
+          "row": 0,
+          "col": 2,
+          "direction": "up",
+          "value": 32
+        }
+      ],
+      "par": 9,
+      "limit": 9
+    },
+    {
+      "levelId": "v3_060",
+      "title": "根のおかわり 2",
+      "hint": "",
+      "size": 4,
+      "tiles": [
+        {
+          "id": "a",
+          "row": 0,
+          "col": 0,
+          "value": 5,
+          "edges": {
+            "right": "+"
+          }
+        },
+        {
+          "id": "b",
+          "row": 0,
+          "col": 1,
+          "value": 9,
+          "edges": {
+            "down": "÷"
+          }
+        },
+        {
+          "id": "c",
+          "row": 2,
+          "col": 1,
+          "value": 9
+        },
+        {
+          "id": "d",
+          "row": 3,
+          "col": 2,
+          "value": 2,
+          "edges": {
+            "right": "÷"
+          }
+        },
+        {
+          "id": "e",
+          "row": 3,
+          "col": 3,
+          "value": 24
+        }
+      ],
+      "walls": [
+        {
+          "row": 2,
+          "col": 0
+        },
+        {
+          "row": 2,
+          "col": 3
+        },
+        {
+          "row": 1,
+          "col": 0
+        }
+      ],
+      "floors": [
+        {
+          "row": 1,
+          "col": 1,
+          "type": "sqrt",
+          "uses": 1
+        }
+      ],
+      "exits": [
+        {
+          "row": 0,
+          "col": 0,
+          "direction": "up",
+          "value": 8
+        },
+        {
+          "row": 3,
+          "col": 0,
+          "direction": "down",
+          "value": 12
+        }
+      ],
+      "par": 9,
+      "limit": 9
     }
   ]
 }
