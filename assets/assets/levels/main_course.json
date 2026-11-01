@@ -1611,55 +1611,55 @@
           "tiles": [
             {
               "id": "a",
-              "row": 2,
-              "col": 0,
-              "value": 15
+              "row": 1,
+              "col": 3,
+              "value": 12
             },
             {
               "id": "b",
               "row": 2,
-              "col": 3,
-              "value": 1
+              "col": 0,
+              "value": 6,
+              "edges": {
+                "right": "−"
+              }
             },
             {
               "id": "c",
               "row": 3,
-              "col": 1,
+              "col": 0,
               "value": 13
             },
             {
               "id": "d",
               "row": 3,
-              "col": 2,
-              "value": 9,
+              "col": 1,
+              "value": 2,
               "edges": {
-                "left": "−"
+                "left": "+",
+                "right": "+"
               }
             },
             {
               "id": "e",
               "row": 3,
-              "col": 3,
-              "value": 3,
-              "edges": {
-                "left": "×",
-                "up": "×"
-              }
+              "col": 2,
+              "value": 3
             }
           ],
           "walls": [
             {
-              "row": 3,
-              "col": 0
+              "row": 0,
+              "col": 2
             },
             {
-              "row": 1,
+              "row": 2,
               "col": 1
             }
           ],
           "floors": [
             {
-              "row": 0,
+              "row": 3,
               "col": 0,
               "type": "swap",
               "uses": 1
@@ -1667,15 +1667,15 @@
           ],
           "exits": [
             {
-              "row": 0,
+              "row": 3,
               "col": 0,
-              "direction": "up",
-              "value": 15
+              "direction": "down",
+              "value": 24
             },
             {
-              "row": 3,
+              "row": 0,
               "col": 3,
-              "direction": "right",
+              "direction": "up",
               "value": 12
             }
           ],
@@ -1683,8 +1683,8 @@
           "limit": 7,
           "hintMove": {
             "type": "move",
-            "row": 2,
-            "col": 0,
+            "row": 1,
+            "col": 3,
             "dir": "up"
           }
         },
@@ -1782,84 +1782,84 @@
             {
               "id": "a",
               "row": 0,
-              "col": 3,
-              "value": 1
+              "col": 2,
+              "value": 7
             },
             {
               "id": "b",
-              "row": 1,
-              "col": 3,
-              "value": 6,
+              "row": 2,
+              "col": 0,
+              "value": 3,
               "edges": {
-                "up": "×"
+                "right": "+"
               }
             },
             {
               "id": "c",
-              "row": 2,
-              "col": 2,
-              "value": 13
+              "row": 3,
+              "col": 1,
+              "value": 10
             },
             {
               "id": "d",
-              "row": 2,
-              "col": 3,
-              "value": 9,
+              "row": 3,
+              "col": 2,
+              "value": 3,
               "edges": {
-                "up": "+",
-                "left": "−"
+                "left": "÷",
+                "right": "÷"
               }
             },
             {
               "id": "e",
               "row": 3,
-              "col": 0,
+              "col": 3,
               "value": 6
             }
           ],
           "walls": [
             {
-              "row": 0,
+              "row": 2,
               "col": 2
+            },
+            {
+              "row": 2,
+              "col": 3
             },
             {
               "row": 1,
               "col": 2
-            },
-            {
-              "row": 1,
-              "col": 0
             }
           ],
           "floors": [
             {
-              "row": 3,
-              "col": 3,
+              "row": 0,
+              "col": 0,
               "type": "swap",
               "uses": 1
             }
           ],
           "exits": [
             {
-              "row": 3,
-              "col": 3,
-              "direction": "right",
-              "value": 10
+              "row": 0,
+              "col": 0,
+              "direction": "up",
+              "value": 4
             },
             {
               "row": 3,
-              "col": 1,
-              "direction": "down",
-              "value": 6
+              "col": 3,
+              "direction": "right",
+              "value": 5
             }
           ],
-          "par": 7,
-          "limit": 7,
+          "par": 9,
+          "limit": 9,
           "hintMove": {
             "type": "move",
             "row": 0,
-            "col": 3,
-            "dir": "down"
+            "col": 2,
+            "dir": "left"
           }
         },
         {
