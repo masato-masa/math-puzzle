@@ -88,7 +88,7 @@ class _LevelSelectScreenState extends State<LevelSelectScreen> {
                 children: [
                   // 行 1 はナビゲーションだけ。クリア数は行 2 に置く。
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
                     child: AppHeader(
                       title: 'ステージ',
                       onBack: () => Navigator.of(context).pop(),

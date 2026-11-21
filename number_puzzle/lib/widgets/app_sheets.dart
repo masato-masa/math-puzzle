@@ -62,6 +62,7 @@ Widget _closeButton(BuildContext context) => Padding(
         onPressed: () => Navigator.of(context).pop(),
         style: ElevatedButton.styleFrom(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
+          minimumSize: const Size.fromHeight(48),
           padding: const EdgeInsets.symmetric(vertical: 12),
         ),
         child: const Text('とじる'),
