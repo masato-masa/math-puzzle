@@ -40,6 +40,7 @@
     こうしないと、帯が白く欠けるか、ボタンが時計に重なる。
   -->
   <style>
+    @media (orientation:landscape) and (max-height:500px) and (max-width:1000px){body>*{visibility:hidden}body::after{content:'↻  スマホを たてに してね';position:fixed;inset:0;display:grid;place-items:center;background:#0b0b0d;color:#f2f0e6;font:700 18px sans-serif;z-index:9999}}
     html, body {
       margin: 0;
       height: 100%;
