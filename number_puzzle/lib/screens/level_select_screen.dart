@@ -221,7 +221,7 @@ class _LevelPathNode extends StatelessWidget {
                         children: [
                           Text('${level.limit}手以内', style: AppTextStyles.caption),
                           const SizedBox(width: 8),
-                          Flexible(child: GimmickChips(gimmicks: gimmicksOf(level))),
+                          Flexible(child: GimmickChips(gimmicks: gimmicksOf(level), size: 24)),
                         ],
                       ),
                     ],

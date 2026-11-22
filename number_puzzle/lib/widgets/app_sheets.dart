@@ -51,7 +51,7 @@ Widget _bullet(String text) => Padding(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text('・', style: TextStyle(color: AppColors.textMuted)),
-          Expanded(child: Text(text, style: AppTextStyles.body.copyWith(fontSize: 14))),
+          Expanded(child: Text(text, style: AppTextStyles.body.copyWith(fontSize: 15))),
         ],
       ),
     );
@@ -94,16 +94,14 @@ Widget _row({required Widget child, VoidCallback? onTap, Color? color}) => Paddi
     );
 
 const _helpRules = [
-  'タイルを動かしてぶつけると、書かれた演算子で計算が起きます。',
-  '出口から数字を出し切るとクリアです。',
-  '氷の床は止まるまで滑り、紫の床は辺を、琥珀の床は値を変えます。',
-  '手数には上限があります。上限を超えるとやり直しです。',
+  'タイルを動かしてぶつけると、演算子で計算されます。',
+  '出口の数字を作って出し切るとクリア。',
+  '手数の上限を超えたらやり直し。',
+  '床: 氷は滑る、紫は辺、琥珀は値を変える。',
 ];
 
 const _helpControls = [
-  'タイルをドラッグすると、その向きへ動きます。',
-  '「もどす」で 1 手ずつ取り消せます。',
-  '「ヒント」は 1 手目にだけ出せます。',
+  'ドラッグで動かす。「もどす」「ヒント」は下のボタン。',
 ];
 
 Future<void> showHelpSheet(BuildContext context) {
