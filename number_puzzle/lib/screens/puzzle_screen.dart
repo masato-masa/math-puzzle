@@ -5,6 +5,7 @@ import '../game/models.dart';
 import '../services/progress_service.dart';
 import '../services/settings_service.dart';
 import '../services/sound_service.dart';
+import '../theme/app_sizes.dart';
 import '../theme/app_theme.dart';
 import '../widgets/app_header.dart';
 import '../widgets/app_sheets.dart';
@@ -186,6 +187,11 @@ class _PuzzleScreenState extends State<PuzzleScreen> {
     );
   }
 
+  /// ダイアログのボタンは指で押せる高さ（共通 UI の hit）以上にする。
+  static final ButtonStyle _dialogButton = ButtonStyle(
+    minimumSize: WidgetStatePropertyAll(Size(88, AppSizes.hit + 4)),
+  );
+
   Future<void> _showClearDialog() async {
     final moves = _controller.moveCount;
     final limit = widget.level.limit;
@@ -206,13 +212,14 @@ class _PuzzleScreenState extends State<PuzzleScreen> {
             Text('$moves 手（制限 $limit 手）\n見事、規定手数で解けました。', style: AppTextStyles.body),
             if (_controller.isPerfectClear) ...[
               const SizedBox(height: 8),
-              const Text('✨ ノーヒント・ノーアンドゥクリア',
+              const Text('✨ ノーヒントでクリア',
                   style: TextStyle(color: AppColors.gold, fontWeight: FontWeight.w700)),
             ],
           ],
         ),
         actions: [
           TextButton(
+            style: _dialogButton,
             onPressed: () {
               Navigator.of(context).pop();
               Navigator.of(context).pop();
@@ -221,6 +228,7 @@ class _PuzzleScreenState extends State<PuzzleScreen> {
           ),
           if (widget.onNextLevel != null)
             ElevatedButton(
+              style: _dialogButton,
               onPressed: () {
                 Navigator.of(context).pop();
                 Navigator.of(context).pop();
@@ -247,6 +255,7 @@ class _PuzzleScreenState extends State<PuzzleScreen> {
         content: Text('${widget.level.limit} 手以内にタイルを出し切れませんでした', style: AppTextStyles.body),
         actions: [
           TextButton(
+            style: _dialogButton,
             onPressed: () {
               Navigator.of(context).pop();
               _undoAndClearDialog();
@@ -254,6 +263,7 @@ class _PuzzleScreenState extends State<PuzzleScreen> {
             child: const Text('1手戻す'),
           ),
           ElevatedButton(
+            style: _dialogButton,
             onPressed: () {
               Navigator.of(context).pop();
               _restart();
