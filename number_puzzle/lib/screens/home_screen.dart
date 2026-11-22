@@ -330,11 +330,11 @@ class _DevPill extends StatelessWidget {
       child: InkWell(
         onTap: onPressed,
         child: const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+          padding: EdgeInsets.symmetric(horizontal: 14, vertical: 8),
           child: Text(
             'テスト用',
             style: TextStyle(
-              fontSize: 10,
+              fontSize: 12,
               fontWeight: FontWeight.w700,
               color: AppColors.textMuted,
             ),

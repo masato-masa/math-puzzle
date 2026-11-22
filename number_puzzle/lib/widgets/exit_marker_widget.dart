@@ -22,10 +22,11 @@ class ExitMarkerWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
+      behavior: HitTestBehavior.opaque,
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+        padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 6),
         decoration: BoxDecoration(
           gradient: const LinearGradient(
             begin: Alignment.topLeft,
@@ -48,7 +49,7 @@ class ExitMarkerWidget extends StatelessWidget {
             fontFamily: 'SFMono-Regular',
             fontFamilyFallback: ['Menlo', 'Consolas', 'monospace'],
             color: AppColors.goldDeep,
-            fontSize: 12,
+            fontSize: 15,
             fontWeight: FontWeight.w800,
           ),
         ),

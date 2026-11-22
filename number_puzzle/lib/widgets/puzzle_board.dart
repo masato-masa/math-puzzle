@@ -433,22 +433,23 @@ class _PuzzleBoardState extends State<PuzzleBoard> {
   }
 
   Widget _positionedExit(ExitSpec exit, double cellSize, double boardW, double boardH) {
-    const w = 56.0, h = 30.0;
+    // 出口のタップ範囲。高さは余白（_kExitMargin 44）に収まる範囲で最大。見た目の札は中で大きく描く。
+    const w = 60.0, h = 40.0;
     final cx = _kExitMargin + exit.col * cellSize + cellSize / 2;
     final cy = _kExitMargin + exit.row * cellSize + cellSize / 2;
     double left, top;
     switch (exit.direction) {
       case ExitDirection.up:
         left = cx - w / 2;
-        top = _kExitMargin - h - 6;
+        top = _kExitMargin - h - 2;
       case ExitDirection.down:
         left = cx - w / 2;
-        top = _kExitMargin + boardH + 6;
+        top = _kExitMargin + boardH + 2;
       case ExitDirection.left:
-        left = _kExitMargin - w - 6;
+        left = _kExitMargin - w - 2;
         top = cy - h / 2;
       case ExitDirection.right:
-        left = _kExitMargin + boardW + 6;
+        left = _kExitMargin + boardW + 2;
         top = cy - h / 2;
     }
 
