@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../game/game_controller.dart';
 import '../game/models.dart';
@@ -193,6 +194,8 @@ class _PuzzleScreenState extends State<PuzzleScreen> {
   );
 
   Future<void> _showClearDialog() async {
+    // 成功の手ごたえ（ネイティブ版。web では何も起きない）
+    HapticFeedback.mediumImpact();
     final moves = _controller.moveCount;
     final limit = widget.level.limit;
     await showDialog<void>(
@@ -242,6 +245,8 @@ class _PuzzleScreenState extends State<PuzzleScreen> {
   }
 
   Future<void> _showFailDialog() async {
+    // 失敗は重めに 1 回
+    HapticFeedback.heavyImpact();
     await showDialog<void>(
       context: context,
       barrierDismissible: false,
