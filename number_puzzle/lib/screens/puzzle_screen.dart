@@ -136,12 +136,15 @@ class _PuzzleScreenState extends State<PuzzleScreen> {
                       );
                     },
                   ),
-                  if (widget.level.hint.isNotEmpty)
+                  // 説明文はチュートリアルの面だけ。ほかの面では出さない（盤の位置は動かさない）。
+                  if (widget.level.hint.isNotEmpty && widget.level.tutorial)
                     Padding(
                       padding: const EdgeInsets.only(top: 4),
                       child: Text(widget.level.hint,
                           style: AppTextStyles.caption, textAlign: TextAlign.center),
-                    ),
+                    )
+                  else
+                    const SizedBox(height: 22),
                   Expanded(
                     child: Center(
                       child: Padding(
